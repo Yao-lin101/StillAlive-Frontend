@@ -98,4 +98,9 @@ export const characterService = {
     const response = await axios.get(`${API_URL}/d/${code}/`);
     return response.data;
   },
+
+  async getCharacterStatus(code: string) {
+    const response = await axios.get(`${API_URL}/d/${code}/status/`);
+    return response.data;
+  },
 }; 

@@ -34,7 +34,7 @@ const LoginForm: React.FC = () => {
       setError('');
       const response = await authService.login(data);
       authService.setTokens(response.access, response.refresh);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
       setError(formatError(err));
     } finally {

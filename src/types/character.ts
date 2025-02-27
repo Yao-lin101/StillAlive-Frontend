@@ -36,9 +36,37 @@ export type VitalSigns = {
   [key: string]: StatusConfig;
 };
 
-export type StatusConfigType = {
-  vital_signs: VitalSigns;
-};
+export interface StatusConfigType {
+  vital_signs?: {
+    [key: string]: {
+      label: string;
+      key?: string;
+      suffix?: string;
+      description?: string;
+      valueType?: 'number' | 'text' | 'string' | 'boolean';
+      color?: {
+        type: string;
+        rules: Array<{
+          value?: number;
+          color: string;
+          default?: string;
+        }>;
+      };
+    };
+  };
+  display?: {
+    default_message: string;
+    timeout_messages?: Array<{
+      hours: number;
+      message: string;
+    }>;
+  };
+  theme?: {
+    background_url: string;
+    background_overlay: string;
+    accent_color: string;
+  };
+}
 
 export interface CharacterDetail extends Character {
   secret_key: string;

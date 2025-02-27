@@ -6,6 +6,7 @@ import { formatError } from '@/lib/utils';
 import { StatusConfigType } from '@/types/character';
 import { Meteors } from "@/components/magicui/meteors";
 import { Marquee } from "@/components/magicui/marquee";
+import { ShineBorder } from "@/components/magicui/shine-border";
 import { cn } from "@/lib/utils";
 
 interface CharacterDisplay {
@@ -253,7 +254,8 @@ export const CharacterDisplayPage: React.FC = () => {
           </div>
         </div>
         
-        <Card className="relative max-w-2xl w-full mx-4 bg-white/80 backdrop-blur-sm">
+        <Card className="relative max-w-2xl w-full mx-4 bg-white/80 backdrop-blur-sm overflow-hidden">
+          <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
           <div className="p-8">
             <div className="flex items-center space-x-6 mb-8">
               {character.avatar ? (

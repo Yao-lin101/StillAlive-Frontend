@@ -40,27 +40,31 @@ const StatusCard = ({ label, description, value, suffix }: {
 }) => {
   return (
     <Card className={cn(
-      "relative w-64 overflow-hidden bg-white/50 backdrop-blur-sm",
+      "relative w-64 h-[120px] overflow-hidden bg-white/50 backdrop-blur-sm group",
       "hover:bg-white/60 transition-colors duration-200"
     )}>
-      <div className="p-4">
+      <div className="p-4 h-full flex flex-col">
         <h3 className="text-sm font-medium text-gray-900">{label}</h3>
-        {description && (
-          <p className="text-xs text-gray-500 mt-1">{description}</p>
-        )}
-        <div className="mt-2">
-          <span className="text-xl font-semibold text-gray-900">
-            {value !== undefined ? (
-              <>
-                {value}
-                {suffix && (
-                  <span className="text-sm ml-1 text-gray-500">{suffix}</span>
-                )}
-              </>
-            ) : (
-              '--'
-            )}
-          </span>
+        <div className="relative flex-1">
+          {description && (
+            <p className="text-xs text-gray-500 mt-1 absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              {description}
+            </p>
+          )}
+          <div className="absolute bottom-0 left-0 right-0">
+            <span className="text-xl font-semibold text-gray-900">
+              {value !== undefined ? (
+                <>
+                  {value}
+                  {suffix && (
+                    <span className="text-sm ml-1 text-gray-500">{suffix}</span>
+                  )}
+                </>
+              ) : (
+                '--'
+              )}
+            </span>
+          </div>
         </div>
       </div>
     </Card>

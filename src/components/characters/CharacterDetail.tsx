@@ -11,10 +11,8 @@ import { CheckIcon, XIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { useCharacter } from '@/hooks/useCharacters';
 import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
-import { UpdateCharacterData, CharacterDetail as ICharacterDetail, StatusConfigType, StatusRule, StatusConfig, VitalSigns } from '@/types/character';
+import { UpdateCharacterData, StatusConfigType } from '@/types/character';
 import { Select } from '../ui/select';
-import { HexColorPicker } from 'react-colorful';
-import { Popover } from '../ui/popover';
 
 const updateCharacterSchema = z.object({
   name: z.string().min(1, '请输入角色名称'),
@@ -31,40 +29,6 @@ const updateCharacterSchema = z.object({
 type UpdateCharacterFormData = z.infer<typeof updateCharacterSchema>;
 
 type SelectChangeEvent = React.ChangeEvent<HTMLSelectElement>;
-
-// Add this new component for color picking
-const ColorPickerInput: React.FC<{
-  value: string;
-  onChange: (color: string) => void;
-}> = ({ value, onChange }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <Popover
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      content={
-        <div className="p-2">
-          <HexColorPicker color={value} onChange={onChange} />
-        </div>
-      }
-    >
-      <div className="flex items-center space-x-2">
-        <div
-          className="w-8 h-8 rounded border cursor-pointer"
-          style={{ backgroundColor: value }}
-          onClick={() => setIsOpen(true)}
-        />
-        <Input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="颜色代码"
-          className="flex-1"
-        />
-      </div>
-    </Popover>
-  );
-};
 
 export const CharacterDetail: React.FC = () => {
   const { uid } = useParams<{ uid: string }>();
@@ -136,17 +100,14 @@ export const CharacterDetail: React.FC = () => {
         [newKey]: {
           key: newKey,
           label: '',
-          suffix: '',
-          description: '',
           valueType: 'number',
-          defaultValue: 0,
-          min: 0,
-          max: 100,
+          description: '',
+          suffix: '',
           color: {
             type: 'threshold',
             rules: [
               { value: 0, color: '#ff0000' },
-              { default: true, color: '#00ff00' }
+              { value: 100, color: '#00ff00' }
             ]
           }
         }
@@ -155,7 +116,7 @@ export const CharacterDetail: React.FC = () => {
   };
 
   const handleRemoveStatusField = (category: keyof StatusConfigType, key: string) => {
-    const currentFields = { ...statusConfig[category] } || {};
+    const currentFields = { ...statusConfig[category] };
     delete currentFields[key];
     
     setStatusConfig({
@@ -447,7 +408,6 @@ export const CharacterDetail: React.FC = () => {
               {isEditingStatus ? (
                 <div className="space-y-4">
                   <div className="space-y-4">
-                    <h4 className="text-sm font-medium">生命体征</h4>
                     {Object.entries(statusConfig?.vital_signs || {}).map(([key, config]) => (
                       <Card key={key} className="p-4 space-y-4">
                         <div className="flex justify-between items-center">
@@ -506,7 +466,7 @@ export const CharacterDetail: React.FC = () => {
                             <Select
                               value={config.valueType}
                               onChange={(e: SelectChangeEvent) => {
-                                const valueType = e.target.value as StatusValueType;
+                                const valueType = e.target.value as 'number' | 'text';
                                 setStatusConfig({
                                   ...statusConfig,
                                   vital_signs: {
@@ -514,13 +474,7 @@ export const CharacterDetail: React.FC = () => {
                                     [key]: {
                                       ...config,
                                       valueType,
-                                      // Reset color rules based on type
-                                      color: {
-                                        type: valueType === 'number' ? 'threshold' : 'enum',
-                                        rules: valueType === 'number' 
-                                          ? [{ value: 0, color: '#ff0000' }, { default: true, color: '#00ff00' }]
-                                          : [{ value: '', label: '默认', color: '#000000', default: true }]
-                                      }
+                                      suffix: valueType === 'text' ? undefined : config.suffix
                                     }
                                   }
                                 });
@@ -551,71 +505,10 @@ export const CharacterDetail: React.FC = () => {
                           </div>
                         </div>
                         {config.valueType === 'number' && (
-                          <div className="grid grid-cols-3 gap-4">
-                            <div>
-                              <label className="text-sm">默认值</label>
-                              <Input
-                                type="number"
-                                value={config.defaultValue}
-                                onChange={(e) => {
-                                  setStatusConfig({
-                                    ...statusConfig,
-                                    vital_signs: {
-                                      ...statusConfig.vital_signs,
-                                      [key]: {
-                                        ...config,
-                                        defaultValue: Number(e.target.value)
-                                      }
-                                    }
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-sm">最小值</label>
-                              <Input
-                                type="number"
-                                value={config.min}
-                                onChange={(e) => {
-                                  setStatusConfig({
-                                    ...statusConfig,
-                                    vital_signs: {
-                                      ...statusConfig.vital_signs,
-                                      [key]: {
-                                        ...config,
-                                        min: Number(e.target.value)
-                                      }
-                                    }
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-sm">最大值</label>
-                              <Input
-                                type="number"
-                                value={config.max}
-                                onChange={(e) => {
-                                  setStatusConfig({
-                                    ...statusConfig,
-                                    vital_signs: {
-                                      ...statusConfig.vital_signs,
-                                      [key]: {
-                                        ...config,
-                                        max: Number(e.target.value)
-                                      }
-                                    }
-                                  });
-                                }}
-                              />
-                            </div>
-                          </div>
-                        )}
-                        {config.valueType !== 'number' && (
                           <div>
-                            <label className="text-sm">默认值</label>
+                            <label className="text-sm">单位</label>
                             <Input
-                              value={config.defaultValue || ''}
+                              value={config.suffix || ''}
                               onChange={(e) => {
                                 setStatusConfig({
                                   ...statusConfig,
@@ -623,178 +516,13 @@ export const CharacterDetail: React.FC = () => {
                                     ...statusConfig.vital_signs,
                                     [key]: {
                                       ...config,
-                                      defaultValue: e.target.value
+                                      suffix: e.target.value
                                     }
                                   }
                                 });
                               }}
-                              placeholder={
-                                '输入默认文本'
-                              }
+                              placeholder="例如：%、℃"
                             />
-                          </div>
-                        )}
-                        <div>
-                          <label className="text-sm">规则类型</label>
-                          <Select
-                            value={config.color.type}
-                            onChange={(e: SelectChangeEvent) => {
-                              const type = e.target.value as 'threshold' | 'range' | 'enum';
-                              setStatusConfig({
-                                ...statusConfig,
-                                vital_signs: {
-                                  ...statusConfig.vital_signs,
-                                  [key]: {
-                                    ...config,
-                                    color: {
-                                      type,
-                                      rules: config.color.rules
-                                    }
-                                  }
-                                }
-                              });
-                            }}
-                          >
-                            {config.valueType === 'number' ? (
-                              <>
-                                <option value="threshold">阈值</option>
-                                <option value="range">范围</option>
-                              </>
-                            ) : (
-                              <option value="enum">枚举</option>
-                            )}
-                          </Select>
-                        </div>
-                        {config.color.type === 'enum' && (
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                              <label className="text-sm">枚举值规则</label>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  const newRules = [...config.color.rules];
-                                  newRules.push({
-                                    value: '',
-                                    label: '',
-                                    color: '#000000'
-                                  });
-                                  setStatusConfig({
-                                    ...statusConfig,
-                                    vital_signs: {
-                                      ...statusConfig.vital_signs,
-                                      [key]: {
-                                        ...config,
-                                        color: {
-                                          ...config.color,
-                                          rules: newRules
-                                        }
-                                      }
-                                    }
-                                  });
-                                }}
-                              >
-                                <PlusIcon className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            {config.color.rules.map((rule, index) => (
-                              <div key={index} className="grid grid-cols-4 gap-2 items-center">
-                                <Input
-                                  value={rule.value || ''}
-                                  onChange={(e) => {
-                                    const newRules = [...config.color.rules];
-                                    newRules[index] = {
-                                      ...rule,
-                                      value: e.target.value
-                                    };
-                                    setStatusConfig({
-                                      ...statusConfig,
-                                      vital_signs: {
-                                        ...statusConfig.vital_signs,
-                                        [key]: {
-                                          ...config,
-                                          color: {
-                                            ...config.color,
-                                            rules: newRules
-                                          }
-                                        }
-                                      }
-                                    });
-                                  }}
-                                  placeholder="值"
-                                />
-                                <Input
-                                  value={rule.label || ''}
-                                  onChange={(e) => {
-                                    const newRules = [...config.color.rules];
-                                    newRules[index] = {
-                                      ...rule,
-                                      label: e.target.value
-                                    };
-                                    setStatusConfig({
-                                      ...statusConfig,
-                                      vital_signs: {
-                                        ...statusConfig.vital_signs,
-                                        [key]: {
-                                          ...config,
-                                          color: {
-                                            ...config.color,
-                                            rules: newRules
-                                          }
-                                        }
-                                      }
-                                    });
-                                  }}
-                                  placeholder="显示文本"
-                                />
-                                <ColorPickerInput
-                                  value={rule.color}
-                                  onChange={(color) => {
-                                    const newRules = [...config.color.rules];
-                                    newRules[index] = {
-                                      ...rule,
-                                      color
-                                    };
-                                    setStatusConfig({
-                                      ...statusConfig,
-                                      vital_signs: {
-                                        ...statusConfig.vital_signs,
-                                        [key]: {
-                                          ...config,
-                                          color: {
-                                            ...config.color,
-                                            rules: newRules
-                                          }
-                                        }
-                                      }
-                                    });
-                                  }}
-                                />
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    const newRules = [...config.color.rules];
-                                    newRules.splice(index, 1);
-                                    setStatusConfig({
-                                      ...statusConfig,
-                                      vital_signs: {
-                                        ...statusConfig.vital_signs,
-                                        [key]: {
-                                          ...config,
-                                          color: {
-                                            ...config.color,
-                                            rules: newRules
-                                          }
-                                        }
-                                      }
-                                    });
-                                  }}
-                                >
-                                  <TrashIcon className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            ))}
                           </div>
                         )}
                       </Card>
@@ -828,28 +556,22 @@ export const CharacterDetail: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {Object.keys(statusConfig?.vital_signs || {}).length > 0 ? (
-                    <div className="space-y-4">
+                  {Object.entries(statusConfig?.vital_signs || {}).map(([key, config]) => (
+                    <Card key={key} className="p-4">
                       <div className="space-y-2">
-                        <h4 className="text-sm font-medium">生命体征</h4>
-                        {Object.entries(statusConfig?.vital_signs || {}).map(([key, config]) => (
-                          <Card key={key} className="p-4">
-                            <div className="space-y-2">
-                              <h5 className="text-sm font-medium">{config.label}</h5>
-                              <p className="text-sm text-gray-500">
-                                单位: {config.suffix || '无'}
-                              </p>
-                              <p className="text-sm text-gray-500">
-                                规则类型: {config.color.type === 'threshold' ? '阈值' : '范围'}
-                              </p>
-                            </div>
-                          </Card>
-                        ))}
+                        <h5 className="text-sm font-medium">{config.label}</h5>
+                        <p className="text-sm text-gray-500">
+                          类型: {config.valueType === 'number' ? '数值' : '文本'}
+                          {config.suffix ? `（${config.suffix}）` : ''}
+                        </p>
+                        {config.description && (
+                          <p className="text-sm text-gray-500">
+                            描述: {config.description}
+                          </p>
+                        )}
                       </div>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">暂无状态配置</p>
-                  )}
+                    </Card>
+                  ))}
                   <Button
                     variant="outline"
                     onClick={() => {

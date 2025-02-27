@@ -51,17 +51,20 @@ export const characterService = {
 
   async update(uid: string, data: UpdateCharacterData): Promise<Character> {
     const formData = new FormData();
+    
+    // 处理非文件字段
     Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined) {
+      if (key === 'avatar' && value instanceof File) {
         formData.append(key, value);
+      } else if (key === 'status_config') {
+        // 确保 status_config 被正确序列化为 JSON 字符串
+        formData.append(key, JSON.stringify(value));
+      } else if (value !== undefined) {
+        formData.append(key, String(value));
       }
     });
-    
-    const response = await api.patch(`/characters/${uid}/`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+
+    const response = await api.patch(`/characters/${uid}/`, formData);
     return response.data;
   },
 

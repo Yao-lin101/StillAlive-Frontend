@@ -26,13 +26,10 @@ export type StatusRule = {
 export type StatusConfig = {
   key: string;        // 状态的键名，用于API通信
   label: string;      // 状态的显示名称
-  suffix?: string;    // 单位
-  description?: string; // 描述
   valueType: StatusValueType; // 值的类型
-  color: StatusRule;  // 颜色规则
-  defaultValue?: number | string; // 默认值
-  min?: number;      // 最小值（仅用于数值类型）
-  max?: number;      // 最大值（仅用于数值类型）
+  description?: string; // 描述
+  suffix?: string;    // 单位（仅用于数值类型）
+  color: StatusRule;  // 保持与后端兼容
 };
 
 export type VitalSigns = {

@@ -76,13 +76,13 @@ export interface CharacterDetail extends Character {
 export interface CreateCharacterData {
   name: string;
   bio?: string;
-  avatar?: File;
+  avatar?: string;
 }
 
 export interface UpdateCharacterData {
-  name?: string;
+  name: string;
   bio?: string;
-  avatar?: File;
+  avatar?: string;
   status_config?: StatusConfigType;
   is_active?: boolean;
 } 

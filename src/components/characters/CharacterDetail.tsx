@@ -18,13 +18,8 @@ import { Label } from '@/components/ui/label';
 const updateCharacterSchema = z.object({
   name: z.string().min(1, '请输入角色名称'),
   bio: z.string().max(500, '简介最多500字').optional(),
-  avatar: z
-    .instanceof(FileList)
-    .optional()
-    .refine(
-      (files) => !files || files.length === 0 || files[0].size <= 5 * 1024 * 1024,
-      '图片大小不能超过5MB'
-    ),
+  avatar: z.string().url('请输入有效的URL地址').optional().or(z.literal('')),
+  qqNumber: z.string().regex(/^\d{5,11}$/, 'QQ号格式不正确').optional().or(z.literal('')),
 });
 
 type UpdateCharacterFormData = z.infer<typeof updateCharacterSchema>;
@@ -37,6 +32,8 @@ export const CharacterDetail: React.FC = () => {
   const { character, isLoading, error, silentRefetch } = useCharacter(uid!);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [secretKey, setSecretKey] = useState<string | null>(null);
   const [isRegeneratingKey, setIsRegeneratingKey] = useState(false);
@@ -44,15 +41,39 @@ export const CharacterDetail: React.FC = () => {
   const [statusConfig, setStatusConfig] = useState<StatusConfigType>({ vital_signs: {} });
   const [isEditingTheme, setIsEditingTheme] = useState(false);
   const [localCharacter, setLocalCharacter] = useState<ICharacterDetail | null>(null);
+  const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
+    watch,
   } = useForm<UpdateCharacterFormData>({
     resolver: zodResolver(updateCharacterSchema),
   });
+
+  const qqNumber = watch('qqNumber');
+  const avatarUrl = watch('avatar');
+
+  // 当QQ号变化时更新预览
+  React.useEffect(() => {
+    if (qqNumber && /^\d{5,11}$/.test(qqNumber)) {
+      const url = `https://q1.qlogo.cn/g?b=qq&nk=${qqNumber}&s=100`;
+      setPreviewAvatar(url);
+      setValue('avatar', url);
+    }
+  }, [qqNumber, setValue]);
+
+  // 当头像URL变化时更新预览
+  React.useEffect(() => {
+    if (avatarUrl) {
+      setPreviewAvatar(avatarUrl);
+    } else {
+      setPreviewAvatar(null);
+    }
+  }, [avatarUrl]);
 
   useEffect(() => {
     if (character) {
@@ -60,7 +81,9 @@ export const CharacterDetail: React.FC = () => {
       reset({
         name: character.name,
         bio: character.bio || '',
+        avatar: character.avatar || '',
       });
+      setPreviewAvatar(character.avatar);
     }
   }, [character, reset]);
 
@@ -125,9 +148,12 @@ export const CharacterDetail: React.FC = () => {
   };
 
   const handleStatusConfigUpdate = async () => {
+    if (!character) return;
+    
     try {
       setIsSaving(true);
       await characterService.update(uid!, { 
+        name: character.name,
         status_config: {
           ...statusConfig,
           theme: localCharacter?.status_config?.theme
@@ -151,11 +177,8 @@ export const CharacterDetail: React.FC = () => {
       const updateData: UpdateCharacterData = {
         name: data.name,
         bio: data.bio,
+        avatar: data.avatar
       };
-
-      if (data.avatar?.[0]) {
-        updateData.avatar = data.avatar[0];
-      }
       
       await characterService.update(uid!, updateData);
       setIsEditing(false);
@@ -182,6 +205,18 @@ export const CharacterDetail: React.FC = () => {
         }
       };
     });
+  };
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      await characterService.delete(uid!);
+      navigate('/characters');
+    } catch (err) {
+      setUpdateError(formatError(err));
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (isLoading) {
@@ -223,11 +258,12 @@ export const CharacterDetail: React.FC = () => {
         {isEditing ? (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex items-center space-x-4 mb-4">
-              {character.avatar ? (
+              {previewAvatar ? (
                 <img
-                  src={character.avatar}
+                  src={previewAvatar}
                   alt={character.name}
                   className="w-24 h-24 rounded-full object-cover"
+                  onError={() => setPreviewAvatar(null)}
                 />
               ) : (
                 <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
@@ -236,18 +272,33 @@ export const CharacterDetail: React.FC = () => {
                   </span>
                 </div>
               )}
-              <div className="flex-1">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">更换头像</label>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    {...register('avatar')}
-                    error={errors.avatar?.message}
-                  />
-                  <p className="text-xs text-gray-500">
-                    支持jpg、png格式，大小不超过5MB
-                  </p>
+              <div className="flex-1 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">QQ号</label>
+                    <Input
+                      type="text"
+                      placeholder="输入QQ号自动获取头像"
+                      {...register('qqNumber')}
+                      error={errors.qqNumber?.message}
+                    />
+                    <p className="text-xs text-gray-500">
+                      输入QQ号自动获取头像
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">头像URL</label>
+                    <Input
+                      type="text"
+                      placeholder="https://example.com/avatar.jpg"
+                      {...register('avatar')}
+                      error={errors.avatar?.message}
+                    />
+                    <p className="text-xs text-gray-500">
+                      也可以直接输入头像图片的URL地址
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -712,6 +763,39 @@ export const CharacterDetail: React.FC = () => {
                       编辑状态配置
                     </Button>
                   </div>
+                )}
+              </div>
+            </div>
+
+            <div className="pt-4 border-t">
+              <h3 className="text-sm font-medium text-red-500 mb-2">危险操作</h3>
+              <div className="space-y-2">
+                {showDeleteConfirm ? (
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-500">确定要删除这个角色吗？此操作不可恢复。</p>
+                    <div className="space-x-2">
+                      <Button
+                        variant="destructive"
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? '删除中...' : '确认删除'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowDeleteConfirm(false)}
+                      >
+                        取消
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    variant="destructive"
+                    onClick={() => setShowDeleteConfirm(true)}
+                  >
+                    删除角色
+                  </Button>
                 )}
               </div>
             </div>

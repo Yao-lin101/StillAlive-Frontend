@@ -13,13 +13,8 @@ import { CreateCharacterData } from '@/types/character';
 const createCharacterSchema = z.object({
   name: z.string().min(1, '请输入角色名称'),
   bio: z.string().max(500, '简介最多500字').optional(),
-  avatar: z
-    .instanceof(FileList)
-    .optional()
-    .refine(
-      (files) => !files || files.length === 0 || files[0].size <= 5 * 1024 * 1024,
-      '图片大小不能超过5MB'
-    ),
+  avatar: z.string().url('请输入有效的URL地址').optional().or(z.literal('')),
+  qqNumber: z.string().regex(/^\d{5,11}$/, 'QQ号格式不正确').optional().or(z.literal('')),
 });
 
 type CreateCharacterFormData = z.infer<typeof createCharacterSchema>;
@@ -28,14 +23,36 @@ export const CreateCharacter: React.FC = () => {
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm<CreateCharacterFormData>({
     resolver: zodResolver(createCharacterSchema),
   });
+
+  const qqNumber = watch('qqNumber');
+  const avatarUrl = watch('avatar');
+
+  // 当QQ号变化时更新预览
+  React.useEffect(() => {
+    if (qqNumber && /^\d{5,11}$/.test(qqNumber)) {
+      const url = `https://q1.qlogo.cn/g?b=qq&nk=${qqNumber}&s=100`;
+      setPreviewAvatar(url);
+      setValue('avatar', url);
+    }
+  }, [qqNumber, setValue]);
+
+  // 当头像URL变化时更新预览
+  React.useEffect(() => {
+    if (avatarUrl) {
+      setPreviewAvatar(avatarUrl);
+    }
+  }, [avatarUrl]);
 
   const onSubmit = async (data: CreateCharacterFormData) => {
     try {
@@ -45,11 +62,8 @@ export const CreateCharacter: React.FC = () => {
       const createData: CreateCharacterData = {
         name: data.name,
         bio: data.bio,
+        avatar: data.avatar
       };
-
-      if (data.avatar?.[0]) {
-        createData.avatar = data.avatar[0];
-      }
 
       const character = await characterService.create(createData);
       navigate(`/characters/${character.uid}`);
@@ -82,18 +96,45 @@ export const CreateCharacter: React.FC = () => {
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">头像</label>
-            <Input
-              type="file"
-              accept="image/*"
-              {...register('avatar')}
-              error={errors.avatar?.message}
-            />
-            <p className="text-xs text-gray-500">
-              支持jpg、png格式，大小不超过5MB
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">QQ号</label>
+              <Input
+                type="text"
+                placeholder="输入QQ号自动获取头像"
+                {...register('qqNumber')}
+                error={errors.qqNumber?.message}
+              />
+              <p className="text-xs text-gray-500">
+                输入QQ号自动获取头像
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">头像URL</label>
+              <Input
+                type="text"
+                placeholder="https://example.com/avatar.jpg"
+                {...register('avatar')}
+                error={errors.avatar?.message}
+              />
+              <p className="text-xs text-gray-500">
+                也可以直接输入头像图片的URL地址
+              </p>
+            </div>
           </div>
+
+          {previewAvatar && (
+            <div className="flex items-center space-x-4">
+              <img
+                src={previewAvatar}
+                alt="头像预览"
+                className="w-16 h-16 rounded-full object-cover"
+                onError={() => setPreviewAvatar(null)}
+              />
+              <span className="text-sm text-gray-500">头像预览</span>
+            </div>
+          )}
 
           <div className="space-y-2">
             <label className="text-sm font-medium">简介</label>

@@ -2,8 +2,8 @@ export interface Character {
   uid: string;
   name: string;
   avatar: string | null;
-  bio: string;
-  display_url: string;
+  bio: string | null;
+  display_code: string;
   created_at: string;
   updated_at: string;
   is_active: boolean;
@@ -15,15 +15,12 @@ export interface CharacterDetail extends Character {
 
 export interface CreateCharacterData {
   name: string;
-  avatar?: File;
   bio?: string;
-  display_url?: string;
+  avatar?: File;
 }
 
 export interface UpdateCharacterData {
-  name?: string;
-  avatar?: File;
+  name: string;
   bio?: string;
-  display_url?: string;
-  is_active?: boolean;
+  avatar?: File;
 } 

@@ -22,6 +22,11 @@ api.interceptors.request.use(
   }
 );
 
+// 创建一个不需要认证的 axios 实例
+const publicApi = axios.create({
+  baseURL: API_URL,
+});
+
 export const characterService = {
   async list(): Promise<Character[]> {
     const response = await api.get('/characters/');
@@ -77,5 +82,15 @@ export const characterService = {
   async regenerateSecretKey(uid: string): Promise<string> {
     const response = await api.post(`/characters/${uid}/regenerate_secret_key/`);
     return response.data.secret_key;
+  },
+
+  async regenerateDisplayCode(uid: string) {
+    const response = await api.post(`/characters/${uid}/regenerate_display_code/`);
+    return response.data;
+  },
+
+  async getPublicDisplay(code: string) {
+    const response = await axios.get(`${API_URL}/d/${code}/`);
+    return response.data;
   },
 }; 

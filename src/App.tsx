@@ -3,6 +3,7 @@ import LoginForm from './components/auth/LoginForm';
 import RegisterForm from './components/auth/RegisterForm';
 import { HomePage } from './pages/HomePage';
 import { CharactersPage } from './pages/CharactersPage';
+import { CharacterDisplayPage } from '@/pages/CharacterDisplayPage';
 import './App.css'
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
             path="/characters/*"
             element={isAuthenticated ? <CharactersPage /> : <Navigate to="/login" replace />}
           />
+          <Route path="/d/:code" element={<CharacterDisplayPage />} />
         </Routes>
       </div>
     </Router>

@@ -237,6 +237,51 @@ export const CharacterDetail: React.FC = () => {
             )}
 
             <div className="pt-4 border-t">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">展示链接</h3>
+              <div className="space-y-2">
+                <div className="p-4 bg-gray-50 rounded-md">
+                  {character.display_code ? (
+                    <p className="font-mono text-sm break-all">
+                      {`${import.meta.env.VITE_CHARACTER_DISPLAY_BASE_URL}/d/${character.display_code}`}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-500">展示链接未生成</p>
+                  )}
+                </div>
+                <div className="space-x-2">
+                  {character.display_code && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const url = `${import.meta.env.VITE_CHARACTER_DISPLAY_BASE_URL}/d/${character.display_code}`;
+                        navigator.clipboard.writeText(url);
+                      }}
+                    >
+                      复制链接
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        setIsSaving(true);
+                        await characterService.regenerateDisplayCode(uid!);
+                        window.location.reload();
+                      } catch (err) {
+                        setUpdateError(formatError(err));
+                      } finally {
+                        setIsSaving(false);
+                      }
+                    }}
+                    disabled={isSaving}
+                  >
+                    重新生成链接
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t">
               <h3 className="text-sm font-medium text-gray-500 mb-2">密钥管理</h3>
               <div className="space-y-2">
                 {secretKey ? (

@@ -6,6 +6,8 @@ import { z } from 'zod';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import Input from '../ui/Input';
+import { AnimatedSubscribeButton } from '@/components/magicui/animated-subscribe-button';
+import { CheckIcon, XIcon } from 'lucide-react';
 import { useCharacter } from '@/hooks/useCharacters';
 import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
@@ -235,6 +237,36 @@ export const CharacterDetail: React.FC = () => {
                 <p className="mt-1">{character.bio}</p>
               </div>
             )}
+
+            <div className="pt-4 border-t">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">角色状态</h3>
+              <div className="flex items-center space-x-2">
+                <AnimatedSubscribeButton 
+                  className="w-32 h-9"
+                  subscribeStatus={character.is_active}
+                  onClick={async () => {
+                    try {
+                      await characterService.updateStatus(uid!, !character.is_active);
+                      window.location.reload();
+                    } catch (err) {
+                      setUpdateError(formatError(err));
+                    }
+                  }}
+                >
+                  <span className="group inline-flex items-center">
+                    <XIcon className="mr-2 size-4" />
+                    已禁用
+                  </span>
+                  <span className="group inline-flex items-center">
+                    <CheckIcon className="mr-2 size-4" />
+                    已启用
+                  </span>
+                </AnimatedSubscribeButton>
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                禁用后，角色展示页面将无法访问
+              </p>
+            </div>
 
             <div className="pt-4 border-t">
               <h3 className="text-sm font-medium text-gray-500 mb-2">展示链接</h3>

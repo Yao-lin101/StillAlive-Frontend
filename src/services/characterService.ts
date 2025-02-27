@@ -89,6 +89,13 @@ export const characterService = {
     return response.data;
   },
 
+  async updateStatus(uid: string, isActive: boolean) {
+    const response = await api.post(`/characters/${uid}/update_status/`, {
+      is_active: isActive
+    });
+    return response.data;
+  },
+
   async getPublicDisplay(code: string) {
     const response = await axios.get(`${API_URL}/d/${code}/`);
     return response.data;

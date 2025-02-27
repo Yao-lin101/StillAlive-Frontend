@@ -5,6 +5,8 @@ import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
 import { StatusConfigType } from '@/types/character';
 import { Meteors } from "@/components/magicui/meteors";
+import { Marquee } from "@/components/magicui/marquee";
+import { cn } from "@/lib/utils";
 
 interface CharacterDisplay {
   name: string;
@@ -29,6 +31,41 @@ interface DominantColor {
   g: number;
   b: number;
 }
+
+const StatusCard = ({ label, description, value, suffix }: {
+  label: string;
+  description?: string;
+  value: any;
+  suffix?: string;
+}) => {
+  return (
+    <Card className={cn(
+      "relative w-64 overflow-hidden bg-white/50 backdrop-blur-sm",
+      "hover:bg-white/60 transition-colors duration-200"
+    )}>
+      <div className="p-4">
+        <h3 className="text-sm font-medium text-gray-900">{label}</h3>
+        {description && (
+          <p className="text-xs text-gray-500 mt-1">{description}</p>
+        )}
+        <div className="mt-2">
+          <span className="text-xl font-semibold text-gray-900">
+            {value !== undefined ? (
+              <>
+                {value}
+                {suffix && (
+                  <span className="text-sm ml-1 text-gray-500">{suffix}</span>
+                )}
+              </>
+            ) : (
+              '--'
+            )}
+          </span>
+        </div>
+      </div>
+    </Card>
+  );
+};
 
 export const CharacterDisplayPage: React.FC = () => {
   const { code } = useParams<{ code: string }>();
@@ -130,11 +167,7 @@ export const CharacterDisplayPage: React.FC = () => {
   useEffect(() => {
     if (character?.status_config?.theme?.background_url && !bgImageError) {
       getDominantColor(character.status_config.theme.background_url)
-        .then((color) => {
-          console.log('提取的主题色:', `rgb(${color.r}, ${color.g}, ${color.b})`);
-          console.log('渐变背景:', `linear-gradient(to bottom, rgba(${color.r},${color.g},${color.b},0.8), rgba(0,0,0,1))`);
-          setDominantColor(color);
-        })
+        .then(setDominantColor)
         .catch(console.error);
     }
   }, [character?.status_config?.theme?.background_url, bgImageError, getDominantColor]);
@@ -277,36 +310,25 @@ export const CharacterDisplayPage: React.FC = () => {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  {Object.entries(character.status_config.vital_signs).map(([key, config]) => {
-                    const statusKey = config.key || key;
-                    const statusValue = status?.status_data?.vital_signs?.data?.[statusKey];
-                    
-                    return (
-                      <Card key={key} className="bg-white/50">
-                        <div className="p-4">
-                          <h3 className="text-sm font-medium text-gray-900">{config.label}</h3>
-                          {config.description && (
-                            <p className="text-xs text-gray-500 mt-1">{config.description}</p>
-                          )}
-                          <div className="mt-2">
-                            <span className="text-xl font-semibold text-gray-900">
-                              {statusValue !== undefined ? (
-                                <>
-                                  {statusValue}
-                                  {config.valueType === 'number' && config.suffix ? (
-                                    <span className="text-sm ml-1 text-gray-500">{config.suffix}</span>
-                                  ) : null}
-                                </>
-                              ) : (
-                                '--'
-                              )}
-                            </span>
-                          </div>
-                        </div>
-                      </Card>
-                    );
-                  })}
+                <div className="relative w-full">
+                  <div className="relative">
+                    <Marquee pauseOnHover className="[--duration:30s] [--gap:1rem]">
+                      {Object.entries(character.status_config.vital_signs).map(([key, config]) => {
+                        const statusKey = config.key || key;
+                        const statusValue = status?.status_data?.vital_signs?.data?.[statusKey];
+                        
+                        return (
+                          <StatusCard
+                            key={key}
+                            label={config.label}
+                            description={config.description}
+                            value={statusValue}
+                            suffix={config.valueType === 'number' ? config.suffix : undefined}
+                          />
+                        );
+                      })}
+                    </Marquee>
+                  </div>
                 </div>
               </div>
             )}

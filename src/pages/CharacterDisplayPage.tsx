@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
 import { StatusConfigType } from '@/types/character';
+import { Meteors } from "@/components/magicui/meteors";
 
 interface CharacterDisplay {
   name: string;
@@ -71,34 +72,22 @@ export const CharacterDisplayPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent" />
+      <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-400 border-t-transparent" />
       </div>
     );
   }
 
   if (error || !character) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
-        <div className="text-center text-white p-8 max-w-md">
+      <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
+        <div className="text-center p-8 max-w-md">
           <h1 className="text-3xl font-bold mb-4">⚠️</h1>
-          <p className="text-gray-300">{error || '角色不存在'}</p>
+          <p className="text-gray-600">{error || '角色不存在'}</p>
         </div>
       </div>
     );
   }
-
-  const theme = character.status_config?.theme || {
-    background_url: '',
-    background_overlay: 'from-gray-900/95 to-gray-800/95',
-    accent_color: 'from-blue-400 to-purple-400'
-  };
-
-  const getStatusColor = (status: 'online' | 'offline') => {
-    return status === 'online' 
-      ? 'bg-emerald-500 shadow-lg shadow-emerald-500/50' 
-      : 'bg-gray-500 shadow-lg shadow-gray-500/50';
-  };
 
   const formatTimeElapsed = (timestamp: string) => {
     const lastUpdate = new Date(timestamp);
@@ -116,136 +105,130 @@ export const CharacterDisplayPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen text-white">
-      {theme.background_url && (
-        <div className="fixed inset-0 z-0">
-          <img 
-            src={theme.background_url} 
-            alt="背景" 
-            className="w-full h-full object-cover"
-          />
-          <div className={`absolute inset-0 bg-gradient-to-b ${theme.background_overlay}`} />
+    <>
+      <style>{`
+        body {
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          height: 100vh;
+          width: 100vw;
+          background-color: #000;
+        }
+      `}</style>
+      <div className="fixed inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 overflow-hidden bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900">
+          {character.status_config?.theme?.background_url && (
+            <img 
+              src={character.status_config.theme.background_url} 
+              alt="背景" 
+              className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50"
+            />
+          )}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Meteors 
+              number={30}
+              className="text-white"
+            />
+          </div>
         </div>
-      )}
-      <div className="relative z-10 py-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="relative mb-12">
-            <div className={`absolute inset-0 bg-gradient-to-r ${theme.accent_color} rounded-lg blur opacity-25`}></div>
-            <Card className="relative bg-gray-800/50 border-0 backdrop-blur-xl rounded-lg overflow-hidden">
-              <div className="p-8">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-6">
-                    {character.avatar ? (
-                      <img
-                        src={character.avatar}
-                        alt={character.name}
-                        className="w-32 h-32 rounded-2xl object-cover ring-4 ring-white/10"
-                      />
-                    ) : (
-                      <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-600 ring-4 ring-white/10 flex items-center justify-center">
-                        <span className="text-5xl font-bold text-white/80">
-                          {character.name[0]}
-                        </span>
-                      </div>
-                    )}
-                    <div>
-                      <h1 className={`text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${theme.accent_color}`}>
-                        {character.name}
-                      </h1>
-                      {character.bio && (
-                        <p className="mt-3 text-gray-300 max-w-xl whitespace-pre-wrap">
-                          {character.bio}
+        
+        <Card className="relative max-w-2xl w-full mx-4 bg-white/80 backdrop-blur-sm">
+          <div className="p-8">
+            <div className="flex items-center space-x-6 mb-8">
+              {character.avatar ? (
+                <img
+                  src={character.avatar}
+                  alt={character.name}
+                  className="w-24 h-24 rounded-full object-cover ring-2 ring-white/50"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center ring-2 ring-white/50">
+                  <span className="text-4xl font-bold text-gray-400">
+                    {character.name[0]}
+                  </span>
+                </div>
+              )}
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {character.name}
+                </h1>
+                {character.bio && (
+                  <p className="mt-2 text-gray-600">
+                    {character.bio}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {character.status_config?.vital_signs && Object.entries(character.status_config.vital_signs).length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    生命体征
+                  </h2>
+                  {status?.status_data?.vital_signs?.updated_at && (
+                    <div className="text-right">
+                      <p className="text-sm text-gray-500">
+                        {formatTimeElapsed(status.status_data.vital_signs.updated_at)}
+                      </p>
+                      {character.status_config?.display && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          {(() => {
+                            if (!status?.status_data?.vital_signs?.updated_at) return '';
+                            
+                            const lastUpdate = new Date(status.status_data.vital_signs.updated_at);
+                            const now = new Date();
+                            const diffInHours = (now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60);
+                            
+                            const timeoutMessage = character.status_config?.display?.timeout_messages
+                              ?.sort((a, b) => b.hours - a.hours)
+                              .find(msg => diffInHours >= msg.hours);
+                            
+                            return timeoutMessage?.message || character.status_config?.display?.default_message || '';
+                          })()}
                         </p>
                       )}
                     </div>
-                  </div>
-                  <div className="flex flex-col items-end space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <div className={`w-3 h-3 rounded-full ${getStatusColor(status?.status || 'offline')}`} />
-                      <span className="text-sm text-gray-300">
-                        {status?.status === 'online' ? '在线' : '离线'}
-                      </span>
-                    </div>
-                  </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(character.status_config.vital_signs).map(([key, config]) => {
+                    const statusKey = config.key || key;
+                    const statusValue = status?.status_data?.vital_signs?.data?.[statusKey];
+                    
+                    return (
+                      <Card key={key} className="bg-white/50">
+                        <div className="p-4">
+                          <h3 className="text-sm font-medium text-gray-900">{config.label}</h3>
+                          {config.description && (
+                            <p className="text-xs text-gray-500 mt-1">{config.description}</p>
+                          )}
+                          <div className="mt-2">
+                            <span className="text-xl font-semibold text-gray-900">
+                              {statusValue !== undefined ? (
+                                <>
+                                  {statusValue}
+                                  {config.valueType === 'number' && config.suffix ? (
+                                    <span className="text-sm ml-1 text-gray-500">{config.suffix}</span>
+                                  ) : null}
+                                </>
+                              ) : (
+                                '--'
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
-            </Card>
+            )}
           </div>
-
-          {character.status_config?.vital_signs && Object.entries(character.status_config.vital_signs).length > 0 && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className={`text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r ${theme.accent_color}`}>
-                  生命体征
-                </h2>
-                {status?.status_data?.vital_signs?.updated_at && (
-                  <div className="text-right">
-                    <p className="text-sm text-gray-400">
-                      {formatTimeElapsed(status.status_data.vital_signs.updated_at)}
-                    </p>
-                    {character.status_config?.display && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {(() => {
-                          if (!status?.status_data?.vital_signs?.updated_at) return '';
-                          
-                          const lastUpdate = new Date(status.status_data.vital_signs.updated_at);
-                          const now = new Date();
-                          const diffInHours = (now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60);
-                          
-                          const timeoutMessage = character.status_config?.display?.timeout_messages
-                            ?.sort((a, b) => b.hours - a.hours)
-                            .find(msg => diffInHours >= msg.hours);
-                          
-                          return timeoutMessage?.message || character.status_config?.display?.default_message || '';
-                        })()}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(character.status_config.vital_signs).map(([key, config]) => {
-                  const statusKey = config.key || key;
-                  const statusValue = status?.status_data?.vital_signs?.data?.[statusKey];
-                  
-                  return (
-                    <Card 
-                      key={key} 
-                      className="relative bg-gray-800/50 border-0 backdrop-blur-sm rounded-lg overflow-hidden group hover:bg-gray-800/70 transition-all duration-300"
-                    >
-                      <div className={`absolute inset-0 bg-gradient-to-r ${theme.accent_color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                      <div className="relative p-6 space-y-2">
-                        <h3 className="text-lg font-medium text-gray-200">{config.label}</h3>
-                        {config.description && (
-                          <div className="absolute invisible group-hover:visible bg-gray-900 text-white text-xs rounded-lg px-3 py-2 -top-12 left-1/2 transform -translate-x-1/2 w-max max-w-[250px] z-10 shadow-xl">
-                            {config.description}
-                            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
-                          </div>
-                        )}
-                        <div className="mt-2">
-                          <span className={`text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${theme.accent_color}`}>
-                            {statusValue !== undefined ? (
-                              <>
-                                {statusValue}
-                                {config.valueType === 'number' && config.suffix ? (
-                                  <span className="text-base ml-1 text-gray-400">{config.suffix}</span>
-                                ) : null}
-                              </>
-                            ) : (
-                              '--'
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
+        </Card>
       </div>
-    </div>
+    </>
   );
 }; 

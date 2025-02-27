@@ -235,7 +235,6 @@ export const CharacterDisplayPage: React.FC = () => {
               alt="背景" 
               className="absolute inset-0 w-full h-full object-cover opacity-50"
               onError={() => {
-                console.warn('Background image failed to load:', character.status_config?.theme?.background_url);
                 setBgImageError(true);
               }}
               crossOrigin="anonymous"
@@ -278,60 +277,94 @@ export const CharacterDisplayPage: React.FC = () => {
               </div>
             </div>
 
-            {character.status_config?.vital_signs && Object.entries(character.status_config.vital_signs).length > 0 && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    生命体征
-                  </h2>
-                  {status?.status_data?.vital_signs?.updated_at && (
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500">
-                        {formatTimeElapsed(status.status_data.vital_signs.updated_at)}
-                      </p>
-                      {character.status_config?.display && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          {(() => {
-                            if (!status?.status_data?.vital_signs?.updated_at) return '';
-                            
-                            const lastUpdate = new Date(status.status_data.vital_signs.updated_at);
-                            const now = new Date();
-                            const diffInHours = (now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60);
-                            
-                            const timeoutMessage = character.status_config?.display?.timeout_messages
-                              ?.sort((a, b) => b.hours - a.hours)
-                              .find(msg => diffInHours >= msg.hours);
-                            
-                            return timeoutMessage?.message || character.status_config?.display?.default_message || '';
-                          })()}
-                        </p>
-                      )}
-                    </div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                状态信息
+              </h2>
+              {status && (
+                <div className="text-right">
+                  <p className="text-sm text-gray-500">
+                    {Object.values(status.status_data).length > 0 && 
+                      formatTimeElapsed(
+                        Object.values(status.status_data)
+                          .map(s => s.updated_at)
+                          .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0]
+                      )
+                    }
+                  </p>
+                  {character.status_config?.display && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      {(() => {
+                        const latestUpdate = Object.values(status.status_data)
+                          .map(s => new Date(s.updated_at).getTime())
+                          .sort((a, b) => b - a)[0];
+                        
+                        if (!latestUpdate) return '';
+                        
+                        const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
+                        
+                        const timeoutMessage = character.status_config?.display?.timeout_messages
+                          ?.sort((a, b) => b.hours - a.hours)
+                          .find(msg => diffInHours >= msg.hours);
+                        
+                        return timeoutMessage?.message || character.status_config?.display?.default_message || '';
+                      })()}
+                    </p>
                   )}
                 </div>
+              )}
+            </div>
 
-                <div className="relative w-full">
-                  <div className="relative">
-                    <Marquee pauseOnHover className="[--duration:30s] [--gap:1rem]">
-                      {Object.entries(character.status_config.vital_signs).map(([key, config]) => {
-                        const statusKey = config.key || key;
-                        const statusValue = status?.status_data?.vital_signs?.data?.[statusKey];
+            <div className="relative w-full">
+              <div className="relative">
+                <Marquee pauseOnHover className="[--duration:30s] [--gap:1rem]">
+                  {character.status_config && Object.entries(character.status_config)
+                    .filter(([key]) => key !== 'display' && key !== 'theme')
+                    .flatMap(([_, configs]) => 
+                      Object.entries(configs as Record<string, any>).map(([key, config]) => {
+                        // 获取配置的 key 或使用字段名
+                        const configKey = config.key || key;
                         
-                        return (
-                          <StatusCard
-                            key={key}
-                            label={config.label}
-                            description={config.description}
-                            value={statusValue}
-                            suffix={config.valueType === 'number' ? config.suffix : undefined}
-                          />
-                        );
-                      })}
-                    </Marquee>
-                  </div>
-                </div>
+                        // 在所有状态类型中查找包含此 key 的最新数据
+                        let latestValue: any;
+                        let latestUpdate: number | undefined;
+                        
+                        if (status?.status_data) {
+                          Object.entries(status.status_data).forEach(([_, typeData]) => {
+                            if (typeData.data && configKey in typeData.data) {
+                              const updateTime = new Date(typeData.updated_at).getTime();
+                              if (!latestUpdate || updateTime > latestUpdate) {
+                                latestValue = typeData.data[configKey];
+                                latestUpdate = updateTime;
+                              }
+                            }
+                          });
+                        }
+
+                        return {
+                          key,
+                          config,
+                          value: latestValue,
+                          updatedAt: latestUpdate
+                        };
+                      })
+                    )
+                    .sort((a, b) => {
+                      if (!a.updatedAt || !b.updatedAt) return 0;
+                      return b.updatedAt - a.updatedAt;
+                    })
+                    .map(({ key, config, value }) => (
+                      <StatusCard
+                        key={key}
+                        label={config.label}
+                        description={config.description}
+                        value={value}
+                        suffix={config.valueType === 'number' ? config.suffix : undefined}
+                      />
+                    ))}
+                </Marquee>
               </div>
-            )}
+            </div>
           </div>
         </Card>
       </div>

@@ -266,11 +266,11 @@ export const CharacterDisplayPage: React.FC = () => {
                 </div>
               )}
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-gray-900 text-left">
                   {character.name}
                 </h1>
                 {character.bio && (
-                  <p className="mt-2 text-gray-600">
+                  <p className="mt-2 text-gray-600 text-left">
                     {character.bio}
                   </p>
                 )}
@@ -278,40 +278,35 @@ export const CharacterDisplayPage: React.FC = () => {
             </div>
 
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">
-                状态信息
-              </h2>
+              {status && character.status_config?.display && (
+                <p className="text-lg font-semibold text-gray-900">
+                  {(() => {
+                    const latestUpdate = Object.values(status.status_data)
+                      .map(s => new Date(s.updated_at).getTime())
+                      .sort((a, b) => b - a)[0];
+                    
+                    if (!latestUpdate) return '';
+                    
+                    const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
+                    
+                    const timeoutMessage = character.status_config?.display?.timeout_messages
+                      ?.sort((a, b) => b.hours - a.hours)
+                      .find(msg => diffInHours >= msg.hours);
+                    
+                    return timeoutMessage?.message || character.status_config?.display?.default_message || '';
+                  })()}
+                </p>
+              )}
               {status && (
-                <div className="text-right">
-                  <p className="text-sm text-gray-500">
-                    {Object.values(status.status_data).length > 0 && 
-                      formatTimeElapsed(
-                        Object.values(status.status_data)
-                          .map(s => s.updated_at)
-                          .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0]
-                      )
-                    }
-                  </p>
-                  {character.status_config?.display && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      {(() => {
-                        const latestUpdate = Object.values(status.status_data)
-                          .map(s => new Date(s.updated_at).getTime())
-                          .sort((a, b) => b - a)[0];
-                        
-                        if (!latestUpdate) return '';
-                        
-                        const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
-                        
-                        const timeoutMessage = character.status_config?.display?.timeout_messages
-                          ?.sort((a, b) => b.hours - a.hours)
-                          .find(msg => diffInHours >= msg.hours);
-                        
-                        return timeoutMessage?.message || character.status_config?.display?.default_message || '';
-                      })()}
-                    </p>
-                  )}
-                </div>
+                <p className="text-sm text-gray-500">
+                  {Object.values(status.status_data).length > 0 && 
+                    formatTimeElapsed(
+                      Object.values(status.status_data)
+                        .map(s => s.updated_at)
+                        .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0]
+                    )
+                  }
+                </p>
               )}
             </div>
 

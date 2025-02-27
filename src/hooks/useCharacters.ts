@@ -1,56 +1,66 @@
 import { useState, useEffect } from 'react';
-import { Character } from '@/types/character';
+import { Character, CharacterDetail } from '@/types/character';
 import { characterService } from '@/services/characterService';
-import { formatError } from '@/lib/utils';
 
 export function useCharacters() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchCharacters = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const data = await characterService.list();
-        setCharacters(data);
-      } catch (err) {
-        setError(formatError(err));
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchCharacters = async () => {
+    try {
+      setIsLoading(true);
+      const data = await characterService.list();
+      setCharacters(data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchCharacters();
   }, []);
 
-  return { characters, isLoading, error };
+  return { characters, isLoading, error, refetch: fetchCharacters };
 }
 
 export function useCharacter(uid: string) {
-  const [character, setCharacter] = useState<Character | null>(null);
+  const [character, setCharacter] = useState<CharacterDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchCharacter = async () => {
-      try {
+  const fetchCharacter = async (showLoading = true) => {
+    try {
+      if (showLoading) {
         setIsLoading(true);
-        setError(null);
-        const data = await characterService.get(uid);
-        setCharacter(data);
-      } catch (err) {
-        setError(formatError(err));
-      } finally {
+      }
+      const data = await characterService.get(uid);
+      setCharacter(data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      if (showLoading) {
         setIsLoading(false);
       }
-    };
-
-    if (uid) {
-      fetchCharacter();
     }
+  };
+
+  // 静默刷新，不显示加载状态
+  const silentRefetch = () => fetchCharacter(false);
+
+  useEffect(() => {
+    fetchCharacter();
   }, [uid]);
 
-  return { character, isLoading, error };
+  return { 
+    character, 
+    isLoading, 
+    error, 
+    refetch: fetchCharacter,
+    silentRefetch 
+  };
 } 

@@ -30,7 +30,7 @@ type UpdateCharacterFormData = z.infer<typeof updateCharacterSchema>;
 export const CharacterDetail: React.FC = () => {
   const { uid } = useParams<{ uid: string }>();
   const navigate = useNavigate();
-  const { character, isLoading, error } = useCharacter(uid!);
+  const { character, isLoading, error, silentRefetch } = useCharacter(uid!);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
@@ -92,8 +92,7 @@ export const CharacterDetail: React.FC = () => {
       
       await characterService.update(uid!, updateData);
       setIsEditing(false);
-      // 刷新页面以获取最新数据
-      window.location.reload();
+      await silentRefetch();
     } catch (err) {
       setUpdateError(formatError(err));
     } finally {
@@ -247,7 +246,7 @@ export const CharacterDetail: React.FC = () => {
                   onClick={async () => {
                     try {
                       await characterService.updateStatus(uid!, !character.is_active);
-                      window.location.reload();
+                      await silentRefetch();
                     } catch (err) {
                       setUpdateError(formatError(err));
                     }
@@ -298,7 +297,7 @@ export const CharacterDetail: React.FC = () => {
                       try {
                         setIsSaving(true);
                         await characterService.regenerateDisplayCode(uid!);
-                        window.location.reload();
+                        await silentRefetch();
                       } catch (err) {
                         setUpdateError(formatError(err));
                       } finally {

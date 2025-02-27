@@ -22,11 +22,6 @@ api.interceptors.request.use(
   }
 );
 
-// 创建一个不需要认证的 axios 实例
-const publicApi = axios.create({
-  baseURL: API_URL,
-});
-
 export const characterService = {
   async list(): Promise<Character[]> {
     const response = await api.get('/characters/');

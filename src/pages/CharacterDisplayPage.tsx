@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { characterService } from '@/services/characterService';
@@ -24,12 +24,69 @@ interface CharacterStatus {
   };
 }
 
+interface DominantColor {
+  r: number;
+  g: number;
+  b: number;
+}
+
 export const CharacterDisplayPage: React.FC = () => {
   const { code } = useParams<{ code: string }>();
   const [character, setCharacter] = useState<CharacterDisplay | null>(null);
   const [status, setStatus] = useState<CharacterStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [bgImageError, setBgImageError] = useState(false);
+  const [dominantColor, setDominantColor] = useState<DominantColor | null>(null);
+
+  const getDominantColor = useCallback((imageUrl: string): Promise<DominantColor> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = imageUrl;
+      
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        const colorCounts: { [key: string]: number } = {};
+        
+        for (let i = 0; i < imageData.length; i += 4) {
+          const r = imageData[i];
+          const g = imageData[i + 1];
+          const b = imageData[i + 2];
+          const rgb = `${r},${g},${b}`;
+          colorCounts[rgb] = (colorCounts[rgb] || 0) + 1;
+        }
+
+        let maxCount = 0;
+        let dominantRGB = '0,0,0';
+        
+        Object.entries(colorCounts).forEach(([rgb, count]) => {
+          if (count > maxCount) {
+            maxCount = count;
+            dominantRGB = rgb;
+          }
+        });
+
+        const [r, g, b] = dominantRGB.split(',').map(Number);
+        resolve({ r, g, b });
+      };
+
+      img.onerror = () => {
+        reject(new Error('Failed to load image'));
+      };
+    });
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,6 +126,18 @@ export const CharacterDisplayPage: React.FC = () => {
     const intervalId = setInterval(fetchStatus, 15000);
     return () => clearInterval(intervalId);
   }, [code]);
+
+  useEffect(() => {
+    if (character?.status_config?.theme?.background_url && !bgImageError) {
+      getDominantColor(character.status_config.theme.background_url)
+        .then((color) => {
+          console.log('提取的主题色:', `rgb(${color.r}, ${color.g}, ${color.b})`);
+          console.log('渐变背景:', `linear-gradient(to bottom, rgba(${color.r},${color.g},${color.b},0.8), rgba(0,0,0,1))`);
+          setDominantColor(color);
+        })
+        .catch(console.error);
+    }
+  }, [character?.status_config?.theme?.background_url, bgImageError, getDominantColor]);
 
   if (isLoading) {
     return (
@@ -116,13 +185,28 @@ export const CharacterDisplayPage: React.FC = () => {
           background-color: #000;
         }
       `}</style>
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="absolute inset-0 overflow-hidden bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900">
-          {character.status_config?.theme?.background_url && (
+      <div 
+        className="fixed inset-0 flex items-center justify-center"
+        style={{
+          background: dominantColor 
+            ? `linear-gradient(to bottom, 
+                rgba(${dominantColor.r},${dominantColor.g},${dominantColor.b},0.8),
+                rgba(0,0,0,1))`
+            : '#000'
+        }}
+      >
+        <div className="absolute inset-0 overflow-hidden">
+          {character.status_config?.theme?.background_url && !bgImageError && (
             <img 
               src={character.status_config.theme.background_url} 
               alt="背景" 
-              className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50"
+              className="absolute inset-0 w-full h-full object-cover opacity-50"
+              onError={() => {
+                console.warn('Background image failed to load:', character.status_config?.theme?.background_url);
+                setBgImageError(true);
+              }}
+              crossOrigin="anonymous"
+              referrerPolicy="no-referrer"
             />
           )}
           <div className="absolute inset-0 flex items-center justify-center">

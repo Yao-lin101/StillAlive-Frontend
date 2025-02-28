@@ -41,7 +41,7 @@ export const CreateCharacter: React.FC = () => {
   // 当QQ号变化时更新预览
   React.useEffect(() => {
     if (qqNumber && /^\d{5,11}$/.test(qqNumber)) {
-      const url = `https://q1.qlogo.cn/g?b=qq&nk=${qqNumber}&s=100`;
+      const url = `https://q.qlogo.cn/headimg_dl?dst_uin=${qqNumber}&spec=640&img_type=jpg`;
       setPreviewAvatar(url);
       setValue('avatar', url);
     }

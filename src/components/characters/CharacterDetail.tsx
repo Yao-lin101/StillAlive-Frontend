@@ -60,7 +60,7 @@ export const CharacterDetail: React.FC = () => {
   // 当QQ号变化时更新预览
   React.useEffect(() => {
     if (qqNumber && /^\d{5,11}$/.test(qqNumber)) {
-      const url = `https://q1.qlogo.cn/g?b=qq&nk=${qqNumber}&s=100`;
+      const url = `https://q.qlogo.cn/headimg_dl?dst_uin=${qqNumber}&spec=640&img_type=jpg`;
       setPreviewAvatar(url);
       setValue('avatar', url);
     }
@@ -374,7 +374,7 @@ export const CharacterDetail: React.FC = () => {
 
             <div className="pt-4 border-t">
               <h3 className="text-sm font-medium text-gray-500 mb-2">角色状态</h3>
-              <div className="flex items-center space-x-2">
+              <div className="flex justify-center items-center space-x-2">
                 <AnimatedSubscribeButton 
                   className="w-32 h-9"
                   subscribeStatus={character.is_active}

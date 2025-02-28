@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://alive.ineed.asia/api/v1';
+import { API_URL } from '@/config';
 
 // 创建一个新的 axios 实例用于认证
 const authApi = axios.create({

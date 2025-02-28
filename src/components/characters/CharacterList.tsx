@@ -40,7 +40,7 @@ export const CharacterList = React.memo(() => {
 
   const fetchInvitationCodes = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/api/v1/users/list_invitations/`, {
+      const response = await fetch(`${API_URL}/users/list_invitations/`, {
         headers: {
           'Authorization': `Bearer ${authService.getTokens().access}`
         }
@@ -64,7 +64,7 @@ export const CharacterList = React.memo(() => {
   const handleCreateInvitation = useCallback(async () => {
     try {
       setIsCreating(true);
-      const response = await fetch(`${API_URL}/api/v1/users/create_invitation/`, {
+      const response = await fetch(`${API_URL}/users/create_invitation/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

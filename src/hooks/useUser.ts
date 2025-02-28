@@ -30,7 +30,7 @@ export const useUser = () => {
         return;
       }
 
-      const response = await fetch(`${API_URL}/api/v1/users/profile/`, {
+      const response = await fetch(`${API_URL}/users/profile/`, {
         headers: {
           'Authorization': `Bearer ${access}`
         }

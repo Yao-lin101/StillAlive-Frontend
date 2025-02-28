@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Character, CharacterDetail, CreateCharacterData, UpdateCharacterData } from '@/types/character';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://alive.ineed.asia/api/v1';
+import { API_URL } from '@/config';
 
 // 创建一个新的 axios 实例
 const api = axios.create({

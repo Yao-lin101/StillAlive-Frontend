@@ -52,39 +52,41 @@ function App() {
   return (
     <AuthContext.Provider value={isAuthenticated}>
       <Router>
-        <div className="min-h-screen bg-gray-100">
-          <Routes>
-            <Route 
-              path="/login" 
-              element={
-                !isAuthenticated ? (
-                  <div className="min-h-screen flex items-center justify-center p-4">
-                    <LoginForm />
-                  </div>
-                ) : (
-                  <Navigate to="/characters" replace />
-                )
-              } 
-            />
-            <Route 
-              path="/register" 
-              element={
-                !isAuthenticated ? (
-                  <div className="min-h-screen flex items-center justify-center p-4">
-                    <RegisterForm />
-                  </div>
-                ) : (
-                  <Navigate to="/characters" replace />
-                )
-              } 
-            />
-            <Route path="/" element={<HomePage />} />
-            <Route
-              path="/characters/*"
-              element={isAuthenticated ? <CharactersPage /> : <Navigate to="/" replace />}
-            />
-            <Route path="/d/:code" element={<CharacterDisplayPage />} />
-          </Routes>
+        <div className="min-h-screen bg-gray-100 flex flex-col">
+          <main className="flex-1 relative">
+            <Routes>
+              <Route 
+                path="/login" 
+                element={
+                  !isAuthenticated ? (
+                    <div className="absolute inset-0 flex items-center justify-center p-4">
+                      <LoginForm />
+                    </div>
+                  ) : (
+                    <Navigate to="/characters" replace />
+                  )
+                } 
+              />
+              <Route 
+                path="/register" 
+                element={
+                  !isAuthenticated ? (
+                    <div className="absolute inset-0 flex items-center justify-center p-4">
+                      <RegisterForm />
+                    </div>
+                  ) : (
+                    <Navigate to="/characters" replace />
+                  )
+                } 
+              />
+              <Route path="/" element={<HomePage />} />
+              <Route
+                path="/characters/*"
+                element={isAuthenticated ? <CharactersPage /> : <Navigate to="/" replace />}
+              />
+              <Route path="/d/:code" element={<CharacterDisplayPage />} />
+            </Routes>
+          </main>
         </div>
       </Router>
     </AuthContext.Provider>

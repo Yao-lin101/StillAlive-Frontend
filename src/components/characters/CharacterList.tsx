@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useUser } from '@/hooks/useUser';
@@ -167,9 +168,12 @@ export const CharacterList = React.memo(() => {
                   <Ticket className="h-4 w-4" />
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle>邀请码管理</DialogTitle>
+                  <DialogDescription>
+                    管理邀请码，查看现有邀请码并生成新的邀请码
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 pt-4">
                   <Button

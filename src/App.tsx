@@ -16,10 +16,8 @@ function App() {
 
   useEffect(() => {
     const checkAuth = () => {
-      console.log('检查认证状态...');
       const { access } = authService.getTokens();
       const newAuthState = !!access;
-      console.log('认证状态:', newAuthState ? '已登录' : '未登录');
       setIsAuthenticated(newAuthState);
     };
 
@@ -28,7 +26,6 @@ function App() {
 
     // 监听 storage 变化
     const handleStorageChange = (e: StorageEvent) => {
-      console.log('Storage 变化:', e.key);
       if (e.key === 'access_token') {
         checkAuth();
       }
@@ -36,7 +33,6 @@ function App() {
 
     // 监听自定义认证事件
     const handleAuthChange = () => {
-      console.log('收到认证状态变化事件');
       checkAuth();
     };
 

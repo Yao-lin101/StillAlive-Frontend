@@ -1,6 +1,15 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api/v1';
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://alive.ineed.asia/api/v1';
+
+// 创建一个新的 axios 实例用于认证
+const authApi = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+  }
+});
 
 export interface LoginCredentials {
   email: string;
@@ -26,22 +35,50 @@ export interface AuthResponse {
 
 const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await axios.post(`${API_URL}/auth/token/`, credentials);
-    return response.data;
+    try {
+      const response = await authApi.post('/auth/token/', credentials);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(error.response.data.detail || '登录失败');
+      }
+      throw error;
+    }
   },
 
   async register(credentials: RegisterCredentials): Promise<AuthResponse> {
-    const response = await axios.post(`${API_URL}/users/register_email/`, credentials);
-    return response.data;
+    try {
+      const response = await authApi.post('/users/register_email/', credentials);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(error.response.data.detail || '注册失败');
+      }
+      throw error;
+    }
   },
 
   async sendVerifyCode(email: string): Promise<void> {
-    await axios.post(`${API_URL}/users/send_verify_code/`, { email });
+    try {
+      await authApi.post('/users/send_verify_code/', { email });
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(error.response.data.detail || '验证码发送失败');
+      }
+      throw error;
+    }
   },
 
   async refreshToken(refresh: string): Promise<{ access: string }> {
-    const response = await axios.post(`${API_URL}/auth/token/refresh/`, { refresh });
-    return response.data;
+    try {
+      const response = await authApi.post('/auth/token/refresh/', { refresh });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(error.response.data.detail || 'Token 刷新失败');
+      }
+      throw error;
+    }
   },
 
   setTokens(access: string, refresh: string): void {

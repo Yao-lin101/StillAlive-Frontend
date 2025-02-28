@@ -8,6 +8,13 @@ import { Meteors } from "@/components/magicui/meteors";
 import { Marquee } from "@/components/magicui/marquee";
 import { ShineBorder } from "@/components/magicui/shine-border";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface CharacterDisplay {
   name: string;
@@ -33,17 +40,21 @@ interface DominantColor {
   b: number;
 }
 
-const StatusCard = ({ label, description, value, suffix }: {
+const StatusCard = ({ label, description, value, suffix, onClick }: {
   label: string;
   description?: string;
   value: any;
   suffix?: string;
+  onClick?: () => void;
 }) => {
   return (
-    <Card className={cn(
-      "relative w-64 h-[120px] overflow-hidden bg-white/50 backdrop-blur-sm group",
-      "hover:bg-white/60 transition-colors duration-200"
-    )}>
+    <Card 
+      className={cn(
+        "relative w-64 h-[120px] overflow-hidden bg-white/50 backdrop-blur-sm group cursor-pointer",
+        "hover:bg-white/60 transition-colors duration-200"
+      )}
+      onClick={onClick}
+    >
       <div className="p-4 h-full flex flex-col">
         <h3 className="text-sm font-medium text-gray-900">{label}</h3>
         <div className="relative flex-1">
@@ -80,6 +91,7 @@ export const CharacterDisplayPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [bgImageError, setBgImageError] = useState(false);
   const [dominantColor, setDominantColor] = useState<DominantColor | null>(null);
+  const [showStatusDialog, setShowStatusDialog] = useState(false);
 
   const getDominantColor = useCallback((imageUrl: string): Promise<DominantColor> => {
     return new Promise((resolve, reject) => {
@@ -176,6 +188,39 @@ export const CharacterDisplayPage: React.FC = () => {
         .catch(console.error);
     }
   }, [character?.status_config?.theme?.background_url, bgImageError, getDominantColor]);
+
+  const statusItems = character?.status_config && Object.entries(character.status_config)
+    .filter(([key]) => key !== 'display' && key !== 'theme')
+    .flatMap(([_, configs]) => 
+      Object.entries(configs as Record<string, any>).map(([key, config]) => {
+        const configKey = config.key || key;
+        let latestValue: any;
+        let latestUpdate: number | undefined;
+        
+        if (status?.status_data) {
+          Object.entries(status.status_data).forEach(([_, typeData]) => {
+            if (typeData.data && configKey in typeData.data) {
+              const updateTime = new Date(typeData.updated_at).getTime();
+              if (!latestUpdate || updateTime > latestUpdate) {
+                latestValue = typeData.data[configKey];
+                latestUpdate = updateTime;
+              }
+            }
+          });
+        }
+
+        return {
+          key,
+          config,
+          value: latestValue,
+          updatedAt: latestUpdate
+        };
+      })
+    )
+    .sort((a, b) => {
+      if (!a.updatedAt || !b.updatedAt) return 0;
+      return b.updatedAt - a.updatedAt;
+    });
 
   if (isLoading) {
     return (
@@ -319,56 +364,64 @@ export const CharacterDisplayPage: React.FC = () => {
             <div className="relative w-full">
               <div className="relative">
                 <Marquee pauseOnHover className="[--duration:30s] [--gap:1rem]">
-                  {character.status_config && Object.entries(character.status_config)
-                    .filter(([key]) => key !== 'display' && key !== 'theme')
-                    .flatMap(([_, configs]) => 
-                      Object.entries(configs as Record<string, any>).map(([key, config]) => {
-                        // 获取配置的 key 或使用字段名
-                        const configKey = config.key || key;
-                        
-                        // 在所有状态类型中查找包含此 key 的最新数据
-                        let latestValue: any;
-                        let latestUpdate: number | undefined;
-                        
-                        if (status?.status_data) {
-                          Object.entries(status.status_data).forEach(([_, typeData]) => {
-                            if (typeData.data && configKey in typeData.data) {
-                              const updateTime = new Date(typeData.updated_at).getTime();
-                              if (!latestUpdate || updateTime > latestUpdate) {
-                                latestValue = typeData.data[configKey];
-                                latestUpdate = updateTime;
-                              }
-                            }
-                          });
-                        }
-
-                        return {
-                          key,
-                          config,
-                          value: latestValue,
-                          updatedAt: latestUpdate
-                        };
-                      })
-                    )
-                    .sort((a, b) => {
-                      if (!a.updatedAt || !b.updatedAt) return 0;
-                      return b.updatedAt - a.updatedAt;
-                    })
-                    .map(({ key, config, value }) => (
-                      <StatusCard
-                        key={key}
-                        label={config.label}
-                        description={config.description}
-                        value={value}
-                        suffix={config.valueType === 'number' ? config.suffix : undefined}
-                      />
-                    ))}
+                  {statusItems?.map(({ key, config, value }) => (
+                    <StatusCard
+                      key={key}
+                      label={config.label}
+                      description={config.description}
+                      value={value}
+                      suffix={config.valueType === 'number' ? config.suffix : undefined}
+                      onClick={() => setShowStatusDialog(true)}
+                    />
+                  ))}
                 </Marquee>
               </div>
             </div>
           </div>
         </Card>
       </div>
+
+      <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>状态信息</DialogTitle>
+            <DialogDescription>
+              显示所有状态的详细信息，包括最近更新时间和描述。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            {statusItems?.map(({ key, config, value, updatedAt }) => (
+              <Card key={key} className="p-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-sm font-medium">{config.label}</h3>
+                    {updatedAt && (
+                      <span className="text-xs text-gray-500">
+                        {formatTimeElapsed(new Date(updatedAt).toISOString())}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xl font-semibold">
+                    {value !== undefined ? (
+                      <>
+                        {value}
+                        {config.valueType === 'number' && config.suffix && (
+                          <span className="text-sm ml-1 text-gray-500">{config.suffix}</span>
+                        )}
+                      </>
+                    ) : (
+                      '--'
+                    )}
+                  </p>
+                  {config.description && (
+                    <p className="text-sm text-gray-500">{config.description}</p>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }; 

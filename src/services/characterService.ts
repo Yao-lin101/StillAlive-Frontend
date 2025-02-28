@@ -6,10 +6,6 @@ const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://alive.ineed.asia/a
 // 创建一个新的 axios 实例
 const api = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  }
 });
 
 // 添加请求拦截器
@@ -22,19 +18,6 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// 添加响应拦截器
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      // Token 过期或无效，可以在这里处理刷新 token 或登出逻辑
-      localStorage.removeItem('access_token');
-      window.location.href = '/login';
-    }
     return Promise.reject(error);
   }
 );
@@ -120,4 +103,4 @@ export const characterService = {
     const response = await axios.get(`${API_URL}/d/${code}/status/`);
     return response.data;
   },
-}; 
+};

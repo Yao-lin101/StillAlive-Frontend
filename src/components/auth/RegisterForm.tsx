@@ -13,6 +13,7 @@ const registerSchema = z.object({
   password: z.string().min(8, '密码至少需要8个字符'),
   confirmPassword: z.string().min(8, '请确认密码'),
   verify_code: z.string().length(6, '验证码必须是6位数字'),
+  invitation_code: z.string().min(1, '请输入邀请码'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "两次输入的密码不一致",
   path: ["confirmPassword"],
@@ -113,6 +114,15 @@ const RegisterForm: React.FC = () => {
               {countdown > 0 ? `${countdown}秒后重试` : '发送验证码'}
             </Button>
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Input
+            type="text"
+            placeholder="邀请码"
+            error={errors.invitation_code?.message}
+            {...register('invitation_code')}
+          />
         </div>
 
         <div className="space-y-2">

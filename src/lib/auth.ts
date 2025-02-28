@@ -20,6 +20,7 @@ export interface RegisterCredentials {
   email: string;
   password: string;
   verify_code: string;
+  invitation_code: string;
 }
 
 export interface AuthResponse {

@@ -8,13 +8,7 @@ import { Meteors } from "@/components/magicui/meteors";
 import { Marquee } from "@/components/magicui/marquee";
 import { ShineBorder } from "@/components/magicui/shine-border";
 import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface CharacterDisplay {
   name: string;
@@ -80,6 +74,72 @@ const StatusCard = ({ label, description, value, suffix, onClick }: {
         </div>
       </div>
     </Card>
+  );
+};
+
+const Modal = ({ 
+  isOpen, 
+  onClose, 
+  children 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  children: React.ReactNode;
+}) => {
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+    
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto overflow-x-hidden"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="relative max-w-2xl w-full"
+            onClick={e => e.stopPropagation()}
+          >
+            <Card className="w-full overflow-hidden bg-white/90 backdrop-blur-sm">
+              <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
+              <div className="p-6">
+                <button
+                  onClick={onClose}
+                  className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+                {children}
+              </div>
+            </Card>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
@@ -262,14 +322,17 @@ export const CharacterDisplayPage: React.FC = () => {
         body {
           margin: 0;
           padding: 0;
-          overflow: hidden;
           height: 100vh;
           width: 100vw;
-          background-color: #000;
+        }
+        #root {
+          height: 100vh;
+          width: 100vw;
+          overflow: hidden;
         }
       `}</style>
       <div 
-        className="fixed inset-0 flex items-center justify-center"
+        className="fixed inset-0 flex items-center justify-center overflow-hidden"
         style={{
           background: dominantColor 
             ? `linear-gradient(to bottom, 
@@ -381,47 +444,45 @@ export const CharacterDisplayPage: React.FC = () => {
         </Card>
       </div>
 
-      <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>状态信息</DialogTitle>
-            <DialogDescription>
-              显示所有状态的详细信息，包括最近更新时间和描述。
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            {statusItems?.map(({ key, config, value, updatedAt }) => (
-              <Card key={key} className="p-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-sm font-medium">{config.label}</h3>
-                    {updatedAt && (
-                      <span className="text-xs text-gray-500">
-                        {formatTimeElapsed(new Date(updatedAt).toISOString())}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xl font-semibold">
-                    {value !== undefined ? (
-                      <>
-                        {value}
-                        {config.valueType === 'number' && config.suffix && (
-                          <span className="text-sm ml-1 text-gray-500">{config.suffix}</span>
-                        )}
-                      </>
-                    ) : (
-                      '--'
-                    )}
-                  </p>
-                  {config.description && (
-                    <p className="text-sm text-gray-500">{config.description}</p>
+      <Modal isOpen={showStatusDialog} onClose={() => setShowStatusDialog(false)}>
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold leading-none tracking-tight">状态信息</h2>
+          <p className="text-sm text-muted-foreground mt-2">
+            显示所有状态的详细信息，包括最近更新时间和描述。
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {statusItems?.map(({ key, config, value, updatedAt }) => (
+            <Card key={key} className="p-4">
+              <div className="space-y-2">
+                <div className="flex justify-between items-start">
+                  <h3 className="text-sm font-medium">{config.label}</h3>
+                  {updatedAt && (
+                    <span className="text-xs text-gray-500">
+                      {formatTimeElapsed(new Date(updatedAt).toISOString())}
+                    </span>
                   )}
                 </div>
-              </Card>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
+                <p className="text-xl font-semibold">
+                  {value !== undefined ? (
+                    <>
+                      {value}
+                      {config.valueType === 'number' && config.suffix && (
+                        <span className="text-sm ml-1 text-gray-500">{config.suffix}</span>
+                      )}
+                    </>
+                  ) : (
+                    '--'
+                  )}
+                </p>
+                {config.description && (
+                  <p className="text-sm text-gray-500">{config.description}</p>
+                )}
+              </div>
+            </Card>
+          ))}
+        </div>
+      </Modal>
     </>
   );
 }; 

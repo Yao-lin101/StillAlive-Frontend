@@ -65,7 +65,8 @@ const RegisterForm: React.FC = () => {
       const { confirmPassword, ...registerData } = data;
       const response = await authService.register(registerData);
       authService.setTokens(response.access, response.refresh);
-      navigate('/dashboard');
+      window.dispatchEvent(new Event('auth-change'));
+      navigate('/characters', { replace: true });
     } catch (err) {
       setError(formatError(err));
     } finally {

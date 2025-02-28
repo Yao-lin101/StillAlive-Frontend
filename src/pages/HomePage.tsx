@@ -1,10 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { AuthContext } from '@/App';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const isAuthenticated = localStorage.getItem('access_token') !== null;
+  const isAuthenticated = React.useContext(AuthContext);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">

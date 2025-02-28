@@ -30,12 +30,27 @@ const LoginForm: React.FC = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
+      console.log('开始登录流程...');
       setIsLoading(true);
       setError('');
+      
+      console.log('调用登录 API...');
       const response = await authService.login(data);
+      console.log('登录 API 响应成功:', response);
+      
+      console.log('设置 tokens...');
       authService.setTokens(response.access, response.refresh);
-      navigate('/');
+      
+      // 触发认证状态更新事件
+      console.log('触发认证状态更新事件...');
+      window.dispatchEvent(new Event('auth-change'));
+      
+      console.log('导航到角色管理页面...');
+      // 直接导航到角色管理页面
+      navigate('/characters', { replace: true });
+      
     } catch (err) {
+      console.error('登录失败:', err);
       setError(formatError(err));
     } finally {
       setIsLoading(false);

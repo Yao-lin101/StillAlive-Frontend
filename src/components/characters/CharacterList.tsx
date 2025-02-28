@@ -4,10 +4,18 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useCharacters } from '@/hooks/useCharacters';
 import { Character } from '@/types/character';
+import { LogOut } from 'lucide-react';
+import authService from '@/lib/auth';
 
 export const CharacterList: React.FC = () => {
   const navigate = useNavigate();
   const { characters, isLoading, error } = useCharacters();
+
+  const handleLogout = () => {
+    // 清除 tokens 并触发认证状态更新事件
+    authService.clearTokens();
+    window.dispatchEvent(new Event('auth-change'));
+  };
 
   if (isLoading) {
     return (
@@ -29,9 +37,19 @@ export const CharacterList: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">我的角色</h1>
-        <Button onClick={() => navigate('/characters/new')}>
-          创建角色
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button onClick={() => navigate('/characters/new')}>
+            创建角色
+          </Button>
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={handleLogout}
+            title="退出登录"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {characters.length === 0 ? (

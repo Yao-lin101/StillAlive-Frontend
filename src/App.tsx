@@ -7,6 +7,7 @@ import { CharactersPage } from './pages/CharactersPage';
 import { CharacterDisplayPage } from '@/pages/CharacterDisplayPage';
 import authService from '@/lib/auth';
 import './App.css'
+import { Toaster } from 'sonner';
 
 // 创建认证上下文
 export const AuthContext = createContext<boolean>(false);
@@ -85,6 +86,7 @@ function App() {
           </main>
         </div>
       </Router>
+      <Toaster richColors />
     </AuthContext.Provider>
   );
 }

@@ -14,6 +14,7 @@ import { formatError } from '@/lib/utils';
 import { UpdateCharacterData, StatusConfigType } from '@/types/character';
 import { Select } from '../ui/select';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -45,6 +46,7 @@ export const CharacterDetail: React.FC = () => {
   const [isRegeneratingKey, setIsRegeneratingKey] = useState(false);
   const [statusConfig, setStatusConfig] = useState<StatusConfigType>({ vital_signs: {} });
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
+  const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
 
   const {
     register,
@@ -102,8 +104,11 @@ export const CharacterDetail: React.FC = () => {
     try {
       const key = await characterService.getSecretKey(uid!);
       setSecretKey(key);
+      await navigator.clipboard.writeText(key);
+      toast.success("密钥已复制到剪贴板");
     } catch (err) {
       setUpdateError(formatError(err));
+      toast.error("获取密钥失败");
     }
   };
 
@@ -112,10 +117,14 @@ export const CharacterDetail: React.FC = () => {
       setIsRegeneratingKey(true);
       const key = await characterService.regenerateSecretKey(uid!);
       setSecretKey(key);
+      await navigator.clipboard.writeText(key);
+      toast.success("新密钥已生成并复制到剪贴板");
     } catch (err) {
       setUpdateError(formatError(err));
+      toast.error("重新生成密钥失败");
     } finally {
       setIsRegeneratingKey(false);
+      setShowRegenerateConfirm(false);
     }
   };
 
@@ -402,9 +411,14 @@ export const CharacterDetail: React.FC = () => {
                   {character.display_code && (
                     <Button
                       variant="outline"
-                      onClick={() => {
+                      onClick={async () => {
                         const url = `${import.meta.env.VITE_CHARACTER_DISPLAY_BASE_URL}/d/${character.display_code}`;
-                        navigator.clipboard.writeText(url);
+                        try {
+                          await navigator.clipboard.writeText(url);
+                          toast.success("展示链接已复制到剪贴板");
+                        } catch (err) {
+                          toast.error("复制链接失败");
+                        }
                       }}
                     >
                       复制链接
@@ -417,8 +431,10 @@ export const CharacterDetail: React.FC = () => {
                         setIsSaving(true);
                         await characterService.regenerateDisplayCode(uid!);
                         await silentRefetch();
+                        toast.success("展示链接已重新生成");
                       } catch (err) {
                         setUpdateError(formatError(err));
+                        toast.error("重新生成链接失败");
                       } finally {
                         setIsSaving(false);
                       }
@@ -451,13 +467,39 @@ export const CharacterDetail: React.FC = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={handleRegenerateSecretKey}
+                    onClick={() => setShowRegenerateConfirm(true)}
                     disabled={isRegeneratingKey}
                   >
                     {isRegeneratingKey ? '生成中...' : '重新生成密钥'}
                   </Button>
                 </div>
               </div>
+
+              <Dialog open={showRegenerateConfirm} onOpenChange={setShowRegenerateConfirm}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>重新生成密钥</DialogTitle>
+                    <DialogDescription>
+                      重新生成密钥后，原有密钥将立即失效。此操作不可撤销，是否继续？
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex justify-end space-x-2 pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowRegenerateConfirm(false)}
+                    >
+                      取消
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleRegenerateSecretKey}
+                      disabled={isRegeneratingKey}
+                    >
+                      {isRegeneratingKey ? '生成中...' : '确认重新生成'}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <div className="pt-4 border-t">

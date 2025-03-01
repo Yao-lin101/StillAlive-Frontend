@@ -129,15 +129,18 @@ export const CharacterDetail: React.FC = () => {
     }
   };
 
-  const handleRemoveStatusField = (category: keyof StatusConfigType, key: string) => {
+  const handleRemoveStatusField = async (category: keyof StatusConfigType, key: string) => {
     if (category === 'vital_signs') {
       const currentFields = { ...(statusConfig.vital_signs || {}) };
       delete currentFields[key];
       
-      setStatusConfig({
+      const newConfig = {
         ...statusConfig,
         vital_signs: currentFields
-      });
+      };
+      
+      setStatusConfig(newConfig);
+      await handleStatusConfigUpdate(newConfig);
     }
   };
 
@@ -955,6 +958,15 @@ const StatusCard: React.FC<{
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      onDelete();
+      setIsEditing(false);
+    } catch (err) {
+      toast.error("删除状态失败");
+    }
+  };
+
   return (
     <>
       {!isNew && (
@@ -1058,10 +1070,7 @@ const StatusCard: React.FC<{
               {!isNew && (
                 <Button
                   variant="destructive"
-                  onClick={() => {
-                    onDelete();
-                    setIsEditing(false);
-                  }}
+                  onClick={handleDelete}
                 >
                   删除
                 </Button>

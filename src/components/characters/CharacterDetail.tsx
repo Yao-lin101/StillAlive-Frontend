@@ -12,7 +12,6 @@ import { useCharacter } from '@/hooks/useCharacters';
 import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
 import { UpdateCharacterData, StatusConfigType } from '@/types/character';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import {
@@ -28,6 +27,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { StatusCard } from './components/cards/StatusCard';
 
 const updateCharacterSchema = z.object({
   name: z.string().min(1, '请输入角色名称'),
@@ -597,7 +597,12 @@ export const CharacterDetail: React.FC = () => {
                         key={key}
                         statusKey={key}
                         config={{
-                          ...config,
+                          key,
+                          label: config.label || key,
+                          valueType: config.valueType || 'text',
+                          description: config.description,
+                          suffix: config.suffix,
+                          color: config.color,
                           __parent: statusConfig
                         }}
                         onUpdate={(updatedConfig) => {
@@ -927,189 +932,6 @@ const DisplayConfigCard: React.FC<{
               >
                 {isSaving ? '保存中...' : '保存'}
               </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-};
-
-const StatusCard: React.FC<{
-  statusKey: string;
-  config: any;
-  onUpdate: (config: any) => void;
-  onDelete: () => void;
-  onSave: (config: any) => Promise<void>;
-  isSaving: boolean;
-  isNew?: boolean;
-}> = ({ statusKey, config, onUpdate, onDelete, onSave, isSaving, isNew }) => {
-  const [isEditing, setIsEditing] = useState(isNew);
-  const [localConfig, setLocalConfig] = useState(config);
-
-  const handleSave = async () => {
-    console.log('StatusCard - Saving config for key:', statusKey, localConfig);
-    // 获取父组件的完整配置
-    const parentConfig = config.__parent || {};
-    // 更新特定状态的配置
-    const newConfig = {
-      ...parentConfig,
-      vital_signs: {
-        ...(parentConfig.vital_signs || {}),
-        [statusKey]: localConfig
-      }
-    };
-    console.log('StatusCard - Full config to save:', newConfig);
-    onUpdate(localConfig);
-    await onSave(newConfig);
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    if (isNew) {
-      onDelete();
-    } else {
-      setLocalConfig(config);
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      onDelete();
-      setIsEditing(false);
-    } catch (err) {
-      toast.error("删除状态失败");
-    }
-  };
-
-  return (
-    <>
-      {!isNew && (
-        <Card
-          className="p-4 cursor-pointer hover:shadow-md transition-shadow"
-          onClick={() => setIsEditing(true)}
-        >
-          <div className="flex flex-col items-center justify-center space-y-2 text-center">
-            <h5 className="text-sm font-medium">{config.label || statusKey}</h5>
-            <p className="text-sm text-gray-500 truncate w-full">
-              类型: {config.valueType === 'number' ? '数值' : '文本'}
-              {config.suffix ? `（${config.suffix}）` : ''}
-            </p>
-            {config.description && (
-              <p className="text-sm text-gray-500 truncate w-full">
-                描述: {config.description}
-              </p>
-            )}
-            <Settings2 className="h-4 w-4 text-gray-400 mt-2" />
-          </div>
-        </Card>
-      )}
-
-      <Dialog open={isEditing} onOpenChange={isNew ? undefined : setIsEditing}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{isNew ? '新增状态' : '编辑状态配置'}</DialogTitle>
-            <DialogDescription>
-              {isNew ? '配置新的状态字段' : '修改状态的显示和行为配置'}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>状态键名</Label>
-                <Input
-                  value={localConfig.key}
-                  onChange={(e) => setLocalConfig({
-                    ...localConfig,
-                    key: e.target.value
-                  })}
-                  placeholder="用于API通信的键名"
-                />
-              </div>
-              <div>
-                <Label>显示名称</Label>
-                <Input
-                  value={localConfig.label}
-                  onChange={(e) => setLocalConfig({
-                    ...localConfig,
-                    label: e.target.value
-                  })}
-                  placeholder="在界面上显示的名称"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>值类型</Label>
-                <Select
-                  value={localConfig.valueType}
-                  onValueChange={(value) => {
-                    const valueType = value as 'number' | 'text';
-                    setLocalConfig({
-                      ...localConfig,
-                      valueType,
-                      suffix: valueType === 'text' ? undefined : localConfig.suffix
-                    });
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择值类型" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="number">数值</SelectItem>
-                    <SelectItem value="text">文本</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>描述</Label>
-                <Input
-                  value={localConfig.description || ''}
-                  onChange={(e) => setLocalConfig({
-                    ...localConfig,
-                    description: e.target.value
-                  })}
-                  placeholder="状态的描述信息"
-                />
-              </div>
-            </div>
-            {localConfig.valueType === 'number' && (
-              <div>
-                <Label>单位</Label>
-                <Input
-                  value={localConfig.suffix || ''}
-                  onChange={(e) => setLocalConfig({
-                    ...localConfig,
-                    suffix: e.target.value
-                  })}
-                  placeholder="例如：%、℃"
-                />
-              </div>
-            )}
-            <div className="flex justify-between pt-4">
-              {!isNew && (
-                <Button
-                  variant="destructive"
-                  onClick={handleDelete}
-                >
-                  删除
-                </Button>
-              )}
-              <div className={`space-x-2 ${isNew ? 'w-full flex justify-end' : ''}`}>
-                <Button
-                  variant="outline"
-                  onClick={handleCancel}
-                >
-                  取消
-                </Button>
-                <Button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                >
-                  {isSaving ? '保存中...' : '保存'}
-                </Button>
-              </div>
             </div>
           </div>
         </DialogContent>

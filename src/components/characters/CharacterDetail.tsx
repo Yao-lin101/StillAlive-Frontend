@@ -22,6 +22,12 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 const updateCharacterSchema = z.object({
   name: z.string().min(1, '请输入角色名称'),
@@ -370,177 +376,220 @@ export const CharacterDetail: React.FC = () => {
               </div>
             )}
 
-            <div className="pt-4 border-t">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">角色状态</h3>
-              <div className="flex justify-center items-center space-x-2">
-                <AnimatedSubscribeButton 
-                  className="w-32 h-9"
-                  subscribeStatus={character.is_active}
-                  onClick={async () => {
-                    try {
-                      await characterService.updateStatus(uid!, !character.is_active);
-                      await silentRefetch();
-                    } catch (err) {
-                      setUpdateError(formatError(err));
-                    }
-                  }}
-                >
-                  <span className="group inline-flex items-center">
-                    <XIcon className="mr-2 size-4" />
-                    已禁用
-                  </span>
-                  <span className="group inline-flex items-center">
-                    <CheckIcon className="mr-2 size-4" />
-                    已启用
-                  </span>
-                </AnimatedSubscribeButton>
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                禁用后，角色展示页面将无法访问
-              </p>
-            </div>
-
-            <div className="pt-4 border-t">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">展示链接</h3>
-              <div className="space-y-2">
-                <div className="p-4 bg-gray-50 rounded-md">
-                  {character.display_code ? (
-                    <p className="font-mono text-sm break-all">
-                      {`${import.meta.env.VITE_CHARACTER_DISPLAY_BASE_URL}/d/${character.display_code}`}
-                    </p>
-                  ) : (
-                    <p className="text-sm text-gray-500">展示链接未生成</p>
-                  )}
-                </div>
-                <div className="space-x-2">
-                  {character.display_code && (
-                    <Button
-                      variant="outline"
+            <Tabs defaultValue="basic" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="basic">基础设置</TabsTrigger>
+                <TabsTrigger value="display">展示配置</TabsTrigger>
+                <TabsTrigger value="sync">状态同步</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="basic" className="space-y-6">
+                <div className="pt-4">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">角色状态</h3>
+                  <div className="flex justify-center items-center space-x-2">
+                    <AnimatedSubscribeButton 
+                      className="w-32 h-9"
+                      subscribeStatus={character.is_active}
                       onClick={async () => {
-                        const url = `${import.meta.env.VITE_CHARACTER_DISPLAY_BASE_URL}/d/${character.display_code}`;
                         try {
-                          await navigator.clipboard.writeText(url);
-                          toast.success("展示链接已复制到剪贴板");
+                          await characterService.updateStatus(uid!, !character.is_active);
+                          await silentRefetch();
                         } catch (err) {
-                          toast.error("复制链接失败");
+                          setUpdateError(formatError(err));
                         }
                       }}
                     >
-                      复制链接
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    onClick={async () => {
-                      try {
-                        setIsSaving(true);
-                        await characterService.regenerateDisplayCode(uid!);
-                        await silentRefetch();
-                        toast.success("展示链接已重新生成");
-                      } catch (err) {
-                        setUpdateError(formatError(err));
-                        toast.error("重新生成链接失败");
-                      } finally {
-                        setIsSaving(false);
-                      }
+                      <span className="group inline-flex items-center">
+                        <XIcon className="mr-2 size-4" />
+                        已禁用
+                      </span>
+                      <span className="group inline-flex items-center">
+                        <CheckIcon className="mr-2 size-4" />
+                        已启用
+                      </span>
+                    </AnimatedSubscribeButton>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    禁用后，角色展示页面将无法访问
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">展示链接</h3>
+                  <div className="space-y-2">
+                    <div className="p-4 bg-gray-50 rounded-md">
+                      {character.display_code ? (
+                        <p className="font-mono text-sm break-all">
+                          {`${import.meta.env.VITE_CHARACTER_DISPLAY_BASE_URL}/d/${character.display_code}`}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-gray-500">展示链接未生成</p>
+                      )}
+                    </div>
+                    <div className="space-x-2">
+                      {character.display_code && (
+                        <Button
+                          variant="outline"
+                          onClick={async () => {
+                            const url = `${import.meta.env.VITE_CHARACTER_DISPLAY_BASE_URL}/d/${character.display_code}`;
+                            try {
+                              await navigator.clipboard.writeText(url);
+                              toast.success("展示链接已复制到剪贴板");
+                            } catch (err) {
+                              toast.error("复制链接失败");
+                            }
+                          }}
+                        >
+                          复制链接
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            setIsSaving(true);
+                            await characterService.regenerateDisplayCode(uid!);
+                            await silentRefetch();
+                            toast.success("展示链接已重新生成");
+                          } catch (err) {
+                            setUpdateError(formatError(err));
+                            toast.error("重新生成链接失败");
+                          } finally {
+                            setIsSaving(false);
+                          }
+                        }}
+                        disabled={isSaving}
+                      >
+                        重新生成链接
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">密钥管理</h3>
+                  <div className="space-y-2">
+                    {secretKey ? (
+                      <div className="p-4 bg-gray-50 rounded-md">
+                        <p className="font-mono text-sm break-all">{secretKey}</p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500">点击下方按钮查看或重新生成密钥</p>
+                    )}
+                    <div className="space-x-2">
+                      <Button
+                        variant="outline"
+                        onClick={handleShowSecretKey}
+                        disabled={!!secretKey}
+                      >
+                        查看密钥
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowRegenerateConfirm(true)}
+                        disabled={isRegeneratingKey}
+                      >
+                        {isRegeneratingKey ? '生成中...' : '重新生成密钥'}
+                      </Button>
+                    </div>
+
+                    <Dialog open={showRegenerateConfirm} onOpenChange={setShowRegenerateConfirm}>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>重新生成密钥</DialogTitle>
+                          <DialogDescription>
+                            重新生成密钥后，原有密钥将立即失效。此操作不可撤销，是否继续？
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex justify-end space-x-2 pt-4">
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowRegenerateConfirm(false)}
+                          >
+                            取消
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={handleRegenerateSecretKey}
+                            disabled={isRegeneratingKey}
+                          >
+                            {isRegeneratingKey ? '生成中...' : '确认重新生成'}
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <h3 className="text-sm font-medium text-red-500 mb-2">危险操作</h3>
+                  <div className="space-y-2">
+                    {showDeleteConfirm ? (
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-500">确定要删除这个角色吗？此操作不可恢复。</p>
+                        <div className="space-x-2">
+                          <Button
+                            variant="destructive"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                          >
+                            {isDeleting ? '删除中...' : '确认删除'}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowDeleteConfirm(false)}
+                          >
+                            取消
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="destructive"
+                        onClick={() => setShowDeleteConfirm(true)}
+                      >
+                        删除角色
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="display" className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* 背景主题配置 */}
+                  <ThemeCard
+                    theme={statusConfig?.theme}
+                    config={statusConfig}
+                    onUpdate={(theme) => {
+                      setStatusConfig({
+                        ...statusConfig,
+                        theme
+                      });
                     }}
-                    disabled={isSaving}
-                  >
-                    重新生成链接
-                  </Button>
+                    onSave={async (config) => {
+                      await handleStatusConfigUpdate(config);
+                    }}
+                    isSaving={isSaving}
+                  />
+
+                  {/* 状态显示配置 */}
+                  <DisplayConfigCard
+                    config={statusConfig}
+                    onUpdate={(newConfig) => {
+                      console.log('Parent received new config:', newConfig);
+                      setStatusConfig(newConfig);
+                    }}
+                    onSave={async (newConfig) => {
+                      await handleStatusConfigUpdate(newConfig);
+                    }}
+                    isSaving={isSaving}
+                  />
                 </div>
-              </div>
-            </div>
+              </TabsContent>
 
-            <div className="pt-4 border-t">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">密钥管理</h3>
-              <div className="space-y-2">
-                {secretKey ? (
-                  <div className="p-4 bg-gray-50 rounded-md">
-                    <p className="font-mono text-sm break-all">{secretKey}</p>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500">点击下方按钮查看或重新生成密钥</p>
-                )}
-                <div className="space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={handleShowSecretKey}
-                    disabled={!!secretKey}
-                  >
-                    查看密钥
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowRegenerateConfirm(true)}
-                    disabled={isRegeneratingKey}
-                  >
-                    {isRegeneratingKey ? '生成中...' : '重新生成密钥'}
-                  </Button>
-                </div>
-              </div>
-
-              <Dialog open={showRegenerateConfirm} onOpenChange={setShowRegenerateConfirm}>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>重新生成密钥</DialogTitle>
-                    <DialogDescription>
-                      重新生成密钥后，原有密钥将立即失效。此操作不可撤销，是否继续？
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="flex justify-end space-x-2 pt-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowRegenerateConfirm(false)}
-                    >
-                      取消
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={handleRegenerateSecretKey}
-                      disabled={isRegeneratingKey}
-                    >
-                      {isRegeneratingKey ? '生成中...' : '确认重新生成'}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            <div className="pt-4 border-t">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">状态展示配置</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* 背景主题配置 */}
-                <ThemeCard
-                  theme={statusConfig?.theme}
-                  config={statusConfig}
-                  onUpdate={(theme) => {
-                    setStatusConfig({
-                      ...statusConfig,
-                      theme
-                    });
-                  }}
-                  onSave={async (config) => {
-                    await handleStatusConfigUpdate(config);
-                  }}
-                  isSaving={isSaving}
-                />
-
-                {/* 状态显示配置 */}
-                <DisplayConfigCard
-                  config={statusConfig}
-                  onUpdate={(newConfig) => {
-                    console.log('Parent received new config:', newConfig);
-                    setStatusConfig(newConfig);
-                  }}
-                  onSave={async (newConfig) => {
-                    await handleStatusConfigUpdate(newConfig);
-                  }}
-                  isSaving={isSaving}
-                />
-
-                {/* 状态同步配置 */}
-                <div className="md:col-span-2 lg:col-span-3">
+              <TabsContent value="sync" className="space-y-6">
+                <div>
                   <h4 className="text-sm font-medium text-gray-500 mb-4">状态同步</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {Object.entries(statusConfig?.vital_signs || {}).map(([key, config]) => (
@@ -605,41 +654,8 @@ export const CharacterDetail: React.FC = () => {
                     )}
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t">
-              <h3 className="text-sm font-medium text-red-500 mb-2">危险操作</h3>
-              <div className="space-y-2">
-                {showDeleteConfirm ? (
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-500">确定要删除这个角色吗？此操作不可恢复。</p>
-                    <div className="space-x-2">
-                      <Button
-                        variant="destructive"
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                      >
-                        {isDeleting ? '删除中...' : '确认删除'}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowDeleteConfirm(false)}
-                      >
-                        取消
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <Button
-                    variant="destructive"
-                    onClick={() => setShowDeleteConfirm(true)}
-                  >
-                    删除角色
-                  </Button>
-                )}
-              </div>
-            </div>
+              </TabsContent>
+            </Tabs>
           </div>
         )}
       </Card>

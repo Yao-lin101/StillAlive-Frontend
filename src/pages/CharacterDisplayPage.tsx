@@ -383,43 +383,45 @@ export const CharacterDisplayPage: React.FC = () => {
         </Card>
       </div>
 
-      <Modal isOpen={showStatusDialog} onClose={() => setShowStatusDialog(false)}>
+      <Modal 
+        isOpen={showStatusDialog} 
+        onClose={() => setShowStatusDialog(false)}
+      >
         <div className="mb-4">
           <h2 className="text-lg font-semibold leading-none tracking-tight">状态信息</h2>
-          <p className="text-sm text-muted-foreground mt-2">
-            显示所有状态的详细信息，包括最近更新时间和描述。
-          </p>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          {statusItems?.map(({ key, config, value, updatedAt }) => (
-            <Card key={key} className="p-4">
-              <div className="space-y-2">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-sm font-medium">{config.label}</h3>
-                  {updatedAt && (
-                    <span className="text-xs text-gray-500">
-                      {formatTimeElapsed(new Date(updatedAt).toISOString())}
-                    </span>
+        <div className="h-[55vh] overflow-y-auto pr-2 -mr-2">
+          <div className="grid grid-cols-2 gap-4">
+            {statusItems?.map(({ key, config, value, updatedAt }) => (
+              <Card key={key} className="p-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-sm font-medium">{config.label}</h3>
+                    {updatedAt && (
+                      <span className="text-xs text-gray-500">
+                        {formatTimeElapsed(new Date(updatedAt).toISOString())}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xl font-semibold">
+                    {value !== undefined ? (
+                      <>
+                        {value}
+                        {config.valueType === 'number' && config.suffix && (
+                          <span className="text-sm ml-1 text-gray-500">{config.suffix}</span>
+                        )}
+                      </>
+                    ) : (
+                      '--'
+                    )}
+                  </p>
+                  {config.description && (
+                    <p className="text-sm text-gray-500">{config.description}</p>
                   )}
                 </div>
-                <p className="text-xl font-semibold">
-                  {value !== undefined ? (
-                    <>
-                      {value}
-                      {config.valueType === 'number' && config.suffix && (
-                        <span className="text-sm ml-1 text-gray-500">{config.suffix}</span>
-                      )}
-                    </>
-                  ) : (
-                    '--'
-                  )}
-                </p>
-                {config.description && (
-                  <p className="text-sm text-gray-500">{config.description}</p>
-                )}
-              </div>
-            </Card>
-          ))}
+              </Card>
+            ))}
+          </div>
         </div>
       </Modal>
     </>

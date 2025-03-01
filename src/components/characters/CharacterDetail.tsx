@@ -11,7 +11,7 @@ import { CheckIcon, XIcon, PlusIcon, TrashIcon, Settings2 } from 'lucide-react';
 import { useCharacter } from '@/hooks/useCharacters';
 import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
-import { UpdateCharacterData, StatusConfigType, CharacterDetail as ICharacterDetail } from '@/types/character';
+import { UpdateCharacterData, StatusConfigType } from '@/types/character';
 import { Select } from '../ui/select';
 import { Label } from '@/components/ui/label';
 import {
@@ -43,17 +43,13 @@ export const CharacterDetail: React.FC = () => {
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [secretKey, setSecretKey] = useState<string | null>(null);
   const [isRegeneratingKey, setIsRegeneratingKey] = useState(false);
-  const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [statusConfig, setStatusConfig] = useState<StatusConfigType>({ vital_signs: {} });
-  const [isEditingTheme, setIsEditingTheme] = useState(false);
-  const [localCharacter, setLocalCharacter] = useState<ICharacterDetail | null>(null);
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
     setValue,
     watch,
   } = useForm<UpdateCharacterFormData>({
@@ -83,24 +79,13 @@ export const CharacterDetail: React.FC = () => {
 
   useEffect(() => {
     if (character) {
-      setLocalCharacter(character);
-      reset({
-        name: character.name,
-        bio: character.bio || '',
-        avatar: character.avatar || '',
-      });
-      setPreviewAvatar(character.avatar);
-    }
-  }, [character, reset]);
-
-  useEffect(() => {
-    if (character?.status_config) {
       setStatusConfig({
-        ...character.status_config,
-        display: character.status_config.display || {
+        vital_signs: {},
+        display: {
           default_message: '状态良好',
           timeout_messages: []
-        }
+        },
+        ...character.status_config
       });
     } else {
       setStatusConfig({
@@ -176,8 +161,6 @@ export const CharacterDetail: React.FC = () => {
         status_config: newConfig
       });
       console.log('Status config saved successfully');
-      setIsEditingStatus(false);
-      setIsEditingTheme(false);
       await silentRefetch();
     } catch (err) {
       console.error('Error saving status config:', err);
@@ -206,23 +189,6 @@ export const CharacterDetail: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const handleThemeChange = (value: string) => {
-    setLocalCharacter((prev: ICharacterDetail | null) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        status_config: {
-          ...prev.status_config,
-          theme: {
-            background_url: value,
-            background_overlay: 'from-gray-900/95 to-gray-800/95',
-            accent_color: 'from-blue-400 to-purple-400'
-          }
-        }
-      };
-    });
   };
 
   const handleDelete = async () => {

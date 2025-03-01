@@ -32,7 +32,7 @@ export const SecretKeySection: React.FC<SecretKeySectionProps> = ({
       await navigator.clipboard.writeText(secretKey);
       toast.success("密钥已复制到剪贴板");
     } catch (err) {
-      toast.error("复制密钥失败");
+      toast.error("复制失败，请手动长按密钥进行复制");
     }
   };
 

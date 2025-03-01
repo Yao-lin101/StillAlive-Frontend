@@ -81,8 +81,15 @@ export const CharacterDetail: React.FC = () => {
       setIsRegeneratingKey(true);
       const key = await characterService.regenerateSecretKey(uid!);
       setSecretKey(key);
-      await navigator.clipboard.writeText(key);
-      toast.success("新密钥已生成并复制到剪贴板");
+      
+      // 尝试复制到剪贴板，但不影响主流程
+      try {
+        await navigator.clipboard.writeText(key);
+        toast.success("新密钥已生成并复制到剪贴板");
+      } catch (err) {
+        // 如果复制失败，只提示生成成功
+        toast.success("新密钥已生成，移动端请重新复制");
+      }
     } catch (err) {
       setUpdateError(formatError(err));
       toast.error("重新生成密钥失败");

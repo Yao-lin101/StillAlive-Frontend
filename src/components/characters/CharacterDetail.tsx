@@ -47,6 +47,7 @@ export const CharacterDetail: React.FC = () => {
   const [statusConfig, setStatusConfig] = useState<StatusConfigType>({ vital_signs: {} });
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
+  const [newStatusKey, setNewStatusKey] = useState<string | null>(null);
 
   const {
     register,
@@ -143,20 +144,21 @@ export const CharacterDetail: React.FC = () => {
   const handleAddStatusField = (category: keyof StatusConfigType) => {
     if (category === 'vital_signs') {
       const newKey = `status_${Object.keys(statusConfig.vital_signs || {}).length + 1}`;
-      setStatusConfig({
-        ...statusConfig,
-        vital_signs: {
-          ...(statusConfig.vital_signs || {}),
-          [newKey]: {
-            key: newKey,
-            label: '',
-            valueType: 'number',
-            description: '',
-            suffix: ''
-          }
-        }
-      });
+      setNewStatusKey(newKey);
     }
+  };
+
+  const handleSaveNewStatus = async (newStatus: any) => {
+    if (!newStatusKey) return;
+    
+    setStatusConfig({
+      ...statusConfig,
+      vital_signs: {
+        ...(statusConfig.vital_signs || {}),
+        [newStatusKey]: newStatus
+      }
+    });
+    setNewStatusKey(null);
   };
 
   const handleStatusConfigUpdate = async (newConfig: StatusConfigType) => {
@@ -570,6 +572,34 @@ export const CharacterDetail: React.FC = () => {
                       <PlusIcon className="h-4 w-4 mr-2" />
                       添加状态
                     </Button>
+                    
+                    {newStatusKey && (
+                      <StatusCard
+                        statusKey={newStatusKey}
+                        config={{
+                          key: newStatusKey,
+                          label: '',
+                          valueType: 'text',
+                          description: '',
+                          suffix: '',
+                          __parent: statusConfig
+                        }}
+                        onUpdate={() => {}}
+                        onDelete={() => setNewStatusKey(null)}
+                        onSave={async (config) => {
+                          await handleSaveNewStatus(config);
+                          await handleStatusConfigUpdate({
+                            ...statusConfig,
+                            vital_signs: {
+                              ...(statusConfig.vital_signs || {}),
+                              [newStatusKey]: config
+                            }
+                          });
+                        }}
+                        isSaving={isSaving}
+                        isNew={true}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -789,12 +819,12 @@ const DisplayConfigCard: React.FC<{
             </div>
             
             <div className="space-y-2">
-              <Label>超时状态配置</Label>
+              <Label>超时状态配置（设置多少小时后显示对应文本）</Label>
               {localConfig.timeout_messages?.map((msg: { hours: number; message: string }, index: number) => (
                 <div key={index} className="flex items-center space-x-2">
                   <Input
                     type="number"
-                    className="w-24"
+                    className="w-16"
                     value={msg.hours}
                     onChange={(e) => {
                       const newMessages = [...localConfig.timeout_messages];
@@ -809,7 +839,6 @@ const DisplayConfigCard: React.FC<{
                     }}
                     placeholder="小时"
                   />
-                  <span className="text-sm">小时后显示</span>
                   <Input
                     className="flex-1"
                     value={msg.message}
@@ -894,8 +923,9 @@ const StatusCard: React.FC<{
   onDelete: () => void;
   onSave: (config: any) => Promise<void>;
   isSaving: boolean;
-}> = ({ statusKey, config, onUpdate, onDelete, onSave, isSaving }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  isNew?: boolean;
+}> = ({ statusKey, config, onUpdate, onDelete, onSave, isSaving, isNew }) => {
+  const [isEditing, setIsEditing] = useState(isNew);
   const [localConfig, setLocalConfig] = useState(config);
 
   const handleSave = async () => {
@@ -916,33 +946,44 @@ const StatusCard: React.FC<{
     setIsEditing(false);
   };
 
+  const handleCancel = () => {
+    setIsEditing(false);
+    if (isNew) {
+      onDelete();
+    } else {
+      setLocalConfig(config);
+    }
+  };
+
   return (
     <>
-      <Card
-        className="p-4 cursor-pointer hover:shadow-md transition-shadow"
-        onClick={() => setIsEditing(true)}
-      >
-        <div className="flex flex-col items-center justify-center space-y-2 text-center">
-          <h5 className="text-sm font-medium">{config.label || statusKey}</h5>
-          <p className="text-sm text-gray-500 truncate w-full">
-            类型: {config.valueType === 'number' ? '数值' : '文本'}
-            {config.suffix ? `（${config.suffix}）` : ''}
-          </p>
-          {config.description && (
+      {!isNew && (
+        <Card
+          className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => setIsEditing(true)}
+        >
+          <div className="flex flex-col items-center justify-center space-y-2 text-center">
+            <h5 className="text-sm font-medium">{config.label || statusKey}</h5>
             <p className="text-sm text-gray-500 truncate w-full">
-              描述: {config.description}
+              类型: {config.valueType === 'number' ? '数值' : '文本'}
+              {config.suffix ? `（${config.suffix}）` : ''}
             </p>
-          )}
-          <Settings2 className="h-4 w-4 text-gray-400 mt-2" />
-        </div>
-      </Card>
+            {config.description && (
+              <p className="text-sm text-gray-500 truncate w-full">
+                描述: {config.description}
+              </p>
+            )}
+            <Settings2 className="h-4 w-4 text-gray-400 mt-2" />
+          </div>
+        </Card>
+      )}
 
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+      <Dialog open={isEditing} onOpenChange={isNew ? undefined : setIsEditing}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>编辑状态配置</DialogTitle>
+            <DialogTitle>{isNew ? '新增状态' : '编辑状态配置'}</DialogTitle>
             <DialogDescription>
-              修改状态的显示和行为配置
+              {isNew ? '配置新的状态字段' : '修改状态的显示和行为配置'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -1014,22 +1055,21 @@ const StatusCard: React.FC<{
               </div>
             )}
             <div className="flex justify-between pt-4">
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  onDelete();
-                  setIsEditing(false);
-                }}
-              >
-                删除
-              </Button>
-              <div className="space-x-2">
+              {!isNew && (
                 <Button
-                  variant="outline"
+                  variant="destructive"
                   onClick={() => {
-                    setLocalConfig(config);
+                    onDelete();
                     setIsEditing(false);
                   }}
+                >
+                  删除
+                </Button>
+              )}
+              <div className={`space-x-2 ${isNew ? 'w-full flex justify-end' : ''}`}>
+                <Button
+                  variant="outline"
+                  onClick={handleCancel}
                 >
                   取消
                 </Button>

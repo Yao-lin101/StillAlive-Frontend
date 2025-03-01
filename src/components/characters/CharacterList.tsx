@@ -17,6 +17,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useUser } from '@/hooks/useUser';
 import { API_URL } from '@/config';
+import { toast } from 'sonner';
 
 interface InvitationCode {
   code: string;
@@ -87,8 +88,12 @@ export const CharacterList = React.memo(() => {
   }, [fetchInvitationCodes]);
 
   const handleNavigateToNew = useCallback(() => {
+    if (!isSuperuser && characters.length >= 3) {
+      toast.error("最多只能创建3个角色");
+      return;
+    }
     navigate('/characters/new');
-  }, [navigate]);
+  }, [navigate, characters.length, isSuperuser]);
 
   const handleNavigateToCharacter = useCallback((uid: string) => {
     navigate(`/characters/${uid}`);
@@ -158,7 +163,10 @@ export const CharacterList = React.memo(() => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">我的角色</h1>
         <div className="flex items-center gap-4">
-          <Button onClick={handleNavigateToNew}>
+          <Button 
+            onClick={handleNavigateToNew}
+            title={!isSuperuser && characters.length >= 3 ? "最多只能创建3个角色" : "创建角色"}
+          >
             创建角色
           </Button>
           {isSuperuser && (

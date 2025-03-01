@@ -63,8 +63,7 @@ export interface StatusConfigType {
   };
   theme?: {
     background_url: string;
-    background_overlay: string;
-    accent_color: string;
+    overlay_opacity: number;
   };
 }
 

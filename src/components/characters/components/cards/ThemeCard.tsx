@@ -14,8 +14,7 @@ import {
 
 interface Theme {
   background_url: string;
-  background_overlay: string;
-  accent_color: string;
+  overlay_opacity: number;
 }
 
 interface ThemeCardProps {
@@ -36,15 +35,13 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [localTheme, setLocalTheme] = useState<Theme>({
     background_url: theme?.background_url || '',
-    background_overlay: theme?.background_overlay || 'from-gray-900/95 to-gray-800/95',
-    accent_color: theme?.accent_color || 'from-blue-400 to-purple-400'
+    overlay_opacity: theme?.overlay_opacity || 0.5,
   });
 
   useEffect(() => {
     setLocalTheme({
       background_url: theme?.background_url || '',
-      background_overlay: theme?.background_overlay || 'from-gray-900/95 to-gray-800/95',
-      accent_color: theme?.accent_color || 'from-blue-400 to-purple-400'
+      overlay_opacity: theme?.overlay_opacity || 0.5
     });
   }, [theme]);
 
@@ -97,14 +94,30 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
               <p className="text-sm text-gray-500">输入图片的URL地址</p>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="overlay_opacity">顶部遮罩透明度</Label>
+              <Input
+                id="overlay_opacity"
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={localTheme.overlay_opacity}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalTheme({
+                  ...localTheme,
+                  overlay_opacity: parseFloat(e.target.value)
+                })}
+              />
+              <p className="text-sm text-gray-500">调整顶部遮罩的透明度，较深的遮罩可以让流星特效更明显</p>
+            </div>
+
             <div className="flex justify-end space-x-2 pt-4">
               <Button
                 variant="outline"
                 onClick={() => {
                   setLocalTheme({
                     background_url: '',
-                    background_overlay: 'from-gray-900/95 to-gray-800/95',
-                    accent_color: 'from-blue-400 to-purple-400'
+                    overlay_opacity: 0.5
                   });
                   setIsEditing(false);
                 }}

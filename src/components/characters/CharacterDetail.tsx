@@ -462,18 +462,8 @@ export const CharacterDetail: React.FC = () => {
 
             <div className="pt-4 border-t">
               <h3 className="text-sm font-medium text-gray-500 mb-2">状态展示配置</h3>
-              <div className="space-y-4">
-                <DisplayConfigCard
-                  config={statusConfig}
-                  onUpdate={(newConfig) => {
-                    console.log('Parent received new config:', newConfig);
-                    setStatusConfig(newConfig);
-                  }}
-                  onSave={async (newConfig) => {
-                    await handleStatusConfigUpdate(newConfig);
-                  }}
-                  isSaving={isSaving}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* 背景主题配置 */}
                 <ThemeCard
                   theme={statusConfig?.theme}
                   config={statusConfig}
@@ -488,39 +478,57 @@ export const CharacterDetail: React.FC = () => {
                   }}
                   isSaving={isSaving}
                 />
-                <div className="space-y-4">
-                  {Object.entries(statusConfig?.vital_signs || {}).map(([key, config]) => (
-                    <StatusCard
-                      key={key}
-                      statusKey={key}
-                      config={{
-                        ...config,
-                        __parent: statusConfig  // 传递完整的父配置
-                      }}
-                      onUpdate={(updatedConfig) => {
-                        setStatusConfig({
-                          ...statusConfig,
-                          vital_signs: {
-                            ...statusConfig.vital_signs,
-                            [key]: updatedConfig
-                          }
-                        });
-                      }}
-                      onDelete={() => handleRemoveStatusField('vital_signs', key)}
-                      onSave={async (config) => {
-                        await handleStatusConfigUpdate(config);
-                      }}
-                      isSaving={isSaving}
-                    />
-                  ))}
-                  <Button
-                    variant="outline"
-                    onClick={() => handleAddStatusField('vital_signs')}
-                    className="w-full"
-                  >
-                    <PlusIcon className="h-4 w-4 mr-2" />
-                    添加状态
-                  </Button>
+
+                {/* 状态显示配置 */}
+                <DisplayConfigCard
+                  config={statusConfig}
+                  onUpdate={(newConfig) => {
+                    console.log('Parent received new config:', newConfig);
+                    setStatusConfig(newConfig);
+                  }}
+                  onSave={async (newConfig) => {
+                    await handleStatusConfigUpdate(newConfig);
+                  }}
+                  isSaving={isSaving}
+                />
+
+                {/* 状态同步配置 */}
+                <div className="md:col-span-2 lg:col-span-3">
+                  <h4 className="text-sm font-medium text-gray-500 mb-4">状态同步</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Object.entries(statusConfig?.vital_signs || {}).map(([key, config]) => (
+                      <StatusCard
+                        key={key}
+                        statusKey={key}
+                        config={{
+                          ...config,
+                          __parent: statusConfig
+                        }}
+                        onUpdate={(updatedConfig) => {
+                          setStatusConfig({
+                            ...statusConfig,
+                            vital_signs: {
+                              ...statusConfig.vital_signs,
+                              [key]: updatedConfig
+                            }
+                          });
+                        }}
+                        onDelete={() => handleRemoveStatusField('vital_signs', key)}
+                        onSave={async (config) => {
+                          await handleStatusConfigUpdate(config);
+                        }}
+                        isSaving={isSaving}
+                      />
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() => handleAddStatusField('vital_signs')}
+                      className="w-full h-[120px] flex items-center justify-center"
+                    >
+                      <PlusIcon className="h-4 w-4 mr-2" />
+                      添加状态
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -607,14 +615,12 @@ const ThemeCard: React.FC<{
         className="p-4 cursor-pointer hover:shadow-md transition-shadow"
         onClick={() => setIsEditing(true)}
       >
-        <div className="flex justify-between items-center">
-          <div className="space-y-2">
-            <h5 className="text-sm font-medium">背景主题设置</h5>
-            <p className="text-sm text-gray-500">
-              背景图片: {localTheme.background_url || '未设置'}
-            </p>
-          </div>
-          <Settings2 className="h-4 w-4 text-gray-400" />
+        <div className="flex flex-col items-center justify-center space-y-2 text-center">
+          <h5 className="text-sm font-medium">背景主题设置</h5>
+          <p className="text-sm text-gray-500 truncate w-full">
+            背景图片: {localTheme.background_url || '未设置'}
+          </p>
+          <Settings2 className="h-4 w-4 text-gray-400 mt-2" />
         </div>
       </Card>
 
@@ -707,17 +713,15 @@ const DisplayConfigCard: React.FC<{
         className="p-4 cursor-pointer hover:shadow-md transition-shadow"
         onClick={() => setIsEditing(true)}
       >
-        <div className="flex justify-between items-center">
-          <div className="space-y-2">
-            <h5 className="text-sm font-medium">状态显示设置</h5>
-            <p className="text-sm text-gray-500">
-              默认状态: {localConfig.default_message || '状态良好'}
-            </p>
-            <p className="text-sm text-gray-500">
-              超时配置: {localConfig.timeout_messages?.length || 0} 条规则
-            </p>
-          </div>
-          <Settings2 className="h-4 w-4 text-gray-400" />
+        <div className="flex flex-col items-center justify-center space-y-2 text-center">
+          <h5 className="text-sm font-medium">状态显示设置</h5>
+          <p className="text-sm text-gray-500 truncate w-full">
+            默认状态: {localConfig.default_message || '状态良好'}
+          </p>
+          <p className="text-sm text-gray-500 truncate w-full">
+            超时配置: {localConfig.timeout_messages?.length || 0} 条规则
+          </p>
+          <Settings2 className="h-4 w-4 text-gray-400 mt-2" />
         </div>
       </Card>
 
@@ -876,20 +880,18 @@ const StatusCard: React.FC<{
         className="p-4 cursor-pointer hover:shadow-md transition-shadow"
         onClick={() => setIsEditing(true)}
       >
-        <div className="flex justify-between items-center">
-          <div className="space-y-2">
-            <h5 className="text-sm font-medium">{config.label || statusKey}</h5>
-            <p className="text-sm text-gray-500">
-              类型: {config.valueType === 'number' ? '数值' : '文本'}
-              {config.suffix ? `（${config.suffix}）` : ''}
+        <div className="flex flex-col items-center justify-center space-y-2 text-center">
+          <h5 className="text-sm font-medium">{config.label || statusKey}</h5>
+          <p className="text-sm text-gray-500 truncate w-full">
+            类型: {config.valueType === 'number' ? '数值' : '文本'}
+            {config.suffix ? `（${config.suffix}）` : ''}
+          </p>
+          {config.description && (
+            <p className="text-sm text-gray-500 truncate w-full">
+              描述: {config.description}
             </p>
-            {config.description && (
-              <p className="text-sm text-gray-500">
-                描述: {config.description}
-              </p>
-            )}
-          </div>
-          <Settings2 className="h-4 w-4 text-gray-400" />
+          )}
+          <Settings2 className="h-4 w-4 text-gray-400 mt-2" />
         </div>
       </Card>
 

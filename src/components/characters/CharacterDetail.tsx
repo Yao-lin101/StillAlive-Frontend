@@ -343,7 +343,6 @@ export const CharacterDetail: React.FC = () => {
 
               <TabsContent value="sync" className="space-y-6">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500 mb-4">状态同步</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {Object.entries(statusConfig?.vital_signs || {}).map(([key, config]) => (
                       <StatusCard

@@ -12,7 +12,7 @@ import { useCharacter } from '@/hooks/useCharacters';
 import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
 import { UpdateCharacterData, StatusConfigType } from '@/types/character';
-import { Select } from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import {
@@ -1028,8 +1028,8 @@ const StatusCard: React.FC<{
                 <Label>值类型</Label>
                 <Select
                   value={localConfig.valueType}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                    const valueType = e.target.value as 'number' | 'text';
+                  onValueChange={(value) => {
+                    const valueType = value as 'number' | 'text';
                     setLocalConfig({
                       ...localConfig,
                       valueType,
@@ -1037,8 +1037,13 @@ const StatusCard: React.FC<{
                     });
                   }}
                 >
-                  <option value="number">数值</option>
-                  <option value="text">文本</option>
+                  <SelectTrigger>
+                    <SelectValue placeholder="选择值类型" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="number">数值</SelectItem>
+                    <SelectItem value="text">文本</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
               <div>

@@ -124,11 +124,10 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
               <Button
                 variant="outline"
                 onClick={() => {
-                  setLocalTheme(prev => ({
-                    ...prev,
-                    background_url: '',
-                    overlay_opacity: 0.5
-                  }));
+                  setLocalTheme({
+                    background_url: theme?.background_url || '',
+                    overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5
+                  });
                   setIsEditing(false);
                 }}
               >

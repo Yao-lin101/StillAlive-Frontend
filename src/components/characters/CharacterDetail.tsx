@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { PlusIcon } from 'lucide-react';
@@ -28,16 +25,6 @@ import {
 } from './components/sections';
 import { CharacterForm } from './components/CharacterForm';
 
-const updateCharacterSchema = z.object({
-  name: z.string().min(1, '请输入角色名称'),
-  bio: z.string().max(500, '简介最多500字').optional(),
-  avatar: z.string().url('请输入有效的URL地址').optional().or(z.literal('')),
-  qqNumber: z.string().regex(/^\d{5,11}$/, 'QQ号格式不正确').optional().or(z.literal('')),
-});
-
-type UpdateCharacterFormData = z.infer<typeof updateCharacterSchema>;
-
-
 export const CharacterDetail: React.FC = () => {
   const { uid } = useParams<{ uid: string }>();
   const navigate = useNavigate();
@@ -50,40 +37,8 @@ export const CharacterDetail: React.FC = () => {
   const [secretKey, setSecretKey] = useState<string | null>(null);
   const [isRegeneratingKey, setIsRegeneratingKey] = useState(false);
   const [statusConfig, setStatusConfig] = useState<StatusConfigType>({ vital_signs: {} });
-  const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const [newStatusKey, setNewStatusKey] = useState<string | null>(null);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-    watch,
-  } = useForm<UpdateCharacterFormData>({
-    resolver: zodResolver(updateCharacterSchema),
-  });
-
-  const qqNumber = watch('qqNumber');
-  const avatarUrl = watch('avatar');
-
-  // 当QQ号变化时更新预览
-  React.useEffect(() => {
-    if (qqNumber && /^\d{5,11}$/.test(qqNumber)) {
-      const url = `https://q.qlogo.cn/headimg_dl?dst_uin=${qqNumber}&spec=640&img_type=jpg`;
-      setPreviewAvatar(url);
-      setValue('avatar', url);
-    }
-  }, [qqNumber, setValue]);
-
-  // 当头像URL变化时更新预览
-  React.useEffect(() => {
-    if (avatarUrl) {
-      setPreviewAvatar(avatarUrl);
-    } else {
-      setPreviewAvatar(null);
-    }
-  }, [avatarUrl]);
 
   useEffect(() => {
     if (character) {
@@ -183,27 +138,6 @@ export const CharacterDetail: React.FC = () => {
       await silentRefetch();
     } catch (err) {
       console.error('Error saving status config:', err);
-      setUpdateError(formatError(err));
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const onSubmit = async (data: UpdateCharacterFormData) => {
-    try {
-      setIsSaving(true);
-      setUpdateError(null);
-      
-      const updateData: UpdateCharacterData = {
-        name: data.name,
-        bio: data.bio,
-        avatar: data.avatar
-      };
-      
-      await characterService.update(uid!, updateData);
-      setIsEditing(false);
-      await silentRefetch();
-    } catch (err) {
       setUpdateError(formatError(err));
     } finally {
       setIsSaving(false);

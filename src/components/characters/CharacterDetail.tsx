@@ -41,6 +41,21 @@ export const CharacterDetail: React.FC = () => {
   const [newStatusKey, setNewStatusKey] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchSecretKey = async () => {
+      try {
+        const key = await characterService.getSecretKey(uid!);
+        setSecretKey(key);
+      } catch (err) {
+        console.error('Failed to fetch secret key:', err);
+      }
+    };
+    
+    if (uid) {
+      fetchSecretKey();
+    }
+  }, [uid]);
+
+  useEffect(() => {
     if (character) {
       setStatusConfig({
         vital_signs: {},
@@ -60,18 +75,6 @@ export const CharacterDetail: React.FC = () => {
       });
     }
   }, [character]);
-
-  const handleShowSecretKey = async () => {
-    try {
-      const key = await characterService.getSecretKey(uid!);
-      setSecretKey(key);
-      await navigator.clipboard.writeText(key);
-      toast.success("密钥已复制到剪贴板");
-    } catch (err) {
-      setUpdateError(formatError(err));
-      toast.error("获取密钥失败");
-    }
-  };
 
   const handleRegenerateSecretKey = async () => {
     try {
@@ -293,7 +296,6 @@ export const CharacterDetail: React.FC = () => {
                   secretKey={secretKey}
                   isRegeneratingKey={isRegeneratingKey}
                   showRegenerateConfirm={showRegenerateConfirm}
-                  onShowSecretKey={handleShowSecretKey}
                   onRegenerateKey={handleRegenerateSecretKey}
                   onCancelRegenerate={() => setShowRegenerateConfirm(false)}
                   onShowRegenerateConfirm={() => setShowRegenerateConfirm(true)}

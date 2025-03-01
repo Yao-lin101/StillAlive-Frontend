@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { characterService } from '@/services/characterService';
@@ -26,12 +26,6 @@ interface CharacterStatus {
       updated_at: string;
     };
   };
-}
-
-interface DominantColor {
-  r: number;
-  g: number;
-  b: number;
 }
 
 const StatusCard = ({ label, description, value, suffix, onClick }: {
@@ -150,57 +144,7 @@ export const CharacterDisplayPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [bgImageError, setBgImageError] = useState(false);
-  const [dominantColor, setDominantColor] = useState<DominantColor | null>(null);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
-
-  const getDominantColor = useCallback((imageUrl: string): Promise<DominantColor> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.src = imageUrl;
-      
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Could not get canvas context'));
-          return;
-        }
-
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-        const colorCounts: { [key: string]: number } = {};
-        
-        for (let i = 0; i < imageData.length; i += 4) {
-          const r = imageData[i];
-          const g = imageData[i + 1];
-          const b = imageData[i + 2];
-          const rgb = `${r},${g},${b}`;
-          colorCounts[rgb] = (colorCounts[rgb] || 0) + 1;
-        }
-
-        let maxCount = 0;
-        let dominantRGB = '0,0,0';
-        
-        Object.entries(colorCounts).forEach(([rgb, count]) => {
-          if (count > maxCount) {
-            maxCount = count;
-            dominantRGB = rgb;
-          }
-        });
-
-        const [r, g, b] = dominantRGB.split(',').map(Number);
-        resolve({ r, g, b });
-      };
-
-      img.onerror = () => {
-        reject(new Error('Failed to load image'));
-      };
-    });
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -240,14 +184,6 @@ export const CharacterDisplayPage: React.FC = () => {
     const intervalId = setInterval(fetchStatus, 15000);
     return () => clearInterval(intervalId);
   }, [code]);
-
-  useEffect(() => {
-    if (character?.status_config?.theme?.background_url && !bgImageError) {
-      getDominantColor(character.status_config.theme.background_url)
-        .then(setDominantColor)
-        .catch(console.error);
-    }
-  }, [character?.status_config?.theme?.background_url, bgImageError, getDominantColor]);
 
   const statusItems = character?.status_config && Object.entries(character.status_config)
     .filter(([key]) => key !== 'display' && key !== 'theme')
@@ -333,26 +269,27 @@ export const CharacterDisplayPage: React.FC = () => {
       `}</style>
       <div 
         className="fixed inset-0 flex items-center justify-center overflow-hidden"
-        style={{
-          background: dominantColor 
-            ? `linear-gradient(to bottom, 
-                rgba(${dominantColor.r},${dominantColor.g},${dominantColor.b},0.8),
-                rgba(0,0,0,1))`
-            : '#000'
-        }}
       >
         <div className="absolute inset-0 overflow-hidden">
           {character.status_config?.theme?.background_url && !bgImageError && (
-            <img 
-              src={character.status_config.theme.background_url} 
-              alt="背景" 
-              className="absolute inset-0 w-full h-full object-cover opacity-50"
-              onError={() => {
-                setBgImageError(true);
-              }}
-              crossOrigin="anonymous"
-              referrerPolicy="no-referrer"
-            />
+            <>
+              <img 
+                src={character.status_config.theme.background_url} 
+                alt="背景" 
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={() => {
+                  setBgImageError(true);
+                }}
+                crossOrigin="anonymous"
+                referrerPolicy="no-referrer"
+              />
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0))'
+                }}
+              />
+            </>
           )}
           <div className="absolute inset-0 flex items-center justify-center">
             <Meteors 

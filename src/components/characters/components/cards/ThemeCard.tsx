@@ -35,14 +35,17 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [localTheme, setLocalTheme] = useState<Theme>({
     background_url: theme?.background_url || '',
-    overlay_opacity: theme?.overlay_opacity || 0.5,
+    overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5,
   });
 
   useEffect(() => {
-    setLocalTheme({
-      background_url: theme?.background_url || '',
-      overlay_opacity: theme?.overlay_opacity || 0.5
-    });
+    if (theme) {
+      setLocalTheme(prev => ({
+        ...prev,
+        background_url: theme.background_url || '',
+        overlay_opacity: typeof theme.overlay_opacity === 'number' ? theme.overlay_opacity : prev.overlay_opacity,
+      }));
+    }
   }, [theme]);
 
   const handleSave = async () => {
@@ -96,18 +99,24 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
 
             <div className="space-y-2">
               <Label htmlFor="overlay_opacity">顶部遮罩透明度</Label>
-              <Input
-                id="overlay_opacity"
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={localTheme.overlay_opacity}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalTheme({
-                  ...localTheme,
-                  overlay_opacity: parseFloat(e.target.value)
-                })}
-              />
+              <div className="flex items-center space-x-2">
+                <input
+                  id="overlay_opacity"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-primary"
+                  value={localTheme.overlay_opacity}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalTheme(prev => ({
+                    ...prev,
+                    overlay_opacity: parseFloat(e.target.value)
+                  }))}
+                />
+                <span className="text-sm text-gray-500 w-12">
+                  {Math.round(localTheme.overlay_opacity * 100)}%
+                </span>
+              </div>
               <p className="text-sm text-gray-500">调整顶部遮罩的透明度，较深的遮罩可以让流星特效更明显</p>
             </div>
 
@@ -115,10 +124,11 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
               <Button
                 variant="outline"
                 onClick={() => {
-                  setLocalTheme({
+                  setLocalTheme(prev => ({
+                    ...prev,
                     background_url: '',
                     overlay_opacity: 0.5
-                  });
+                  }));
                   setIsEditing(false);
                 }}
               >

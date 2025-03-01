@@ -242,14 +242,14 @@ export const CharacterDisplayPage: React.FC = () => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - lastUpdate.getTime()) / (1000 * 60));
     
-    if (diffInMinutes < 1) return '刚刚更新';
-    if (diffInMinutes < 60) return `${diffInMinutes}分钟前更新`;
+    if (diffInMinutes < 1) return '刚刚';
+    if (diffInMinutes < 60) return `${diffInMinutes}分钟前`;
     
     const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}小时前更新`;
+    if (diffInHours < 24) return `${diffInHours}小时前`;
     
     const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}天前更新`;
+    return `${diffInDays}天前`;
   };
 
   return (

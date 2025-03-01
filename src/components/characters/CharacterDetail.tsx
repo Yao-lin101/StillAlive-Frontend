@@ -7,13 +7,20 @@ import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import Input from '../ui/Input';
 import { AnimatedSubscribeButton } from '@/components/magicui/animated-subscribe-button';
-import { CheckIcon, XIcon, PlusIcon, TrashIcon } from 'lucide-react';
+import { CheckIcon, XIcon, PlusIcon, TrashIcon, Settings2 } from 'lucide-react';
 import { useCharacter } from '@/hooks/useCharacters';
 import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
 import { UpdateCharacterData, StatusConfigType, CharacterDetail as ICharacterDetail } from '@/types/character';
 import { Select } from '../ui/select';
 import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 const updateCharacterSchema = z.object({
   name: z.string().min(1, '请输入角色名称'),
@@ -24,7 +31,6 @@ const updateCharacterSchema = z.object({
 
 type UpdateCharacterFormData = z.infer<typeof updateCharacterSchema>;
 
-type SelectChangeEvent = React.ChangeEvent<HTMLSelectElement>;
 
 export const CharacterDetail: React.FC = () => {
   const { uid } = useParams<{ uid: string }>();
@@ -89,9 +95,21 @@ export const CharacterDetail: React.FC = () => {
 
   useEffect(() => {
     if (character?.status_config) {
-      setStatusConfig(character.status_config);
+      setStatusConfig({
+        ...character.status_config,
+        display: character.status_config.display || {
+          default_message: '状态良好',
+          timeout_messages: []
+        }
+      });
     } else {
-      setStatusConfig({ vital_signs: {} });
+      setStatusConfig({
+        vital_signs: {},
+        display: {
+          default_message: '状态良好',
+          timeout_messages: []
+        }
+      });
     }
   }, [character]);
 
@@ -147,22 +165,22 @@ export const CharacterDetail: React.FC = () => {
     }
   };
 
-  const handleStatusConfigUpdate = async () => {
+  const handleStatusConfigUpdate = async (newConfig: StatusConfigType) => {
     if (!character) return;
     
     try {
+      console.log('Attempting to save status config:', newConfig);
       setIsSaving(true);
       await characterService.update(uid!, { 
         name: character.name,
-        status_config: {
-          ...statusConfig,
-          theme: localCharacter?.status_config?.theme
-        }
+        status_config: newConfig
       });
+      console.log('Status config saved successfully');
       setIsEditingStatus(false);
       setIsEditingTheme(false);
       await silentRefetch();
     } catch (err) {
+      console.error('Error saving status config:', err);
       setUpdateError(formatError(err));
     } finally {
       setIsSaving(false);
@@ -479,291 +497,65 @@ export const CharacterDetail: React.FC = () => {
             <div className="pt-4 border-t">
               <h3 className="text-sm font-medium text-gray-500 mb-2">状态展示配置</h3>
               <div className="space-y-4">
-                {isEditingStatus ? (
-                  <>
-                    <Card className="p-4">
-                      <div className="space-y-4">
-                        <div>
-                          <label className="text-sm">默认状态文本</label>
-                          <Input
-                            value={statusConfig.display?.default_message || ''}
-                            onChange={(e) => {
-                              setStatusConfig({
-                                ...statusConfig,
-                                display: {
-                                  ...statusConfig.display,
-                                  default_message: e.target.value || '状态良好',
-                                  timeout_messages: statusConfig.display?.timeout_messages || []
-                                }
-                              });
-                            }}
-                            placeholder="例如：状态良好"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm">超时状态配置</label>
-                          {statusConfig.display?.timeout_messages?.map((msg: { hours: number; message: string }, index: number) => (
-                            <div key={index} className="flex items-center space-x-2">
-                              <Input
-                                type="number"
-                                className="w-24"
-                                value={msg.hours}
-                                onChange={(e) => {
-                                  const newMessages = [...(statusConfig.display?.timeout_messages || [])];
-                                  newMessages[index] = {
-                                    ...msg,
-                                    hours: parseInt(e.target.value) || 0
-                                  };
-                                  setStatusConfig({
-                                    ...statusConfig,
-                                    display: {
-                                      default_message: statusConfig.display?.default_message || '状态良好',
-                                      timeout_messages: newMessages
-                                    }
-                                  });
-                                }}
-                                placeholder="小时"
-                              />
-                              <span className="text-sm">小时后显示</span>
-                              <Input
-                                className="flex-1"
-                                value={msg.message}
-                                onChange={(e) => {
-                                  const newMessages = [...(statusConfig.display?.timeout_messages || [])];
-                                  newMessages[index] = {
-                                    ...msg,
-                                    message: e.target.value
-                                  };
-                                  setStatusConfig({
-                                    ...statusConfig,
-                                    display: {
-                                      default_message: statusConfig.display?.default_message || '状态良好',
-                                      timeout_messages: newMessages
-                                    }
-                                  });
-                                }}
-                                placeholder="显示文本"
-                              />
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  const newMessages = [...(statusConfig.display?.timeout_messages || [])];
-                                  newMessages.splice(index, 1);
-                                  setStatusConfig({
-                                    ...statusConfig,
-                                    display: {
-                                      default_message: statusConfig.display?.default_message || '状态良好',
-                                      timeout_messages: newMessages
-                                    }
-                                  });
-                                }}
-                              >
-                                <TrashIcon className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setStatusConfig({
-                                ...statusConfig,
-                                display: {
-                                  default_message: statusConfig.display?.default_message || '状态良好',
-                                  timeout_messages: [
-                                    ...(statusConfig.display?.timeout_messages || []),
-                                    { hours: 1, message: '' }
-                                  ]
-                                }
-                              });
-                            }}
-                            className="w-full mt-2"
-                          >
-                            <PlusIcon className="h-4 w-4 mr-2" />
-                            添加超时状态
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-medium text-gray-500 mb-2">状态配置</h3>
-                      <div className="space-y-4">
-                        {Object.entries(statusConfig?.vital_signs || {}).map(([key, config]) => (
-                          <Card key={key} className="p-4 space-y-4">
-                            <div className="flex justify-between items-center">
-                              <h5 className="text-sm font-medium">{config.label || key}</h5>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleRemoveStatusField('vital_signs', key)}
-                              >
-                                <TrashIcon className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <label className="text-sm">状态键名</label>
-                                <Input
-                                  value={config.key}
-                                  onChange={(e) => {
-                                    setStatusConfig({
-                                      ...statusConfig,
-                                      vital_signs: {
-                                        ...statusConfig.vital_signs,
-                                        [key]: {
-                                          ...config,
-                                          key: e.target.value
-                                        }
-                                      }
-                                    });
-                                  }}
-                                  placeholder="用于API通信的键名"
-                                />
-                              </div>
-                              <div>
-                                <label className="text-sm">显示名称</label>
-                                <Input
-                                  value={config.label}
-                                  onChange={(e) => {
-                                    setStatusConfig({
-                                      ...statusConfig,
-                                      vital_signs: {
-                                        ...statusConfig.vital_signs,
-                                        [key]: {
-                                          ...config,
-                                          label: e.target.value
-                                        }
-                                      }
-                                    });
-                                  }}
-                                  placeholder="在界面上显示的名称"
-                                />
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <label className="text-sm">值类型</label>
-                                <Select
-                                  value={config.valueType}
-                                  onChange={(e: SelectChangeEvent) => {
-                                    const valueType = e.target.value as 'number' | 'text';
-                                    setStatusConfig({
-                                      ...statusConfig,
-                                      vital_signs: {
-                                        ...statusConfig.vital_signs,
-                                        [key]: {
-                                          ...config,
-                                          valueType,
-                                          suffix: valueType === 'text' ? undefined : config.suffix
-                                        }
-                                      }
-                                    });
-                                  }}
-                                >
-                                  <option value="number">数值</option>
-                                  <option value="text">文本</option>
-                                </Select>
-                              </div>
-                              <div>
-                                <label className="text-sm">描述</label>
-                                <Input
-                                  value={config.description || ''}
-                                  onChange={(e) => {
-                                    setStatusConfig({
-                                      ...statusConfig,
-                                      vital_signs: {
-                                        ...statusConfig.vital_signs,
-                                        [key]: {
-                                          ...config,
-                                          description: e.target.value
-                                        }
-                                      }
-                                    });
-                                  }}
-                                  placeholder="状态的描述信息"
-                                />
-                              </div>
-                            </div>
-                            {config.valueType === 'number' && (
-                              <div>
-                                <label className="text-sm">单位</label>
-                                <Input
-                                  value={config.suffix || ''}
-                                  onChange={(e) => {
-                                    setStatusConfig({
-                                      ...statusConfig,
-                                      vital_signs: {
-                                        ...statusConfig.vital_signs,
-                                        [key]: {
-                                          ...config,
-                                          suffix: e.target.value
-                                        }
-                                      }
-                                    });
-                                  }}
-                                  placeholder="例如：%、℃"
-                                />
-                              </div>
-                            )}
-                          </Card>
-                        ))}
-                        <Button
-                          variant="outline"
-                          onClick={() => handleAddStatusField('vital_signs')}
-                          className="w-full"
-                        >
-                          <PlusIcon className="h-4 w-4 mr-2" />
-                          添加状态
-                        </Button>
-                      </div>
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setIsEditingStatus(false);
-                            setStatusConfig(character?.status_config || { vital_signs: {} });
-                          }}
-                        >
-                          取消
-                        </Button>
-                        <Button
-                          onClick={handleStatusConfigUpdate}
-                          disabled={isSaving}
-                        >
-                          {isSaving ? '保存中...' : '保存'}
-                        </Button>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="space-y-4">
-                    {Object.entries(statusConfig?.vital_signs || {}).map(([key, config]) => (
-                      <Card key={key} className="p-4">
-                        <div className="space-y-2">
-                          <h5 className="text-sm font-medium">{config.label}</h5>
-                          <p className="text-sm text-gray-500">
-                            类型: {config.valueType === 'number' ? '数值' : '文本'}
-                            {config.suffix ? `（${config.suffix}）` : ''}
-                          </p>
-                          {config.description && (
-                            <p className="text-sm text-gray-500">
-                              描述: {config.description}
-                            </p>
-                          )}
-                        </div>
-                      </Card>
-                    ))}
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setIsEditingStatus(true);
+                <DisplayConfigCard
+                  config={statusConfig}
+                  onUpdate={(newConfig) => {
+                    console.log('Parent received new config:', newConfig);
+                    setStatusConfig(newConfig);
+                  }}
+                  onSave={async (newConfig) => {
+                    await handleStatusConfigUpdate(newConfig);
+                  }}
+                  isSaving={isSaving}
+                />
+                <ThemeCard
+                  theme={statusConfig?.theme}
+                  config={statusConfig}
+                  onUpdate={(theme) => {
+                    setStatusConfig({
+                      ...statusConfig,
+                      theme
+                    });
+                  }}
+                  onSave={async (config) => {
+                    await handleStatusConfigUpdate(config);
+                  }}
+                  isSaving={isSaving}
+                />
+                <div className="space-y-4">
+                  {Object.entries(statusConfig?.vital_signs || {}).map(([key, config]) => (
+                    <StatusCard
+                      key={key}
+                      statusKey={key}
+                      config={{
+                        ...config,
+                        __parent: statusConfig  // 传递完整的父配置
                       }}
-                    >
-                      编辑状态配置
-                    </Button>
-                  </div>
-                )}
+                      onUpdate={(updatedConfig) => {
+                        setStatusConfig({
+                          ...statusConfig,
+                          vital_signs: {
+                            ...statusConfig.vital_signs,
+                            [key]: updatedConfig
+                          }
+                        });
+                      }}
+                      onDelete={() => handleRemoveStatusField('vital_signs', key)}
+                      onSave={async (config) => {
+                        await handleStatusConfigUpdate(config);
+                      }}
+                      isSaving={isSaving}
+                    />
+                  ))}
+                  <Button
+                    variant="outline"
+                    onClick={() => handleAddStatusField('vital_signs')}
+                    className="w-full"
+                  >
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    添加状态
+                  </Button>
+                </div>
               </div>
             </div>
 
@@ -802,65 +594,446 @@ export const CharacterDetail: React.FC = () => {
           </div>
         )}
       </Card>
+    </div>
+  );
+};
 
-      <div className="mt-8 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium">背景图片</h3>
-          <Button
-            variant="outline"
-            onClick={() => setIsEditingTheme(!isEditingTheme)}
-          >
-            {isEditingTheme ? '取消' : '编辑'}
-          </Button>
+const ThemeCard: React.FC<{
+  theme?: {
+    background_url?: string;
+    background_overlay?: string;
+    accent_color?: string;
+  };
+  config: StatusConfigType;
+  onUpdate: (theme: any) => void;
+  onSave: (config: any) => Promise<void>;
+  isSaving: boolean;
+}> = ({ theme, config, onUpdate, onSave, isSaving }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [localTheme, setLocalTheme] = useState(theme || {
+    background_url: '',
+    background_overlay: 'from-gray-900/95 to-gray-800/95',
+    accent_color: 'from-blue-400 to-purple-400'
+  });
+
+  useEffect(() => {
+    setLocalTheme(theme || {
+      background_url: '',
+      background_overlay: 'from-gray-900/95 to-gray-800/95',
+      accent_color: 'from-blue-400 to-purple-400'
+    });
+  }, [theme]);
+
+  const handleSave = async () => {
+    console.log('ThemeCard - Saving theme:', localTheme);
+    const newConfig = {
+      ...config,
+      theme: localTheme
+    };
+    onUpdate(localTheme);
+    await onSave(newConfig);
+    setIsEditing(false);
+  };
+
+  return (
+    <>
+      <Card
+        className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+        onClick={() => setIsEditing(true)}
+      >
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <h5 className="text-sm font-medium">背景主题设置</h5>
+            <p className="text-sm text-gray-500">
+              背景图片: {localTheme.background_url || '未设置'}
+            </p>
+          </div>
+          <Settings2 className="h-4 w-4 text-gray-400" />
         </div>
+      </Card>
 
-        {isEditingTheme ? (
-          <Card className="p-4 space-y-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="background_url">背景图片URL</Label>
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>编辑背景主题</DialogTitle>
+            <DialogDescription>
+              设置展示页面的背景图片和主题
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="background_url">背景图片URL</Label>
+              <Input
+                id="background_url"
+                value={localTheme.background_url || ''}
+                onChange={(e) => setLocalTheme({
+                  ...localTheme,
+                  background_url: e.target.value
+                })}
+                placeholder="https://example.com/background.jpg"
+              />
+              <p className="text-sm text-gray-500">输入图片的URL地址</p>
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setLocalTheme(theme || {
+                    background_url: '',
+                    background_overlay: 'from-gray-900/95 to-gray-800/95',
+                    accent_color: 'from-blue-400 to-purple-400'
+                  });
+                  setIsEditing(false);
+                }}
+              >
+                取消
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? '保存中...' : '保存'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+
+const DisplayConfigCard: React.FC<{
+  config: any;
+  onUpdate: (config: any) => void;
+  onSave: (config: any) => Promise<void>;
+  isSaving: boolean;
+}> = ({ config, onUpdate, onSave, isSaving }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [localConfig, setLocalConfig] = useState(config?.display || {
+    default_message: '状态良好',
+    timeout_messages: []
+  });
+
+  useEffect(() => {
+    setLocalConfig(config?.display || {
+      default_message: '状态良好',
+      timeout_messages: []
+    });
+  }, [config]);
+
+  const handleSave = async () => {
+    console.log('DisplayConfigCard - Current config:', config);
+    console.log('DisplayConfigCard - Local config to save:', localConfig);
+    const newConfig = {
+      ...config,
+      display: localConfig
+    };
+    onUpdate(newConfig);
+    console.log('DisplayConfigCard - Updated parent config:', newConfig);
+    await onSave(newConfig);
+    setIsEditing(false);
+  };
+
+  return (
+    <>
+      <Card
+        className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+        onClick={() => setIsEditing(true)}
+      >
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <h5 className="text-sm font-medium">状态显示设置</h5>
+            <p className="text-sm text-gray-500">
+              默认状态: {localConfig.default_message || '状态良好'}
+            </p>
+            <p className="text-sm text-gray-500">
+              超时配置: {localConfig.timeout_messages?.length || 0} 条规则
+            </p>
+          </div>
+          <Settings2 className="h-4 w-4 text-gray-400" />
+        </div>
+      </Card>
+
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>编辑状态显示设置</DialogTitle>
+            <DialogDescription>
+              配置默认状态文本和超时显示规则
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>默认状态文本</Label>
+              <Input
+                value={localConfig.default_message || ''}
+                onChange={(e) => setLocalConfig({
+                  ...localConfig,
+                  default_message: e.target.value
+                })}
+                placeholder="例如：状态良好"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>超时状态配置</Label>
+              {localConfig.timeout_messages?.map((msg: { hours: number; message: string }, index: number) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <Input
+                    type="number"
+                    className="w-24"
+                    value={msg.hours}
+                    onChange={(e) => {
+                      const newMessages = [...localConfig.timeout_messages];
+                      newMessages[index] = {
+                        ...msg,
+                        hours: parseInt(e.target.value) || 0
+                      };
+                      setLocalConfig({
+                        ...localConfig,
+                        timeout_messages: newMessages
+                      });
+                    }}
+                    placeholder="小时"
+                  />
+                  <span className="text-sm">小时后显示</span>
+                  <Input
+                    className="flex-1"
+                    value={msg.message}
+                    onChange={(e) => {
+                      const newMessages = [...localConfig.timeout_messages];
+                      newMessages[index] = {
+                        ...msg,
+                        message: e.target.value
+                      };
+                      setLocalConfig({
+                        ...localConfig,
+                        timeout_messages: newMessages
+                      });
+                    }}
+                    placeholder="显示文本"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const newMessages = [...localConfig.timeout_messages];
+                      newMessages.splice(index, 1);
+                      setLocalConfig({
+                        ...localConfig,
+                        timeout_messages: newMessages
+                      });
+                    }}
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setLocalConfig({
+                    ...localConfig,
+                    timeout_messages: [
+                      ...(localConfig.timeout_messages || []),
+                      { hours: 1, message: '' }
+                    ]
+                  });
+                }}
+                className="w-full mt-2"
+              >
+                <PlusIcon className="h-4 w-4 mr-2" />
+                添加超时状态
+              </Button>
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setLocalConfig(config?.display || {
+                    default_message: '状态良好',
+                    timeout_messages: []
+                  });
+                  setIsEditing(false);
+                }}
+              >
+                取消
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? '保存中...' : '保存'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+
+const StatusCard: React.FC<{
+  statusKey: string;
+  config: any;
+  onUpdate: (config: any) => void;
+  onDelete: () => void;
+  onSave: (config: any) => Promise<void>;
+  isSaving: boolean;
+}> = ({ statusKey, config, onUpdate, onDelete, onSave, isSaving }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [localConfig, setLocalConfig] = useState(config);
+
+  const handleSave = async () => {
+    console.log('StatusCard - Saving config for key:', statusKey, localConfig);
+    // 获取父组件的完整配置
+    const parentConfig = config.__parent || {};
+    // 更新特定状态的配置
+    const newConfig = {
+      ...parentConfig,
+      vital_signs: {
+        ...(parentConfig.vital_signs || {}),
+        [statusKey]: localConfig
+      }
+    };
+    console.log('StatusCard - Full config to save:', newConfig);
+    onUpdate(localConfig);
+    await onSave(newConfig);
+    setIsEditing(false);
+  };
+
+  return (
+    <>
+      <Card
+        className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+        onClick={() => setIsEditing(true)}
+      >
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <h5 className="text-sm font-medium">{config.label || statusKey}</h5>
+            <p className="text-sm text-gray-500">
+              类型: {config.valueType === 'number' ? '数值' : '文本'}
+              {config.suffix ? `（${config.suffix}）` : ''}
+            </p>
+            {config.description && (
+              <p className="text-sm text-gray-500">
+                描述: {config.description}
+              </p>
+            )}
+          </div>
+          <Settings2 className="h-4 w-4 text-gray-400" />
+        </div>
+      </Card>
+
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>编辑状态配置</DialogTitle>
+            <DialogDescription>
+              修改状态的显示和行为配置
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>状态键名</Label>
                 <Input
-                  id="background_url"
-                  placeholder="https://example.com/background.jpg"
-                  value={localCharacter?.status_config?.theme?.background_url || ''}
-                  onChange={(e) => handleThemeChange(e.target.value)}
+                  value={localConfig.key}
+                  onChange={(e) => setLocalConfig({
+                    ...localConfig,
+                    key: e.target.value
+                  })}
+                  placeholder="用于API通信的键名"
                 />
-                <p className="text-sm text-gray-500">输入图片的URL地址</p>
               </div>
-              <div className="flex justify-end space-x-2">
+              <div>
+                <Label>显示名称</Label>
+                <Input
+                  value={localConfig.label}
+                  onChange={(e) => setLocalConfig({
+                    ...localConfig,
+                    label: e.target.value
+                  })}
+                  placeholder="在界面上显示的名称"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>值类型</Label>
+                <Select
+                  value={localConfig.valueType}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    const valueType = e.target.value as 'number' | 'text';
+                    setLocalConfig({
+                      ...localConfig,
+                      valueType,
+                      suffix: valueType === 'text' ? undefined : localConfig.suffix
+                    });
+                  }}
+                >
+                  <option value="number">数值</option>
+                  <option value="text">文本</option>
+                </Select>
+              </div>
+              <div>
+                <Label>描述</Label>
+                <Input
+                  value={localConfig.description || ''}
+                  onChange={(e) => setLocalConfig({
+                    ...localConfig,
+                    description: e.target.value
+                  })}
+                  placeholder="状态的描述信息"
+                />
+              </div>
+            </div>
+            {localConfig.valueType === 'number' && (
+              <div>
+                <Label>单位</Label>
+                <Input
+                  value={localConfig.suffix || ''}
+                  onChange={(e) => setLocalConfig({
+                    ...localConfig,
+                    suffix: e.target.value
+                  })}
+                  placeholder="例如：%、℃"
+                />
+              </div>
+            )}
+            <div className="flex justify-between pt-4">
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  onDelete();
+                  setIsEditing(false);
+                }}
+              >
+                删除
+              </Button>
+              <div className="space-x-2">
                 <Button
                   variant="outline"
                   onClick={() => {
-                    setIsEditingTheme(false);
-                    setLocalCharacter(character);
+                    setLocalConfig(config);
+                    setIsEditing(false);
                   }}
                 >
                   取消
                 </Button>
                 <Button
-                  onClick={() => {
-                    handleStatusConfigUpdate();
-                    setIsEditingTheme(false);
-                  }}
+                  onClick={handleSave}
+                  disabled={isSaving}
                 >
-                  保存
+                  {isSaving ? '保存中...' : '保存'}
                 </Button>
               </div>
             </div>
-          </Card>
-        ) : (
-          <Card className="p-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">背景图片</span>
-                <span className="text-gray-400 truncate max-w-[300px]">
-                  {localCharacter?.status_config?.theme?.background_url || '未设置'}
-                </span>
-              </div>
-            </div>
-          </Card>
-        )}
-      </div>
-    </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }; 

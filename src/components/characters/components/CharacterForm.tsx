@@ -41,6 +41,11 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
     watch,
   } = useForm<UpdateCharacterFormData>({
     resolver: zodResolver(updateCharacterSchema),
+    defaultValues: {
+      name: character.name,
+      bio: character.bio || '',
+      avatar: character.avatar || '',
+    }
   });
 
   const qqNumber = watch('qqNumber');

@@ -358,7 +358,8 @@ export const CharacterDetail: React.FC = () => {
                         key={key}
                         statusKey={key}
                         config={{
-                          key,
+                          ...config,
+                          key: config.key || key,
                           label: config.label || key,
                           valueType: config.valueType || 'text',
                           description: config.description,

@@ -15,8 +15,7 @@ interface WillConfigSectionProps {
 
 export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
   willConfig,
-  onUpdate,
-  isLoading
+  onUpdate
 }) => {
   const [targetEmail, setTargetEmail] = useState<string>('');
   const [ccEmails, setCcEmails] = useState<string[]>([]);
@@ -25,6 +24,13 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
   const [timeoutHours, setTimeoutHours] = useState<number>(24); // 默认24小时
   const [content, setContent] = useState<string>('');
   const [emailError, setEmailError] = useState<string>('');
+  
+  // 为各个操作添加独立的loading状态
+  const [isUpdatingEmail, setIsUpdatingEmail] = useState<boolean>(false);
+  const [isUpdatingCcEmail, setIsUpdatingCcEmail] = useState<boolean>(false);
+  const [isTogglingEnabled, setIsTogglingEnabled] = useState<boolean>(false);
+  const [isUpdatingTimeout, setIsUpdatingTimeout] = useState<boolean>(false);
+  const [isUpdatingContent, setIsUpdatingContent] = useState<boolean>(false);
 
   // 初始化数据
   useEffect(() => {
@@ -62,17 +68,20 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
       return;
     }
     
-    setCcEmails([...ccEmails, newCcEmail]);
+    const newCcEmails = [...ccEmails, newCcEmail];
+    setCcEmails(newCcEmails);
     setNewCcEmail('');
     setEmailError('');
     
     // 更新到服务器
-    onUpdate('cc_emails', [...ccEmails, newCcEmail])
+    setIsUpdatingCcEmail(true);
+    onUpdate('cc_emails', newCcEmails)
       .then(() => toast.success('抄送邮箱已添加'))
       .catch(() => {
         setCcEmails(ccEmails); // 恢复原状态
         toast.error('添加抄送邮箱失败');
-      });
+      })
+      .finally(() => setIsUpdatingCcEmail(false));
   };
 
   // 移除抄送邮箱
@@ -81,12 +90,14 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
     setCcEmails(newCcEmails);
     
     // 更新到服务器
+    setIsUpdatingCcEmail(true);
     onUpdate('cc_emails', newCcEmails)
       .then(() => toast.success('抄送邮箱已移除'))
       .catch(() => {
         setCcEmails(ccEmails); // 恢复原状态
         toast.error('移除抄送邮箱失败');
-      });
+      })
+      .finally(() => setIsUpdatingCcEmail(false));
   };
 
   // 更新主要收件人
@@ -104,18 +115,21 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
     setEmailError('');
     
     // 确保同时发送content字段，避免后端创建新记录时出错
+    setIsUpdatingEmail(true);
     onUpdate('target_email', targetEmail)
       .then(() => {
         toast.success('主要收件人已更新');
       })
       .catch(() => {
         toast.error('更新主要收件人失败');
-      });
+      })
+      .finally(() => setIsUpdatingEmail(false));
   };
 
   // 更新启用状态
   const handleToggleEnabled = async () => {
-    if (!isEnabled && !targetEmail) {
+    // 检查是否有服务器返回的target_email，而不是本地状态
+    if (!isEnabled && (!willConfig || !willConfig.target_email)) {
       toast.error('请先设置主要收件人邮箱');
       return;
     }
@@ -124,12 +138,15 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
     setIsEnabled(newState);
     
     try {
+      setIsTogglingEnabled(true);
       // 只发送is_enabled字段
       await onUpdate('is_enabled', newState);
       toast.success(newState ? '遗嘱功能已启用' : '遗嘱功能已禁用');
     } catch (error) {
       setIsEnabled(isEnabled); // 恢复原状态
       toast.error(newState ? '启用遗嘱功能失败' : '禁用遗嘱功能失败');
+    } finally {
+      setIsTogglingEnabled(false);
     }
   };
 
@@ -140,16 +157,20 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
   };
 
   const handleSaveTimeoutHours = () => {
+    setIsUpdatingTimeout(true);
     onUpdate('timeout_hours', timeoutHours)
       .then(() => toast.success('触发时间已更新'))
-      .catch(() => toast.error('更新触发时间失败'));
+      .catch(() => toast.error('更新触发时间失败'))
+      .finally(() => setIsUpdatingTimeout(false));
   };
 
   // 更新遗嘱内容
   const handleUpdateContent = () => {
+    setIsUpdatingContent(true);
     onUpdate('content', content)
       .then(() => toast.success('遗嘱内容已更新'))
-      .catch(() => toast.error('更新遗嘱内容失败'));
+      .catch(() => toast.error('更新遗嘱内容失败'))
+      .finally(() => setIsUpdatingContent(false));
   };
 
   // 格式化时间显示
@@ -168,8 +189,8 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-medium text-gray-500 mb-2">主要收件人</h3>
-        <div className="flex space-x-2">
+        <h3 className="text-sm font-medium text-gray-500 mb-2 text-center">主要收件人</h3>
+        <div className="flex justify-center items-center space-x-2 max-w-md mx-auto">
           <Input
             value={targetEmail}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTargetEmail(e.target.value)}
@@ -178,20 +199,20 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
           />
           <Button 
             onClick={handleUpdateTargetEmail}
-            disabled={isLoading || !targetEmail}
+            disabled={isUpdatingEmail || !targetEmail}
           >
-            保存
+            {isUpdatingEmail ? '保存中...' : '保存'}
           </Button>
         </div>
-        {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
-        <p className="text-xs text-gray-500 mt-1">
+        {emailError && <p className="text-xs text-red-500 mt-1 text-center">{emailError}</p>}
+        <p className="text-xs text-gray-500 mt-1 text-center">
           主要收件人将在触发条件满足时收到遗嘱邮件
         </p>
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-gray-500 mb-2">抄送人列表</h3>
-        <div className="flex space-x-2 mb-2">
+        <h3 className="text-sm font-medium text-gray-500 mb-2 text-center">抄送人列表</h3>
+        <div className="flex justify-center items-center space-x-2 mb-2 max-w-md mx-auto">
           <Input
             value={newCcEmail}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCcEmail(e.target.value)}
@@ -200,14 +221,14 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
           />
           <Button 
             onClick={handleAddCcEmail}
-            disabled={isLoading || !newCcEmail}
+            disabled={isUpdatingCcEmail || !newCcEmail}
           >
-            添加
+            {isUpdatingCcEmail ? '添加中...' : '添加'}
           </Button>
         </div>
         
         {ccEmails.length > 0 ? (
-          <div className="space-y-2 mt-2">
+          <div className="space-y-2 mt-2 max-w-md mx-auto">
             {ccEmails.map((email, index) => (
               <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                 <span className="text-sm truncate">{email}</span>
@@ -215,7 +236,7 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => handleRemoveCcEmail(email)}
-                  disabled={isLoading}
+                  disabled={isUpdatingCcEmail}
                 >
                   <MinusIcon className="h-4 w-4" />
                 </Button>
@@ -223,18 +244,18 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
             ))}
           </div>
         ) : (
-          <p className="text-xs text-gray-500">暂无抄送人</p>
+          <p className="text-xs text-gray-500 text-center">暂无抄送人</p>
         )}
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-gray-500 mb-2">启用遗嘱功能</h3>
+        <h3 className="text-sm font-medium text-gray-500 mb-2 text-center">启用遗嘱功能</h3>
         <div className="flex justify-center items-center space-x-2">
           <AnimatedSubscribeButton 
             className="w-32 h-9"
             subscribeStatus={isEnabled}
             onClick={handleToggleEnabled}
-            disabled={!targetEmail}
+            disabled={isTogglingEnabled || (!isEnabled && (!willConfig || !willConfig.target_email))}
           >
             <span className="group inline-flex items-center">
               <XIcon className="mr-2 size-4" />
@@ -246,7 +267,7 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
             </span>
           </AnimatedSubscribeButton>
         </div>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-gray-500 mt-1 text-center">
           {isEnabled ? '当前状态：已启用' : '当前状态：已禁用'} - 启用后，系统将在指定时间内未收到状态更新时发送遗嘱邮件
         </p>
       </div>
@@ -254,10 +275,10 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
       {isEnabled && (
         <>
           <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-2">
+            <h3 className="text-sm font-medium text-gray-500 mb-2 text-center">
               触发时间: {formatTimeoutDisplay(timeoutHours)}
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-4 max-w-md mx-auto">
               <input
                 type="range"
                 value={timeoutHours}
@@ -275,20 +296,20 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
               </div>
               <Button 
                 onClick={handleSaveTimeoutHours}
-                disabled={isLoading}
+                disabled={isUpdatingTimeout}
                 className="w-full"
               >
-                保存触发时间
+                {isUpdatingTimeout ? '保存中...' : '保存触发时间'}
               </Button>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 mt-1 text-center">
               如果在设定的时间内未收到状态更新，系统将自动发送遗嘱邮件
             </p>
           </div>
 
           <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-2">遗嘱内容</h3>
-            <div className="space-y-2">
+            <h3 className="text-sm font-medium text-gray-500 mb-2 text-center">遗嘱内容</h3>
+            <div className="space-y-2 max-w-md mx-auto">
               <textarea
                 value={content}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)}
@@ -297,13 +318,13 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
               />
               <Button 
                 onClick={handleUpdateContent}
-                disabled={isLoading}
+                disabled={isUpdatingContent}
                 className="w-full"
               >
-                保存遗嘱内容
+                {isUpdatingContent ? '保存中...' : '保存遗嘱内容'}
               </Button>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 mt-1 text-center">
               遗嘱内容将在触发条件满足时发送给收件人，如不填写将使用默认内容
             </p>
           </div>

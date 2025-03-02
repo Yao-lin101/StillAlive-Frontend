@@ -6,7 +6,7 @@ import { PlusIcon } from 'lucide-react';
 import { useCharacter } from '@/hooks/useCharacters';
 import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
-import { UpdateCharacterData, StatusConfigType } from '@/types/character';
+import { UpdateCharacterData, StatusConfigType, WillConfig } from '@/types/character';
 import { toast } from 'sonner';
 import {
   Tabs,
@@ -21,7 +21,8 @@ import {
   CharacterStatusSection,
   DisplayLinkSection,
   SecretKeySection,
-  DangerZoneSection
+  DangerZoneSection,
+  WillConfigSection
 } from './components/sections';
 import { CharacterForm } from './components/CharacterForm';
 
@@ -39,6 +40,8 @@ export const CharacterDetail: React.FC = () => {
   const [statusConfig, setStatusConfig] = useState<StatusConfigType>({ vital_signs: {} });
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const [newStatusKey, setNewStatusKey] = useState<string | null>(null);
+  const [willConfig, setWillConfig] = useState<WillConfig | null>(null);
+  const [isLoadingWill, setIsLoadingWill] = useState(false);
 
   useEffect(() => {
     const fetchSecretKey = async () => {
@@ -53,6 +56,26 @@ export const CharacterDetail: React.FC = () => {
     if (uid) {
       fetchSecretKey();
     }
+  }, [uid]);
+
+  useEffect(() => {
+    const fetchWillConfig = async () => {
+      if (!uid) return;
+      
+      try {
+        setIsLoadingWill(true);
+        const config = await characterService.getWillConfig(uid);
+        setWillConfig(config);
+      } catch (err) {
+        console.error('获取遗嘱配置失败:', err);
+        // 如果是404错误，说明还没有配置，设置为null
+        setWillConfig(null);
+      } finally {
+        setIsLoadingWill(false);
+      }
+    };
+    
+    fetchWillConfig();
   }, [uid]);
 
   useEffect(() => {
@@ -138,13 +161,11 @@ export const CharacterDetail: React.FC = () => {
     if (!character) return;
     
     try {
-      console.log('Attempting to save status config:', newConfig);
       setIsSaving(true);
       await characterService.update(uid!, { 
         name: character.name,
         status_config: newConfig
       });
-      console.log('Status config saved successfully');
       await silentRefetch();
     } catch (err) {
       console.error('Error saving status config:', err);
@@ -163,6 +184,25 @@ export const CharacterDetail: React.FC = () => {
       setUpdateError(formatError(err));
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // 处理遗嘱配置更新
+  const handleWillConfigUpdate = async (field: keyof WillConfig, value: any) => {
+    if (!uid) return;
+    
+    try {
+      setIsSaving(true);
+      const updatedConfig = await characterService.updateWillConfig(uid, { [field]: value });
+      // 后端API已修改，直接返回单个对象而不是分页结果
+      setWillConfig(updatedConfig);
+      return updatedConfig;
+    } catch (err) {
+      console.error('Error updating will config:', err);
+      setUpdateError(formatError(err));
+      throw err;
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -261,10 +301,11 @@ export const CharacterDetail: React.FC = () => {
             )}
 
             <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="basic">基础设置</TabsTrigger>
                 <TabsTrigger value="display">展示配置</TabsTrigger>
                 <TabsTrigger value="sync">状态同步</TabsTrigger>
+                <TabsTrigger value="will">遗嘱配置</TabsTrigger>
               </TabsList>
               
               <TabsContent value="basic" className="space-y-6">
@@ -339,7 +380,6 @@ export const CharacterDetail: React.FC = () => {
                   <DisplayConfigCard
                     config={statusConfig}
                     onUpdate={(newConfig) => {
-                      console.log('Parent received new config:', newConfig);
                       setStatusConfig(newConfig);
                     }}
                     onSave={async (newConfig) => {
@@ -421,6 +461,21 @@ export const CharacterDetail: React.FC = () => {
                     )}
                   </div>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="will" className="space-y-6">
+                {isLoadingWill ? (
+                  <div className="flex items-center justify-center min-h-[200px]">
+                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+                  </div>
+                ) : (
+                  <WillConfigSection
+                    characterUid={uid!}
+                    willConfig={willConfig}
+                    onUpdate={handleWillConfigUpdate}
+                    isLoading={isSaving}
+                  />
+                )}
               </TabsContent>
             </Tabs>
           </div>

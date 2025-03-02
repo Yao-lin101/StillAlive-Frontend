@@ -84,4 +84,13 @@ export interface UpdateCharacterData {
   avatar?: string;
   status_config?: StatusConfigType;
   is_active?: boolean;
+}
+
+export interface WillConfig {
+  is_enabled: boolean;
+  content?: string;
+  target_email: string;
+  cc_emails: string[];
+  timeout_hours: number;
+  created_at: string;
 } 

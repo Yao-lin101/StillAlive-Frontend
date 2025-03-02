@@ -67,7 +67,7 @@ export const CharacterDetail: React.FC = () => {
         const config = await characterService.getWillConfig(uid);
         setWillConfig(config);
       } catch (err) {
-        console.error('获取遗嘱配置失败:', err);
+        console.error('获取亡语配置失败:', err);
         // 如果是404错误，说明还没有配置，设置为null
         setWillConfig(null);
       } finally {
@@ -187,7 +187,7 @@ export const CharacterDetail: React.FC = () => {
     }
   };
 
-  // 处理遗嘱配置更新
+  // 处理亡语配置更新
   const handleWillConfigUpdate = async (field: keyof WillConfig, value: any) => {
     if (!uid) return;
     
@@ -302,10 +302,10 @@ export const CharacterDetail: React.FC = () => {
 
             <Tabs defaultValue="basic" className="w-full">
               <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="basic">基础设置</TabsTrigger>
-                <TabsTrigger value="display">展示配置</TabsTrigger>
-                <TabsTrigger value="sync">状态同步</TabsTrigger>
-                <TabsTrigger value="will">遗嘱配置</TabsTrigger>
+                <TabsTrigger value="basic">基础</TabsTrigger>
+                <TabsTrigger value="display">展示</TabsTrigger>
+                <TabsTrigger value="sync">同步</TabsTrigger>
+                <TabsTrigger value="will">亡语</TabsTrigger>
               </TabsList>
               
               <TabsContent value="basic" className="space-y-6">

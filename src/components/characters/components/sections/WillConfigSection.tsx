@@ -179,13 +179,13 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
     return `${days}天`;
   };
 
+  // 检查是否有主要收件人邮箱
+  const hasTargetEmail = willConfig?.target_email || targetEmail;
+
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-sm font-medium text-gray-500 mb-2 text-center">主要对象</h3>
-        <p className="text-xs text-gray-500 mt-1 text-center">
-          主要对象将在触发条件满足时收到亡语
-        </p>
         <div className="flex justify-center items-center space-x-2 max-w-md mx-auto">
           <Input
             value={targetEmail}
@@ -200,6 +200,9 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
             {isUpdatingEmail ? '保存中...' : '保存'}
           </Button>
         </div>
+        <p className="text-xs text-gray-500 mt-1 text-center">
+          主要对象将在触发条件满足时收到亡语
+        </p>
         {emailError && <p className="text-xs text-red-500 mt-1 text-center">{emailError}</p>}
       </div>
 
@@ -209,12 +212,13 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
           <Input
             value={newCcEmail}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCcEmail(e.target.value)}
-            placeholder="请输入抄送邮箱"
+            placeholder={hasTargetEmail ? "请输入抄送邮箱" : "请先设置主要对象邮箱"}
             className="flex-1"
+            disabled={!hasTargetEmail || isUpdatingCcEmail}
           />
           <Button 
             onClick={handleAddCcEmail}
-            disabled={isUpdatingCcEmail || !newCcEmail}
+            disabled={isUpdatingCcEmail || !newCcEmail || !hasTargetEmail}
           >
             {isUpdatingCcEmail ? '添加中...' : '添加'}
           </Button>
@@ -237,7 +241,9 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
             ))}
           </div>
         ) : (
-          <p className="text-xs text-gray-500 text-center">暂无次要对象</p>
+          <p className="text-xs text-gray-500 text-center">
+            {hasTargetEmail ? "暂无次要对象" : "请先设置主要对象邮箱"}
+          </p>
         )}
       </div>
 

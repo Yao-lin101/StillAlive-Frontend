@@ -145,6 +145,7 @@ export const CharacterDisplayPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [bgImageError, setBgImageError] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -157,6 +158,11 @@ export const CharacterDisplayPage: React.FC = () => {
         ]);
         setCharacter(characterData);
         setStatus(statusData);
+        
+        // 初始化音乐
+        if (characterData.status_config?.display) {
+          updateMusicPlayer(characterData.status_config, statusData);
+        }
       } catch (err) {
         setError(formatError(err));
       } finally {
@@ -176,6 +182,11 @@ export const CharacterDisplayPage: React.FC = () => {
       try {
         const statusData = await characterService.getCharacterStatus(code);
         setStatus(statusData);
+        
+        // 更新音乐播放器
+        if (character?.status_config?.display) {
+          updateMusicPlayer(character.status_config, statusData);
+        }
       } catch (err) {
         console.error('Failed to fetch status:', err);
       }
@@ -183,7 +194,38 @@ export const CharacterDisplayPage: React.FC = () => {
 
     const intervalId = setInterval(fetchStatus, 15000);
     return () => clearInterval(intervalId);
-  }, [code]);
+  }, [code, character]);
+
+  // 根据状态更新音乐播放器
+  const updateMusicPlayer = (config: StatusConfigType, statusData: CharacterStatus | null) => {
+    if (!statusData || !config.display) return;
+    
+    // 获取最新更新时间
+    const latestUpdate = Object.values(statusData.status_data)
+      .map(s => new Date(s.updated_at).getTime())
+      .sort((a, b) => b - a)[0];
+    
+    if (!latestUpdate) {
+      // 如果没有更新记录，使用默认音乐
+      setCurrentMusicUrl(config.display.default_music_url || null);
+      return;
+    }
+    
+    // 计算距离最后更新的小时数
+    const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
+    
+    // 查找匹配的超时消息
+    const timeoutMessage = config.display.timeout_messages
+      ?.sort((a, b) => b.hours - a.hours)
+      .find(msg => diffInHours >= msg.hours);
+    
+    // 设置音乐URL
+    if (timeoutMessage?.music_link) {
+      setCurrentMusicUrl(timeoutMessage.music_link);
+    } else {
+      setCurrentMusicUrl(config.display.default_music_url || null);
+    }
+  };
 
   const statusItems = character?.status_config && Object.entries(character.status_config)
     .filter(([key]) => key !== 'display' && key !== 'theme')
@@ -329,7 +371,6 @@ export const CharacterDisplayPage: React.FC = () => {
                 )}
               </div>
             </div>
-
             <div className="flex items-center justify-between mb-4">
               {status && character.status_config?.display && (
                 <p className="text-lg font-semibold text-gray-900">
@@ -379,6 +420,20 @@ export const CharacterDisplayPage: React.FC = () => {
                 </Marquee>
               </div>
             </div>
+
+            {/* 音乐播放器 */}
+            {currentMusicUrl && (
+              <div className="w-full flex justify-center">
+                <iframe 
+                  style={{ border: 0 }}
+                  width="100%" 
+                  height={100} 
+                  src={currentMusicUrl}
+                  className="mx-auto rounded-md"
+                ></iframe>
+              </div>
+            )}
+
           </div>
         </Card>
       </div>

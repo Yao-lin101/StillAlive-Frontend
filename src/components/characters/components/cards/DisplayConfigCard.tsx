@@ -18,6 +18,7 @@ interface DisplayConfig {
   timeout_messages: Array<{
     hours: number;
     message: string;
+    music_link?: string;
   }>;
 }
 
@@ -141,6 +142,21 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                     }}
                     placeholder="显示文本"
                   />
+                  <Input
+                    value={msg.music_link || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const newMessages = [...localConfig.timeout_messages];
+                      newMessages[index] = {
+                        ...msg,
+                        music_link: e.target.value
+                      };
+                      setLocalConfig({
+                        ...localConfig,
+                        timeout_messages: newMessages
+                      });
+                    }}
+                    placeholder="网易云音乐分享链接（可选）"
+                  />
                   <Button
                     variant="ghost"
                     size="sm"
@@ -164,7 +180,7 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                     ...localConfig,
                     timeout_messages: [
                       ...localConfig.timeout_messages,
-                      { hours: 1, message: '' }
+                      { hours: 1, message: '', music_link: '' }
                     ]
                   });
                 }}

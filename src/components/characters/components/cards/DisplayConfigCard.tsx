@@ -1,17 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import Input from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
-import { Settings2, TrashIcon, PlusIcon, ChevronDown, ChevronUp, Music, AlertCircle, Loader2, X } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Settings2, PlusIcon, ChevronDown, ChevronUp, Music } from 'lucide-react';
 import { parseNeteaseMusicLink } from '@/utils/musicLinkParser';
 import {
   DisplayConfig,
@@ -20,6 +11,7 @@ import {
   DisplayConfigCardProps
 } from '@/types/displayConfig';
 import { DefaultMessageDialog } from '../dialogs/DefaultMessageDialog';
+import { TimeoutMessageDialog } from '../dialogs/TimeoutMessageDialog';
 
 export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
   config,
@@ -377,208 +369,24 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
       />
 
       {/* 超时状态编辑对话框 */}
-      <Dialog 
-        open={editingMessageIndex !== null} 
-        onOpenChange={(open) => {
-          if (!open) {
-            setEditingMessageIndex(null);
-            setEditingMessage(null);
-            setMusicLinkError(null);
-            setParsedMusicLink(null);
-          }
+      <TimeoutMessageDialog 
+        isOpen={editingMessageIndex !== null}
+        onClose={() => {
+          setEditingMessageIndex(null);
+          setEditingMessage(null);
+          setMusicLinkError(null);
+          setParsedMusicLink(null);
         }}
-      >
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>编辑超时状态</DialogTitle>
-            <DialogDescription>
-              设置超时时间和显示内容
-            </DialogDescription>
-          </DialogHeader>
-          
-          {editingMessage && (
-            <div className="space-y-4">
-              <div>
-                <Label>超时时间（小时）</Label>
-                <Input
-                  type="number"
-                  value={editingMessage.hours}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingMessage({
-                    ...editingMessage,
-                    hours: parseInt(e.target.value) || 0
-                  })}
-                  placeholder="例如：24"
-                />
-              </div>
-              
-              <div>
-                <Label>显示消息</Label>
-                <div className="relative">
-                  <Input
-                    value={editingMessage.message}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingMessage({
-                      ...editingMessage,
-                      message: e.target.value
-                    })}
-                    placeholder="超时后显示的消息"
-                    className="pr-8"
-                  />
-                  {editingMessage.message && (
-                    <button
-                      type="button"
-                      onClick={() => setEditingMessage({
-                        ...editingMessage,
-                        message: ''
-                      })}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-              
-              <div>
-                <Label>网易云音乐链接 - 非VIP（可选）</Label>
-                <div className="relative">
-                  <Input
-                    value={editingMessage.raw_music_link || ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                      handleMusicLinkChange(e.target.value)
-                    }
-                    placeholder="粘贴网易云音乐分享链接"
-                    className={musicLinkError ? "border-red-300 pr-8" : "pr-8"}
-                  />
-                  {isParsingLink ? (
-                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                      <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-                    </div>
-                  ) : editingMessage.raw_music_link ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingMessage({
-                          ...editingMessage,
-                          raw_music_link: ''
-                        });
-                        setParsedMusicLink(null);
-                        setMusicLinkError(null);
-                      }}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  ) : null}
-                </div>
-                {musicLinkError && (
-                  <p className="text-xs text-red-500 mt-1 flex items-center">
-                    <AlertCircle className="h-3 w-3 mr-1" />
-                    {musicLinkError}
-                  </p>
-                )}
-                <p className="text-xs text-gray-500 mt-1">
-                  支持网易云音乐分享链接，将在超时状态下播放
-                </p>
-              </div>
-              
-              <div>
-                <Label>封面图片URL（可选）</Label>
-                <div className="relative">
-                  <Input
-                    value={editingMessage.cover_url || ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingMessage({
-                      ...editingMessage,
-                      cover_url: e.target.value
-                    })}
-                    placeholder="音乐封面图片URL"
-                    className="pr-8"
-                  />
-                  {editingMessage.cover_url && (
-                    <button
-                      type="button"
-                      onClick={() => setEditingMessage({
-                        ...editingMessage,
-                        cover_url: ''
-                      })}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-              
-              {/* 音乐预览 */}
-              {parsedMusicLink && (
-                <div className="mt-4 border rounded-md p-3 bg-gray-50">
-                  <Label className="text-xs text-gray-500 mb-2 block">音乐预览</Label>
-                  <div className="w-full flex justify-center">
-                    {(() => {
-                      // 确保使用HTTPS
-                      let secureLink = parsedMusicLink.replace('http://', 'https://');
-                      
-                      // 检测是否为移动设备
-                      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                      
-                      // 检查是否是网易云音乐的outchain播放器链接
-                      if (secureLink.includes('music.163.com/outchain/player')) {
-                        if (isMobile) {
-                          // 移动设备：添加/m/路径
-                          secureLink = secureLink.replace('/outchain/', '/m/outchain/');
-                        }
-                      }
-                      
-                      return (
-                        <iframe 
-                          frameBorder="no" 
-                          style={{ border: 0 }}
-                          width={330} 
-                          height={100} 
-                          src={secureLink}
-                          className="mx-auto"
-                        ></iframe>
-                      );
-                    })()}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-          
-          <DialogFooter className="flex flex-row items-center justify-between w-full">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDeleteTimeoutMessage}
-              className="text-red-500 border-red-200 hover:bg-red-50"
-              disabled={isSaving}
-            >
-              <TrashIcon className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">{isSaving ? '删除中...' : '删除'}</span>
-            </Button>
-            
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setEditingMessageIndex(null);
-                  setEditingMessage(null);
-                  setMusicLinkError(null);
-                  setParsedMusicLink(null);
-                }}
-              >
-                取消
-              </Button>
-              <Button 
-                onClick={handleSaveTimeoutMessage}
-                disabled={isSaving || !!musicLinkError || isParsingLink}
-              >
-                {isSaving ? '保存中...' : '保存'}
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        timeoutMessage={editingMessage}
+        onTimeoutMessageChange={setEditingMessage}
+        onSave={handleSaveTimeoutMessage}
+        onDelete={handleDeleteTimeoutMessage}
+        isSaving={isSaving}
+        musicLinkError={musicLinkError}
+        parsedMusicLink={parsedMusicLink}
+        isParsingLink={isParsingLink}
+        onMusicLinkChange={(value) => handleMusicLinkChange(value)}
+      />
     </>
   );
 }; 

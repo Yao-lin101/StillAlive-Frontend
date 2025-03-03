@@ -9,6 +9,7 @@ import { Marquee } from "@/components/magicui/marquee";
 import { ShineBorder } from "@/components/magicui/shine-border";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import MusicPlayer from '../components/MusicPlayer';
 
 interface CharacterDisplay {
   name: string;
@@ -145,6 +146,8 @@ export const CharacterDisplayPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [bgImageError, setBgImageError] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
+  const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -157,6 +160,11 @@ export const CharacterDisplayPage: React.FC = () => {
         ]);
         setCharacter(characterData);
         setStatus(statusData);
+        
+        // 初始化音乐
+        if (characterData.status_config?.display) {
+          updateMusicPlayer(characterData.status_config, statusData);
+        }
       } catch (err) {
         setError(formatError(err));
       } finally {
@@ -176,6 +184,11 @@ export const CharacterDisplayPage: React.FC = () => {
       try {
         const statusData = await characterService.getCharacterStatus(code);
         setStatus(statusData);
+        
+        // 更新音乐播放器
+        if (character?.status_config?.display) {
+          updateMusicPlayer(character.status_config, statusData);
+        }
       } catch (err) {
         console.error('Failed to fetch status:', err);
       }
@@ -183,7 +196,41 @@ export const CharacterDisplayPage: React.FC = () => {
 
     const intervalId = setInterval(fetchStatus, 15000);
     return () => clearInterval(intervalId);
-  }, [code]);
+  }, [code, character]);
+
+  // 根据状态更新音乐播放器
+  const updateMusicPlayer = (config: StatusConfigType, statusData: CharacterStatus | null) => {
+    if (!statusData || !config.display) return;
+    
+    // 获取最新更新时间
+    const latestUpdate = Object.values(statusData.status_data)
+      .map(s => new Date(s.updated_at).getTime())
+      .sort((a, b) => b - a)[0];
+    
+    if (!latestUpdate) {
+      // 如果没有更新记录，使用默认音乐和封面
+      setCurrentMusicUrl(config.display.default_music_url || null);
+      setCurrentCoverUrl(config.display.default_cover_url || null);
+      return;
+    }
+    
+    // 计算距离最后更新的小时数
+    const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
+    
+    // 查找匹配的超时消息
+    const timeoutMessage = config.display.timeout_messages
+      ?.sort((a, b) => b.hours - a.hours)
+      .find(msg => diffInHours >= msg.hours);
+    
+    // 设置音乐URL和封面URL
+    if (timeoutMessage?.music_link) {
+      setCurrentMusicUrl(timeoutMessage.music_link);
+      setCurrentCoverUrl(timeoutMessage.cover_url || config.display.default_cover_url || null);
+    } else {
+      setCurrentMusicUrl(config.display.default_music_url || null);
+      setCurrentCoverUrl(config.display.default_cover_url || null);
+    }
+  };
 
   const statusItems = character?.status_config && Object.entries(character.status_config)
     .filter(([key]) => key !== 'display' && key !== 'theme')
@@ -329,7 +376,6 @@ export const CharacterDisplayPage: React.FC = () => {
                 )}
               </div>
             </div>
-
             <div className="flex items-center justify-between mb-4">
               {status && character.status_config?.display && (
                 <p className="text-lg font-semibold text-gray-900">
@@ -337,7 +383,7 @@ export const CharacterDisplayPage: React.FC = () => {
                     const latestUpdate = Object.values(status.status_data)
                       .map(s => new Date(s.updated_at).getTime())
                       .sort((a, b) => b - a)[0];
-                    
+                      
                     if (!latestUpdate) return '';
                     
                     const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
@@ -345,7 +391,7 @@ export const CharacterDisplayPage: React.FC = () => {
                     const timeoutMessage = character.status_config?.display?.timeout_messages
                       ?.sort((a, b) => b.hours - a.hours)
                       .find(msg => diffInHours >= msg.hours);
-                    
+                        
                     return timeoutMessage?.message || character.status_config?.display?.default_message || '';
                   })()}
                 </p>
@@ -382,6 +428,16 @@ export const CharacterDisplayPage: React.FC = () => {
           </div>
         </Card>
       </div>
+      
+      {/* 音乐播放器 - 固定在底部 */}
+      {currentMusicUrl && (
+        <div className="fixed bottom-8 left-0 right-0 flex justify-center z-20">
+          <MusicPlayer 
+            musicUrl={currentMusicUrl} 
+            coverUrl={currentCoverUrl || character?.avatar || undefined}
+          />
+        </div>
+      )}
 
       <Modal 
         isOpen={showStatusDialog} 

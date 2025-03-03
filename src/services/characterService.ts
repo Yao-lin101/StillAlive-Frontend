@@ -2,25 +2,11 @@ import axios from 'axios';
 import { Character, CharacterDetail, CreateCharacterData, UpdateCharacterData, WillConfig } from '@/types/character';
 
 import { API_URL } from '@/config';
+import api from '@/lib/api';
 
 // 创建一个新的 axios 实例
-const api = axios.create({
-  baseURL: API_URL,
-});
 
 // 添加请求拦截器
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 export const characterService = {
   async list(): Promise<Character[]> {

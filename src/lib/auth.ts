@@ -1,5 +1,4 @@
 import axios from 'axios';
-
 import { API_URL } from '@/config';
 
 // 创建一个新的 axios 实例用于认证
@@ -85,6 +84,8 @@ const authService = {
   setTokens(access: string, refresh: string): void {
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
+    // 触发认证状态变更事件
+    window.dispatchEvent(new Event('auth-change'));
   },
 
   getTokens(): { access: string | null; refresh: string | null } {
@@ -97,6 +98,8 @@ const authService = {
   clearTokens(): void {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    // 触发认证状态变更事件
+    window.dispatchEvent(new Event('auth-change'));
   },
 };
 

@@ -322,7 +322,6 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                     {localConfig.default_music_url && (
                       <span className="text-xs text-gray-500 flex items-center">
                         <Music className="h-3 w-3 mr-1" />
-                        音乐
                       </span>
                     )}
                   </div>
@@ -371,7 +370,6 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                           {msg.music_link && (
                             <span className="text-xs text-gray-500 flex items-center">
                               <Music className="h-3 w-3 mr-1" />
-                              音乐
                             </span>
                           )}
                         </div>

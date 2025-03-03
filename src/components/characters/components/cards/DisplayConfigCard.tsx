@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Input from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
-import { Settings2, TrashIcon, PlusIcon, ChevronDown, ChevronUp, Music } from 'lucide-react';
+import { Settings2, TrashIcon, PlusIcon, ChevronDown, ChevronUp, Music, AlertCircle, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { StatusConfigType } from '@/types/character';
+import { parseNeteaseMusicLink } from '@/utils/musicLinkParser';
 
 interface DisplayConfig {
   default_message: string;
@@ -28,11 +29,13 @@ interface TimeoutMessage {
   hours: number;
   message: string;
   music_link?: string;
+  raw_music_link?: string; // 用户输入的原始链接
 }
 
 interface DefaultMessage {
   message: string;
   music_url?: string;
+  raw_music_url?: string; // 用户输入的原始链接
 }
 
 interface DisplayConfigCardProps {
@@ -54,8 +57,12 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
   const [isEditingDefault, setIsEditingDefault] = useState(false);
   const [defaultMessageData, setDefaultMessageData] = useState<DefaultMessage>({
     message: '',
-    music_url: ''
+    music_url: '',
+    raw_music_url: ''
   });
+  const [musicLinkError, setMusicLinkError] = useState<string | null>(null);
+  const [parsedMusicLink, setParsedMusicLink] = useState<string | null>(null);
+  const [isParsingLink, setIsParsingLink] = useState(false);
   
   const defaultConfig: DisplayConfig = {
     default_message: '状态良好',
@@ -81,14 +88,45 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
     if (e) {
       e.stopPropagation();
     }
+    const message = {...localConfig.timeout_messages[index]};
     setEditingMessageIndex(index);
-    setEditingMessage({...localConfig.timeout_messages[index]});
+    setEditingMessage({
+      ...message,
+      raw_music_link: message.music_link || ''
+    });
+    setMusicLinkError(null);
+    setParsedMusicLink(message.music_link || null);
+  };
+
+  const validateAndParseMusicLink = (link: string): string | null => {
+    if (!link) return null;
+    
+    const parsedLink = parseNeteaseMusicLink(link);
+    if (!parsedLink && link.trim() !== '') {
+      setMusicLinkError('无效的网易云音乐链接，请检查后重试');
+      setParsedMusicLink(null);
+      return null;
+    }
+    
+    setMusicLinkError(null);
+    setParsedMusicLink(parsedLink);
+    return parsedLink;
   };
 
   const handleSaveTimeoutMessage = async () => {
     if (editingMessageIndex !== null && editingMessage) {
+      // 解析音乐链接
+      const parsedMusicLink = validateAndParseMusicLink(editingMessage.raw_music_link || '');
+      
+      // 如果链接无效且用户输入了内容，不保存
+      if (musicLinkError) return;
+      
       const newMessages = [...localConfig.timeout_messages];
-      newMessages[editingMessageIndex] = editingMessage;
+      newMessages[editingMessageIndex] = {
+        hours: editingMessage.hours,
+        message: editingMessage.message,
+        music_link: parsedMusicLink || undefined
+      };
       
       const updatedConfig = {
         ...localConfig,
@@ -107,6 +145,7 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
       
       setEditingMessageIndex(null);
       setEditingMessage(null);
+      setParsedMusicLink(null);
     }
   };
 
@@ -132,34 +171,46 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
       
       setEditingMessageIndex(null);
       setEditingMessage(null);
+      setParsedMusicLink(null);
     }
   };
 
   const handleAddTimeoutMessage = () => {
-    const newMessage = { hours: 24, message: '', music_link: '' };
+    const newMessage = { hours: 24, message: '', music_link: '', raw_music_link: '' };
     const newIndex = localConfig.timeout_messages.length;
     setLocalConfig({
       ...localConfig,
-      timeout_messages: [...localConfig.timeout_messages, newMessage]
+      timeout_messages: [...localConfig.timeout_messages, { hours: 24, message: '', music_link: undefined }]
     });
     // 立即打开编辑对话框
     setEditingMessageIndex(newIndex);
     setEditingMessage(newMessage);
+    setMusicLinkError(null);
+    setParsedMusicLink(null);
   };
 
   const handleEditDefaultMessage = () => {
     setDefaultMessageData({
       message: localConfig.default_message,
-      music_url: localConfig.default_music_url || ''
+      music_url: localConfig.default_music_url || '',
+      raw_music_url: localConfig.default_music_url || ''
     });
     setIsEditingDefault(true);
+    setMusicLinkError(null);
+    setParsedMusicLink(localConfig.default_music_url || null);
   };
 
   const handleSaveDefaultMessage = async () => {
+    // 解析音乐链接
+    const parsedMusicLink = validateAndParseMusicLink(defaultMessageData.raw_music_url || '');
+    
+    // 如果链接无效且用户输入了内容，不保存
+    if (musicLinkError) return;
+    
     const updatedConfig = {
       ...localConfig,
       default_message: defaultMessageData.message,
-      default_music_url: defaultMessageData.music_url
+      default_music_url: parsedMusicLink || undefined
     };
     
     setLocalConfig(updatedConfig);
@@ -173,6 +224,46 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
     await onSave(newConfig);
     
     setIsEditingDefault(false);
+    setParsedMusicLink(null);
+  };
+
+  const handleMusicLinkChange = async (value: string, isDefault: boolean = false) => {
+    if (isDefault) {
+      setDefaultMessageData({
+        ...defaultMessageData,
+        raw_music_url: value
+      });
+    } else if (editingMessage) {
+      setEditingMessage({
+        ...editingMessage,
+        raw_music_link: value
+      });
+    }
+    
+    // 清除错误提示
+    setMusicLinkError(null);
+    
+    // 如果输入为空，清除解析结果
+    if (!value.trim()) {
+      setParsedMusicLink(null);
+      return;
+    }
+    
+    // 实时解析链接
+    setIsParsingLink(true);
+    
+    // 使用setTimeout模拟异步解析，避免UI阻塞
+    setTimeout(() => {
+      const parsedLink = parseNeteaseMusicLink(value);
+      if (!parsedLink) {
+        setMusicLinkError('无效的网易云音乐链接，请检查后重试');
+        setParsedMusicLink(null);
+      } else {
+        setMusicLinkError(null);
+        setParsedMusicLink(parsedLink);
+      }
+      setIsParsingLink(false);
+    }, 300);
   };
 
   return (
@@ -217,6 +308,7 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                     {localConfig.default_music_url && (
                       <span className="text-xs text-gray-500 flex items-center">
                         <Music className="h-3 w-3 mr-1" />
+                        音乐
                       </span>
                     )}
                   </div>
@@ -265,6 +357,7 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                           {msg.music_link && (
                             <span className="text-xs text-gray-500 flex items-center">
                               <Music className="h-3 w-3 mr-1" />
+                              音乐
                             </span>
                           )}
                         </div>
@@ -287,6 +380,8 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
         onOpenChange={(open) => {
           if (!open) {
             setIsEditingDefault(false);
+            setMusicLinkError(null);
+            setParsedMusicLink(null);
           }
         }}
       >
@@ -312,31 +407,65 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
             </div>
             
             <div>
-              <Label>默认音乐链接（可选）</Label>
-              <Input
-                value={defaultMessageData.music_url || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDefaultMessageData({
-                  ...defaultMessageData,
-                  music_url: e.target.value
-                })}
-                placeholder="粘贴网易云音乐分享链接"
-              />
+              <Label>网易云音乐链接（可选）</Label>
+              <div className="relative">
+                <Input
+                  value={defaultMessageData.raw_music_url || ''}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                    handleMusicLinkChange(e.target.value, true)
+                  }
+                  placeholder="粘贴网易云音乐分享链接"
+                  className={musicLinkError ? "border-red-300 pr-8" : "pr-8"}
+                />
+                {isParsingLink && (
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                    <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                  </div>
+                )}
+              </div>
+              {musicLinkError && (
+                <p className="text-xs text-red-500 mt-1 flex items-center">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  {musicLinkError}
+                </p>
+              )}
               <p className="text-xs text-gray-500 mt-1">
                 支持网易云音乐分享链接，将在正常状态下播放
               </p>
             </div>
+            
+            {/* 音乐预览 */}
+            {parsedMusicLink && (
+              <div className="mt-4 border rounded-md p-3 bg-gray-50">
+                <Label className="text-xs text-gray-500 mb-2 block">音乐预览</Label>
+                <div className="w-full flex justify-center">
+                  <iframe 
+                    frameBorder="no" 
+                    style={{ border: 0 }}
+                    width={330} 
+                    height={100} 
+                    src={parsedMusicLink}
+                    className="mx-auto"
+                  ></iframe>
+                </div>
+              </div>
+            )}
           </div>
           
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsEditingDefault(false)}
+              onClick={() => {
+                setIsEditingDefault(false);
+                setMusicLinkError(null);
+                setParsedMusicLink(null);
+              }}
             >
               取消
             </Button>
             <Button 
               onClick={handleSaveDefaultMessage}
-              disabled={isSaving}
+              disabled={isSaving || !!musicLinkError || isParsingLink}
             >
               {isSaving ? '保存中...' : '保存'}
             </Button>
@@ -351,6 +480,8 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
           if (!open) {
             setEditingMessageIndex(null);
             setEditingMessage(null);
+            setMusicLinkError(null);
+            setParsedMusicLink(null);
           }
         }}
       >
@@ -391,18 +522,48 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
               
               <div>
                 <Label>网易云音乐链接（可选）</Label>
-                <Input
-                  value={editingMessage.music_link || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingMessage({
-                    ...editingMessage,
-                    music_link: e.target.value
-                  })}
-                  placeholder="粘贴网易云音乐分享链接"
-                />
+                <div className="relative">
+                  <Input
+                    value={editingMessage.raw_music_link || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                      handleMusicLinkChange(e.target.value)
+                    }
+                    placeholder="粘贴网易云音乐分享链接"
+                    className={musicLinkError ? "border-red-300 pr-8" : "pr-8"}
+                  />
+                  {isParsingLink && (
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                      <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                {musicLinkError && (
+                  <p className="text-xs text-red-500 mt-1 flex items-center">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    {musicLinkError}
+                  </p>
+                )}
                 <p className="text-xs text-gray-500 mt-1">
                   支持网易云音乐分享链接，将在超时状态下播放
                 </p>
               </div>
+              
+              {/* 音乐预览 */}
+              {parsedMusicLink && (
+                <div className="mt-4 border rounded-md p-3 bg-gray-50">
+                  <Label className="text-xs text-gray-500 mb-2 block">音乐预览</Label>
+                  <div className="w-full flex justify-center">
+                    <iframe 
+                      frameBorder="no" 
+                      style={{ border: 0 }}
+                      width={330} 
+                      height={100} 
+                      src={parsedMusicLink}
+                      className="mx-auto"
+                    ></iframe>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
@@ -424,13 +585,15 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                 onClick={() => {
                   setEditingMessageIndex(null);
                   setEditingMessage(null);
+                  setMusicLinkError(null);
+                  setParsedMusicLink(null);
                 }}
               >
                 取消
               </Button>
               <Button 
                 onClick={handleSaveTimeoutMessage}
-                disabled={isSaving}
+                disabled={isSaving || !!musicLinkError || isParsingLink}
               >
                 {isSaving ? '保存中...' : '保存'}
               </Button>

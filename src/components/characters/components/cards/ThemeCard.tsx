@@ -37,16 +37,28 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
     background_url: theme?.background_url || '',
     overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5,
   });
+  
+  // 保存原始主题值，用于取消或关闭弹窗时重置
+  const [originalTheme, setOriginalTheme] = useState<Theme>({
+    background_url: theme?.background_url || '',
+    overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5,
+  });
 
   useEffect(() => {
     if (theme) {
-      setLocalTheme(prev => ({
-        ...prev,
+      const updatedTheme = {
         background_url: theme.background_url || '',
-        overlay_opacity: typeof theme.overlay_opacity === 'number' ? theme.overlay_opacity : prev.overlay_opacity,
-      }));
+        overlay_opacity: typeof theme.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5,
+      };
+      setLocalTheme(updatedTheme);
+      setOriginalTheme(updatedTheme);
     }
   }, [theme]);
+  
+  // 重置为原始值的函数
+  const resetToOriginal = () => {
+    setLocalTheme({...originalTheme});
+  };
 
   const handleSave = async () => {
     console.log('ThemeCard - Saving theme:', localTheme);
@@ -56,6 +68,9 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
     };
     onUpdate(localTheme);
     await onSave(newConfig);
+    
+    // 保存成功后，更新原始值
+    setOriginalTheme({...localTheme});
     setIsEditing(false);
   };
 
@@ -74,7 +89,16 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
         </div>
       </Card>
 
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+      <Dialog 
+        open={isEditing} 
+        onOpenChange={(open) => {
+          if (!open) {
+            // 当弹窗关闭时（无论通过什么方式），重置为原始值
+            resetToOriginal();
+          }
+          setIsEditing(open);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>编辑背景主题</DialogTitle>
@@ -139,10 +163,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
               <Button
                 variant="outline"
                 onClick={() => {
-                  setLocalTheme({
-                    background_url: theme?.background_url || '',
-                    overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5
-                  });
+                  resetToOriginal();
                   setIsEditing(false);
                 }}
               >

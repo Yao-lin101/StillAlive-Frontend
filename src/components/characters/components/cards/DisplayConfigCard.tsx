@@ -76,19 +76,6 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
       timeout_messages: config?.display?.timeout_messages || defaultConfig.timeout_messages
     });
   }, [config]);
-
-  const handleSave = async () => {
-    console.log('DisplayConfigCard - Current config:', config);
-    console.log('DisplayConfigCard - Local config to save:', localConfig);
-    const newConfig = {
-      ...config,
-      display: localConfig
-    };
-    onUpdate(newConfig);
-    console.log('DisplayConfigCard - Updated parent config:', newConfig);
-    await onSave(newConfig);
-  };
-
   const handleEditTimeoutMessage = (index: number, e?: React.MouseEvent) => {
     if (e) {
       e.stopPropagation();
@@ -97,27 +84,51 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
     setEditingMessage({...localConfig.timeout_messages[index]});
   };
 
-  const handleSaveTimeoutMessage = () => {
+  const handleSaveTimeoutMessage = async () => {
     if (editingMessageIndex !== null && editingMessage) {
       const newMessages = [...localConfig.timeout_messages];
       newMessages[editingMessageIndex] = editingMessage;
-      setLocalConfig({
+      
+      const updatedConfig = {
         ...localConfig,
         timeout_messages: newMessages
-      });
+      };
+      
+      setLocalConfig(updatedConfig);
+      
+      // 保存到服务器
+      const newConfig = {
+        ...config,
+        display: updatedConfig
+      };
+      onUpdate(newConfig);
+      await onSave(newConfig);
+      
       setEditingMessageIndex(null);
       setEditingMessage(null);
     }
   };
 
-  const handleDeleteTimeoutMessage = () => {
+  const handleDeleteTimeoutMessage = async () => {
     if (editingMessageIndex !== null) {
       const newMessages = [...localConfig.timeout_messages];
       newMessages.splice(editingMessageIndex, 1);
-      setLocalConfig({
+      
+      const updatedConfig = {
         ...localConfig,
         timeout_messages: newMessages
-      });
+      };
+      
+      setLocalConfig(updatedConfig);
+      
+      // 保存到服务器
+      const newConfig = {
+        ...config,
+        display: updatedConfig
+      };
+      onUpdate(newConfig);
+      await onSave(newConfig);
+      
       setEditingMessageIndex(null);
       setEditingMessage(null);
     }
@@ -143,12 +154,23 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
     setIsEditingDefault(true);
   };
 
-  const handleSaveDefaultMessage = () => {
-    setLocalConfig({
+  const handleSaveDefaultMessage = async () => {
+    const updatedConfig = {
       ...localConfig,
       default_message: defaultMessageData.message,
       default_music_url: defaultMessageData.music_url
-    });
+    };
+    
+    setLocalConfig(updatedConfig);
+    
+    // 保存到服务器
+    const newConfig = {
+      ...config,
+      display: updatedConfig
+    };
+    onUpdate(newConfig);
+    await onSave(newConfig);
+    
     setIsEditingDefault(false);
   };
 
@@ -247,16 +269,6 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                 </div>
               )}
             </div>
-
-            {/* 保存按钮 */}
-            <div className="flex justify-end pt-2">
-              <Button
-                onClick={handleSave}
-                disabled={isSaving}
-              >
-                {isSaving ? '保存中...' : '保存'}
-              </Button>
-            </div>
           </div>
         )}
       </Card>
@@ -314,8 +326,11 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
             >
               取消
             </Button>
-            <Button onClick={handleSaveDefaultMessage}>
-              确认
+            <Button 
+              onClick={handleSaveDefaultMessage}
+              disabled={isSaving}
+            >
+              {isSaving ? '保存中...' : '保存'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -389,9 +404,10 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
               size="sm"
               onClick={handleDeleteTimeoutMessage}
               className="text-red-500 border-red-200 hover:bg-red-50"
+              disabled={isSaving}
             >
               <TrashIcon className="h-4 w-4 mr-1" />
-              删除
+              {isSaving ? '删除中...' : '删除'}
             </Button>
             
             <div className="flex gap-2">
@@ -404,8 +420,11 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
               >
                 取消
               </Button>
-              <Button onClick={handleSaveTimeoutMessage}>
-                确认
+              <Button 
+                onClick={handleSaveTimeoutMessage}
+                disabled={isSaving}
+              >
+                {isSaving ? '保存中...' : '保存'}
               </Button>
             </div>
           </DialogFooter>

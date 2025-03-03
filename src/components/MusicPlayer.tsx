@@ -48,17 +48,20 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
           setCoverImage(`https://p1.music.126.net/v0joo2QoT_1P3DpcoPbB3Q==/${id}.jpg?param=200y200`);
         }
         
-        // 创建音频元素
-        const audio = new Audio(`https://music.163.com/song/media/outer/url?id=${id}.mp3`);
-        // 设置循环播放
-        audio.loop = true;
-        audio.addEventListener('ended', () => {
-          // 由于设置了循环播放，这个事件通常不会触发
-          // 但保留以防万一循环播放失效
-          audio.currentTime = 0;
-          audio.play().catch(err => console.error('Failed to restart audio:', err));
-        });
-        audioRef.current = audio;
+        // 只有在使用自定义UI时才创建音频元素
+        if (coverUrl) {
+          // 创建音频元素
+          const audio = new Audio(`https://music.163.com/song/media/outer/url?id=${id}.mp3`);
+          // 设置循环播放
+          audio.loop = true;
+          audio.addEventListener('ended', () => {
+            // 由于设置了循环播放，这个事件通常不会触发
+            // 但保留以防万一循环播放失效
+            audio.currentTime = 0;
+            audio.play().catch(err => console.error('Failed to restart audio:', err));
+          });
+          audioRef.current = audio;
+        }
         
         // 只有在没有提供自定义封面时，才尝试获取歌曲信息
         if (!coverUrl) {
@@ -185,6 +188,27 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     transition: isPlaying ? 'none' : 'box-shadow 0.3s ease-out'
   };
 
+  // 准备iframe的URL
+  const prepareIframeUrl = () => {
+    if (!musicUrl) return '';
+    
+    // 确保使用HTTPS
+    let secureLink = musicUrl.replace('http://', 'https://');
+    
+    // 检测是否为移动设备
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // 检查是否是网易云音乐的outchain播放器链接
+    if (secureLink.includes('music.163.com/outchain/player')) {
+      if (isMobile) {
+        // 移动设备：添加/m/路径
+        secureLink = secureLink.replace('/outchain/', '/m/outchain/');
+      }
+    }
+    
+    return secureLink;
+  };
+
   return (
     <div className="music-player-container">
       {/* 添加全局样式 */}
@@ -206,45 +230,59 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         `}
       </style>
       
-      {/* 自定义UI */}
-      <div className="flex justify-center items-center flex-col">
-        <div 
-          className="relative w-16 h-16 rounded-full overflow-hidden cursor-pointer"
-          onClick={togglePlayPause}
-          style={containerStyle}
-        >
-          <img 
-            src={coverImage || defaultCoverImage} 
-            alt="Album Cover" 
-            className="w-full h-full object-cover"
-            style={coverStyle}
-            onError={(e) => {
-              // 如果封面图片加载失败，使用默认图片
-              console.log('Cover image load failed, using default');
-              (e.target as HTMLImageElement).src = defaultCoverImage || '';
-            }}
-          />
-          
-          {/* 播放按钮覆盖 - 只在非播放状态显示 */}
-          {!isPlaying && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 transition-opacity duration-200 hover:bg-opacity-50">
-              <div className="text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
+      {coverUrl ? (
+        // 自定义UI - 当coverUrl存在时显示
+        <div className="flex justify-center items-center flex-col">
+          <div 
+            className="relative w-16 h-16 rounded-full overflow-hidden cursor-pointer"
+            onClick={togglePlayPause}
+            style={containerStyle}
+          >
+            <img 
+              src={coverImage || defaultCoverImage} 
+              alt="Album Cover" 
+              className="w-full h-full object-cover"
+              style={coverStyle}
+              onError={(e) => {
+                // 如果封面图片加载失败，使用默认图片
+                console.log('Cover image load failed, using default');
+                (e.target as HTMLImageElement).src = defaultCoverImage || '';
+              }}
+            />
+            
+            {/* 播放按钮覆盖 - 只在非播放状态显示 */}
+            {!isPlaying && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 transition-opacity duration-200 hover:bg-opacity-50">
+                <div className="text-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                </div>
               </div>
+            )}
+          </div>
+          
+          {/* 歌曲信息 */}
+          {songInfo && (
+            <div className="text-center mt-2 text-xs text-gray-600">
+              <div className="font-medium">{songInfo.name}</div>
+              {songInfo.artist && <div>{songInfo.artist}</div>}
             </div>
           )}
         </div>
-        
-        {/* 歌曲信息 */}
-        {songInfo && (
-          <div className="text-center mt-2 text-xs text-gray-600">
-            <div className="font-medium">{songInfo.name}</div>
-            {songInfo.artist && <div>{songInfo.artist}</div>}
-          </div>
-        )}
-      </div>
+      ) : (
+        // iframe组件 - 当coverUrl为空时显示
+        <div className="flex justify-center">
+          <iframe 
+            frameBorder="no" 
+            style={{ border: 0 }}
+            width={330} 
+            height={100} 
+            src={prepareIframeUrl()}
+            className="mx-auto"
+          ></iframe>
+        </div>
+      )}
     </div>
   );
 };

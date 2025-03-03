@@ -434,7 +434,7 @@ export const CharacterDisplayPage: React.FC = () => {
         <div className="fixed bottom-8 left-0 right-0 flex justify-center z-20">
           <MusicPlayer 
             musicUrl={currentMusicUrl} 
-            coverUrl={currentCoverUrl || character?.avatar || undefined}
+            coverUrl={currentCoverUrl || undefined}
           />
         </div>
       )}

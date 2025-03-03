@@ -50,8 +50,13 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         
         // 创建音频元素
         const audio = new Audio(`https://music.163.com/song/media/outer/url?id=${id}.mp3`);
+        // 设置循环播放
+        audio.loop = true;
         audio.addEventListener('ended', () => {
-          setIsPlaying(false);
+          // 由于设置了循环播放，这个事件通常不会触发
+          // 但保留以防万一循环播放失效
+          audio.currentTime = 0;
+          audio.play().catch(err => console.error('Failed to restart audio:', err));
         });
         audioRef.current = audio;
         

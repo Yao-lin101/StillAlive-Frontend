@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Input from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
-import { Settings2 } from 'lucide-react';
+import { Settings2, X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -85,15 +85,30 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="background_url">背景图片URL</Label>
-              <Input
-                id="background_url"
-                value={localTheme.background_url || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalTheme({
-                  ...localTheme,
-                  background_url: e.target.value
-                })}
-                placeholder="https://example.com/background.jpg"
-              />
+              <div className="relative">
+                <Input
+                  id="background_url"
+                  value={localTheme.background_url || ''}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalTheme({
+                    ...localTheme,
+                    background_url: e.target.value
+                  })}
+                  placeholder="https://example.com/background.jpg"
+                  className="pr-8"
+                />
+                {localTheme.background_url && (
+                  <button
+                    type="button"
+                    onClick={() => setLocalTheme({
+                      ...localTheme,
+                      background_url: ''
+                    })}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
               <p className="text-sm text-gray-500">输入图片的URL地址</p>
             </div>
 

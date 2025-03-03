@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Input from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
-import { Settings2, TrashIcon, PlusIcon, ChevronDown, ChevronUp, Music, AlertCircle, Loader2 } from 'lucide-react';
+import { Settings2, TrashIcon, PlusIcon, ChevronDown, ChevronUp, Music, AlertCircle, Loader2, X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -408,14 +408,29 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
           <div className="space-y-4">
             <div>
               <Label>默认状态文本</Label>
-              <Input
-                value={defaultMessageData.message}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDefaultMessageData({
-                  ...defaultMessageData,
-                  message: e.target.value
-                })}
-                placeholder="例如：状态良好"
-              />
+              <div className="relative">
+                <Input
+                  value={defaultMessageData.message}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDefaultMessageData({
+                    ...defaultMessageData,
+                    message: e.target.value
+                  })}
+                  placeholder="例如：状态良好"
+                  className="pr-8"
+                />
+                {defaultMessageData.message && (
+                  <button
+                    type="button"
+                    onClick={() => setDefaultMessageData({
+                      ...defaultMessageData,
+                      message: ''
+                    })}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
             </div>
             
             <div>
@@ -429,11 +444,26 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                   placeholder="粘贴网易云音乐分享链接"
                   className={musicLinkError ? "border-red-300 pr-8" : "pr-8"}
                 />
-                {isParsingLink && (
+                {isParsingLink ? (
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                     <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
                   </div>
-                )}
+                ) : defaultMessageData.raw_music_url ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDefaultMessageData({
+                        ...defaultMessageData,
+                        raw_music_url: ''
+                      });
+                      setParsedMusicLink(null);
+                      setMusicLinkError(null);
+                    }}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                ) : null}
               </div>
               {musicLinkError && (
                 <p className="text-xs text-red-500 mt-1 flex items-center">
@@ -448,14 +478,29 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
             
             <div>
               <Label>封面图片URL（可选）</Label>
-              <Input
-                value={defaultMessageData.cover_url || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDefaultMessageData({
-                  ...defaultMessageData,
-                  cover_url: e.target.value
-                })}
-                placeholder="音乐封面图片URL"
-              />
+              <div className="relative">
+                <Input
+                  value={defaultMessageData.cover_url || ''}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDefaultMessageData({
+                    ...defaultMessageData,
+                    cover_url: e.target.value
+                  })}
+                  placeholder="音乐封面图片URL"
+                  className="pr-8"
+                />
+                {defaultMessageData.cover_url && (
+                  <button
+                    type="button"
+                    onClick={() => setDefaultMessageData({
+                      ...defaultMessageData,
+                      cover_url: ''
+                    })}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
             </div>
             
             {/* 音乐预览 */}
@@ -552,14 +597,29 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
               
               <div>
                 <Label>显示消息</Label>
-                <Input
-                  value={editingMessage.message}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingMessage({
-                    ...editingMessage,
-                    message: e.target.value
-                  })}
-                  placeholder="超时后显示的消息"
-                />
+                <div className="relative">
+                  <Input
+                    value={editingMessage.message}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingMessage({
+                      ...editingMessage,
+                      message: e.target.value
+                    })}
+                    placeholder="超时后显示的消息"
+                    className="pr-8"
+                  />
+                  {editingMessage.message && (
+                    <button
+                      type="button"
+                      onClick={() => setEditingMessage({
+                        ...editingMessage,
+                        message: ''
+                      })}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </div>
               
               <div>
@@ -573,11 +633,26 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                     placeholder="粘贴网易云音乐分享链接"
                     className={musicLinkError ? "border-red-300 pr-8" : "pr-8"}
                   />
-                  {isParsingLink && (
+                  {isParsingLink ? (
                     <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                       <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
                     </div>
-                  )}
+                  ) : editingMessage.raw_music_link ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingMessage({
+                          ...editingMessage,
+                          raw_music_link: ''
+                        });
+                        setParsedMusicLink(null);
+                        setMusicLinkError(null);
+                      }}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  ) : null}
                 </div>
                 {musicLinkError && (
                   <p className="text-xs text-red-500 mt-1 flex items-center">
@@ -592,14 +667,29 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
               
               <div>
                 <Label>封面图片URL（可选）</Label>
-                <Input
-                  value={editingMessage.cover_url || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingMessage({
-                    ...editingMessage,
-                    cover_url: e.target.value
-                  })}
-                  placeholder="音乐封面图片URL"
-                />
+                <div className="relative">
+                  <Input
+                    value={editingMessage.cover_url || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingMessage({
+                      ...editingMessage,
+                      cover_url: e.target.value
+                    })}
+                    placeholder="音乐封面图片URL"
+                    className="pr-8"
+                  />
+                  {editingMessage.cover_url && (
+                    <button
+                      type="button"
+                      onClick={() => setEditingMessage({
+                        ...editingMessage,
+                        cover_url: ''
+                      })}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </div>
               
               {/* 音乐预览 */}

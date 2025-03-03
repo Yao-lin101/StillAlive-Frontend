@@ -463,14 +463,42 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
               <div className="mt-4 border rounded-md p-3 bg-gray-50">
                 <Label className="text-xs text-gray-500 mb-2 block">音乐预览</Label>
                 <div className="w-full flex justify-center">
-                  <iframe 
-                    frameBorder="no" 
-                    style={{ border: 0 }}
-                    width={330} 
-                    height={100} 
-                    src={parsedMusicLink}
-                    className="mx-auto"
-                  ></iframe>
+                  {(() => {
+                    console.log('渲染音乐预览，原始链接:', parsedMusicLink);
+                    
+                    // 确保使用HTTPS
+                    let secureLink = parsedMusicLink.replace('http://', 'https://');
+                    
+                    // 检测是否为移动设备
+                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    console.log('当前设备类型:', isMobile ? '移动设备' : '桌面设备');
+                    
+                    // 检查是否是网易云音乐的outchain播放器链接
+                    if (secureLink.includes('music.163.com/outchain/player')) {
+                      if (isMobile) {
+                        // 移动设备：添加/m/路径
+                        secureLink = secureLink.replace('/outchain/', '/m/outchain/');
+                        console.log('移动设备，添加/m/路径');
+                      } else {
+                        // 桌面设备：保持原样
+                        console.log('桌面设备，保持原路径');
+                      }
+                    }
+                    
+                    console.log('处理后的链接:', secureLink);
+                    return (
+                      <iframe 
+                        frameBorder="no" 
+                        style={{ border: 0 }}
+                        width={330} 
+                        height={100} 
+                        src={secureLink}
+                        className="mx-auto"
+                        onLoad={() => console.log('iframe 加载成功:', secureLink)}
+                        onError={(e) => console.error('iframe 加载失败:', e)}
+                      ></iframe>
+                    );
+                  })()}
                 </div>
               </div>
             )}
@@ -589,13 +617,42 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                 <div className="mt-4 border rounded-md p-3 bg-gray-50">
                   <Label className="text-xs text-gray-500 mb-2 block">音乐预览</Label>
                   <div className="w-full flex justify-center">
-                    <iframe 
-                      style={{ border: 0 }}
-                      width={330} 
-                      height={100} 
-                      src={parsedMusicLink}
-                      className="mx-auto"
-                    ></iframe>
+                    {(() => {
+                      console.log('渲染音乐预览，原始链接:', parsedMusicLink);
+                      
+                      // 确保使用HTTPS
+                      let secureLink = parsedMusicLink.replace('http://', 'https://');
+                      
+                      // 检测是否为移动设备
+                      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                      console.log('当前设备类型:', isMobile ? '移动设备' : '桌面设备');
+                      
+                      // 检查是否是网易云音乐的outchain播放器链接
+                      if (secureLink.includes('music.163.com/outchain/player')) {
+                        if (isMobile) {
+                          // 移动设备：添加/m/路径
+                          secureLink = secureLink.replace('/outchain/', '/m/outchain/');
+                          console.log('移动设备，添加/m/路径');
+                        } else {
+                          // 桌面设备：保持原样
+                          console.log('桌面设备，保持原路径');
+                        }
+                      }
+                      
+                      console.log('处理后的链接:', secureLink);
+                      return (
+                        <iframe 
+                          frameBorder="no" 
+                          style={{ border: 0 }}
+                          width={330} 
+                          height={100} 
+                          src={secureLink}
+                          className="mx-auto"
+                          onLoad={() => console.log('iframe 加载成功:', secureLink)}
+                          onError={(e) => console.error('iframe 加载失败:', e)}
+                        ></iframe>
+                      );
+                    })()}
                   </div>
                 </div>
               )}

@@ -227,6 +227,20 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
             }
           }
+
+          @keyframes playButtonBreathing {
+            0% {
+              background-color: rgba(0, 0, 0, 0.3);
+            }
+            
+            50% {
+              background-color: rgba(0, 0, 0, 0.5);
+            }
+            
+            100% {
+              background-color: rgba(0, 0, 0, 0.3);
+            }
+          }
         `}
       </style>
       
@@ -252,7 +266,12 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             
             {/* 播放按钮覆盖 - 只在非播放状态显示 */}
             {!isPlaying && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 transition-opacity duration-200 hover:bg-opacity-50">
+              <div 
+                className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 hover:bg-opacity-50"
+                style={{
+                  animation: 'playButtonBreathing 2s ease-in-out infinite'
+                }}
+              >
                 <div className="text-white">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>

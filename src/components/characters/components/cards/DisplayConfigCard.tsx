@@ -76,6 +76,7 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
       timeout_messages: config?.display?.timeout_messages || defaultConfig.timeout_messages
     });
   }, [config]);
+
   const handleEditTimeoutMessage = (index: number, e?: React.MouseEvent) => {
     if (e) {
       e.stopPropagation();
@@ -210,13 +211,19 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                 className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
                 onClick={handleEditDefaultMessage}
               >
-                <p className="text-sm text-gray-700">{localConfig.default_message}</p>
-                {localConfig.default_music_url && (
-                  <p className="text-xs text-gray-500 mt-1 flex items-center">
-                    <Music className="h-3 w-3 mr-1" />
-                    已设置默认音乐
+                <div className="w-full">
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="text-sm font-medium">默认状态</p>
+                    {localConfig.default_music_url && (
+                      <span className="text-xs text-gray-500 flex items-center">
+                        <Music className="h-3 w-3 mr-1" />
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 w-full text-left">
+                    {localConfig.default_message}
                   </p>
-                )}
+                </div>
               </div>
             </div>
             
@@ -252,17 +259,18 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                       className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
                       onClick={() => handleEditTimeoutMessage(index)}
                     >
-                      <div>
-                        <p className="text-sm font-medium">{msg.hours} 小时后</p>
-                        <p className="text-sm text-gray-600 truncate max-w-[300px]">
+                      <div className="w-full">
+                        <div className="flex justify-between items-center mb-1">
+                          <p className="text-sm font-medium">{msg.hours} 小时后</p>
+                          {msg.music_link && (
+                            <span className="text-xs text-gray-500 flex items-center">
+                              <Music className="h-3 w-3 mr-1" />
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 w-full text-left">
                           {msg.message || '(无消息)'}
                         </p>
-                        {msg.music_link && (
-                          <p className="text-xs text-gray-500 truncate max-w-[300px] flex items-center">
-                            <Music className="h-3 w-3 mr-1" />
-                            已设置音乐
-                          </p>
-                        )}
                       </div>
                     </div>
                   ))}

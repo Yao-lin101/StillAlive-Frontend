@@ -383,7 +383,7 @@ export const CharacterDisplayPage: React.FC = () => {
                     const latestUpdate = Object.values(status.status_data)
                       .map(s => new Date(s.updated_at).getTime())
                       .sort((a, b) => b - a)[0];
-                    
+                      
                     if (!latestUpdate) return '';
                     
                     const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
@@ -391,7 +391,7 @@ export const CharacterDisplayPage: React.FC = () => {
                     const timeoutMessage = character.status_config?.display?.timeout_messages
                       ?.sort((a, b) => b.hours - a.hours)
                       .find(msg => diffInHours >= msg.hours);
-                    
+                        
                     return timeoutMessage?.message || character.status_config?.display?.default_message || '';
                   })()}
                 </p>
@@ -425,20 +425,19 @@ export const CharacterDisplayPage: React.FC = () => {
                 </Marquee>
               </div>
             </div>
-
-            {/* 音乐播放器 */}
-            {currentMusicUrl && (
-              <div className="w-full flex justify-center">
-                <MusicPlayer 
-                  musicUrl={currentMusicUrl} 
-                  coverUrl={currentCoverUrl || character?.avatar || undefined}
-                />
-              </div>
-            )}
-
           </div>
         </Card>
       </div>
+      
+      {/* 音乐播放器 - 固定在底部 */}
+      {currentMusicUrl && (
+        <div className="fixed bottom-8 left-0 right-0 flex justify-center z-20">
+          <MusicPlayer 
+            musicUrl={currentMusicUrl} 
+            coverUrl={currentCoverUrl || character?.avatar || undefined}
+          />
+        </div>
+      )}
 
       <Modal 
         isOpen={showStatusDialog} 

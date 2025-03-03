@@ -56,9 +56,11 @@ export interface StatusConfigType {
   };
   display?: {
     default_message: string;
+    default_music_url?: string;
     timeout_messages?: Array<{
       hours: number;
       message: string;
+      music_link?: string;
     }>;
   };
   theme?: {

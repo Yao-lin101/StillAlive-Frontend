@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Settings2, PlusIcon, ChevronDown, ChevronUp, Music } from 'lucide-react';
+import { Settings2,  ChevronDown, ChevronUp } from 'lucide-react';
 import { parseNeteaseMusicLink } from '@/utils/musicLinkParser';
 import {
   DisplayConfig,
@@ -12,6 +10,8 @@ import {
 } from '@/types/displayConfig';
 import { DefaultMessageDialog } from '../dialogs/DefaultMessageDialog';
 import { TimeoutMessageDialog } from '../dialogs/TimeoutMessageDialog';
+import { DefaultStatusSection } from './sections/DefaultStatusSection';
+import { TimeoutMessagesSection } from './sections/TimeoutMessagesSection';
 
 export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
   config,
@@ -271,81 +271,16 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
 
         {isExpanded && (
           <div className="mt-4 space-y-4">
-            {/* 默认状态文本区域 */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label className="font-medium">默认状态文本</Label>
-              </div>
-              <div 
-                className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
-                onClick={handleEditDefaultMessage}
-              >
-                <div className="w-full">
-                  <div className="flex justify-between items-center mb-1">
-                    <p className="text-sm font-medium">默认状态</p>
-                    {localConfig.default_music_url && (
-                      <span className="text-xs text-gray-500 flex items-center">
-                        <Music className="h-3 w-3 mr-1" />
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-600 w-full text-left">
-                    {localConfig.default_message}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <DefaultStatusSection 
+              config={localConfig}
+              onEdit={handleEditDefaultMessage}
+            />
             
-            {/* 超时状态列表 */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label className="font-medium">超时状态配置</Label>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleAddTimeoutMessage}
-                >
-                  <PlusIcon className="h-4 w-4 mr-1" />
-                  添加
-                </Button>
-              </div>
-              
-              {localConfig.timeout_messages.length === 0 ? (
-                <p className="text-sm text-gray-500 italic p-4 text-center border rounded-md">
-                  暂无超时状态配置
-                </p>
-              ) : (
-                <div 
-                  className="space-y-2 mt-2 max-h-[240px] overflow-y-auto pr-1 custom-scrollbar"
-                  style={{
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: '#d1d5db transparent'
-                  }}
-                >
-                  {localConfig.timeout_messages.map((msg, index) => (
-                    <div 
-                      key={index} 
-                      className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
-                      onClick={() => handleEditTimeoutMessage(index)}
-                    >
-                      <div className="w-full">
-                        <div className="flex justify-between items-center mb-1">
-                          <p className="text-sm font-medium">{msg.hours} 小时后</p>
-                          {msg.music_link && (
-                            <span className="text-xs text-gray-500 flex items-center">
-                              <Music className="h-3 w-3 mr-1" />
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600 w-full text-left">
-                          {msg.message || '(无消息)'}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <TimeoutMessagesSection 
+              config={localConfig}
+              onEdit={handleEditTimeoutMessage}
+              onAdd={handleAddTimeoutMessage}
+            />
           </div>
         )}
       </Card>

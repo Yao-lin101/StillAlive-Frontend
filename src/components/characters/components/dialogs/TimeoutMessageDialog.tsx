@@ -1,8 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import Input from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, Loader2, TrashIcon, X } from 'lucide-react';
+import { AlertCircle, Loader2, TrashIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { TimeoutMessage } from '@/types/displayConfig';
 import { MusicPreview } from '../music/MusicPreview';
+import { ClearableInput } from '../common/ClearableInput';
 
 interface TimeoutMessageDialogProps {
   isOpen: boolean;
@@ -60,77 +60,61 @@ export const TimeoutMessageDialog: React.FC<TimeoutMessageDialogProps> = ({
         <div className="space-y-4">
           <div>
             <Label>超时时间（小时）</Label>
-            <Input
+            <ClearableInput
               type="number"
-              value={timeoutMessage.hours}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+              value={timeoutMessage.hours.toString()}
+              onChange={(e) => 
                 onTimeoutMessageChange({
                   ...timeoutMessage,
                   hours: parseInt(e.target.value) || 0
                 })
               }
+              onClear={() => onTimeoutMessageChange({
+                ...timeoutMessage,
+                hours: 0
+              })}
               placeholder="例如：24"
             />
           </div>
           
           <div>
             <Label>显示消息</Label>
-            <div className="relative">
-              <Input
-                value={timeoutMessage.message}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  onTimeoutMessageChange({
-                    ...timeoutMessage,
-                    message: e.target.value
-                  })
-                }
-                placeholder="超时后显示的消息"
-                className="pr-8"
-              />
-              {timeoutMessage.message && (
-                <button
-                  type="button"
-                  onClick={() => onTimeoutMessageChange({
-                    ...timeoutMessage,
-                    message: ''
-                  })}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
+            <ClearableInput
+              value={timeoutMessage.message}
+              onChange={(e) => 
+                onTimeoutMessageChange({
+                  ...timeoutMessage,
+                  message: e.target.value
+                })
+              }
+              onClear={() => onTimeoutMessageChange({
+                ...timeoutMessage,
+                message: ''
+              })}
+              placeholder="超时后显示的消息"
+            />
           </div>
           
           <div>
             <Label>网易云音乐链接 - 非VIP（可选）</Label>
             <div className="relative">
-              <Input
-                value={timeoutMessage.raw_music_link || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  onMusicLinkChange(e.target.value)
-                }
-                placeholder="粘贴网易云音乐分享链接"
-                className={musicLinkError ? "border-red-300 pr-8" : "pr-8"}
-              />
               {isParsingLink ? (
-                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                <div className="absolute right-8 top-1/2 transform -translate-y-1/2 z-10">
                   <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
                 </div>
-              ) : timeoutMessage.raw_music_link ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onTimeoutMessageChange({
-                      ...timeoutMessage,
-                      raw_music_link: ''
-                    });
-                  }}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="h-4 w-4" />
-                </button>
               ) : null}
+              <ClearableInput
+                value={timeoutMessage.raw_music_link || ''}
+                onChange={(e) => onMusicLinkChange(e.target.value)}
+                onClear={() => {
+                  onTimeoutMessageChange({
+                    ...timeoutMessage,
+                    raw_music_link: ''
+                  });
+                }}
+                error={!!musicLinkError}
+                placeholder="粘贴网易云音乐分享链接"
+              />
             </div>
             {musicLinkError && (
               <p className="text-xs text-red-500 mt-1 flex items-center">
@@ -145,31 +129,20 @@ export const TimeoutMessageDialog: React.FC<TimeoutMessageDialogProps> = ({
           
           <div>
             <Label>封面图片URL（可选）</Label>
-            <div className="relative">
-              <Input
-                value={timeoutMessage.cover_url || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  onTimeoutMessageChange({
-                    ...timeoutMessage,
-                    cover_url: e.target.value
-                  })
-                }
-                placeholder="音乐封面图片URL"
-                className="pr-8"
-              />
-              {timeoutMessage.cover_url && (
-                <button
-                  type="button"
-                  onClick={() => onTimeoutMessageChange({
-                    ...timeoutMessage,
-                    cover_url: ''
-                  })}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
+            <ClearableInput
+              value={timeoutMessage.cover_url || ''}
+              onChange={(e) => 
+                onTimeoutMessageChange({
+                  ...timeoutMessage,
+                  cover_url: e.target.value
+                })
+              }
+              onClear={() => onTimeoutMessageChange({
+                ...timeoutMessage,
+                cover_url: ''
+              })}
+              placeholder="音乐封面图片URL"
+            />
           </div>
           
           {/* 音乐预览 */}

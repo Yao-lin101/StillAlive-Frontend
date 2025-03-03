@@ -1,8 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import Input from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, Loader2, X } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { DefaultMessage } from '@/types/displayConfig';
 import { MusicPreview } from '../music/MusicPreview';
+import { ClearableInput } from '../common/ClearableInput';
 
 interface DefaultMessageDialogProps {
   isOpen: boolean;
@@ -56,62 +56,42 @@ export const DefaultMessageDialog: React.FC<DefaultMessageDialogProps> = ({
         <div className="space-y-4">
           <div>
             <Label>默认状态文本</Label>
-            <div className="relative">
-              <Input
-                value={defaultMessageData.message}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  onDefaultMessageChange({
-                    ...defaultMessageData,
-                    message: e.target.value
-                  })
-                }
-                placeholder="例如：状态良好"
-                className="pr-8"
-              />
-              {defaultMessageData.message && (
-                <button
-                  type="button"
-                  onClick={() => onDefaultMessageChange({
-                    ...defaultMessageData,
-                    message: ''
-                  })}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
+            <ClearableInput
+              value={defaultMessageData.message}
+              onChange={(e) => 
+                onDefaultMessageChange({
+                  ...defaultMessageData,
+                  message: e.target.value
+                })
+              }
+              onClear={() => onDefaultMessageChange({
+                ...defaultMessageData,
+                message: ''
+              })}
+              placeholder="例如：状态良好"
+            />
           </div>
           
           <div>
             <Label>网易云音乐链接 - 非VIP（可选）</Label>
             <div className="relative">
-              <Input
-                value={defaultMessageData.raw_music_url || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  onMusicLinkChange(e.target.value)
-                }
-                placeholder="粘贴网易云音乐分享链接"
-                className={musicLinkError ? "border-red-300 pr-8" : "pr-8"}
-              />
               {isParsingLink ? (
-                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                <div className="absolute right-8 top-1/2 transform -translate-y-1/2 z-10">
                   <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
                 </div>
-              ) : defaultMessageData.raw_music_url ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onDefaultMessageChange({
-                      ...defaultMessageData,
-                      raw_music_url: ''
-                    });
-                  }}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="h-4 w-4" />
-                </button>
               ) : null}
+              <ClearableInput
+                value={defaultMessageData.raw_music_url || ''}
+                onChange={(e) => onMusicLinkChange(e.target.value)}
+                onClear={() => {
+                  onDefaultMessageChange({
+                    ...defaultMessageData,
+                    raw_music_url: ''
+                  });
+                }}
+                error={!!musicLinkError}
+                placeholder="粘贴网易云音乐分享链接"
+              />
             </div>
             {musicLinkError && (
               <p className="text-xs text-red-500 mt-1 flex items-center">
@@ -126,31 +106,20 @@ export const DefaultMessageDialog: React.FC<DefaultMessageDialogProps> = ({
           
           <div>
             <Label>封面图片URL（可选）</Label>
-            <div className="relative">
-              <Input
-                value={defaultMessageData.cover_url || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  onDefaultMessageChange({
-                    ...defaultMessageData,
-                    cover_url: e.target.value
-                  })
-                }
-                placeholder="音乐封面图片URL"
-                className="pr-8"
-              />
-              {defaultMessageData.cover_url && (
-                <button
-                  type="button"
-                  onClick={() => onDefaultMessageChange({
-                    ...defaultMessageData,
-                    cover_url: ''
-                  })}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
+            <ClearableInput
+              value={defaultMessageData.cover_url || ''}
+              onChange={(e) => 
+                onDefaultMessageChange({
+                  ...defaultMessageData,
+                  cover_url: e.target.value
+                })
+              }
+              onClear={() => onDefaultMessageChange({
+                ...defaultMessageData,
+                cover_url: ''
+              })}
+              placeholder="音乐封面图片URL"
+            />
           </div>
           
           {/* 音乐预览 */}

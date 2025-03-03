@@ -419,7 +419,7 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
             </div>
             
             <div>
-              <Label>网易云音乐链接（可选）</Label>
+              <Label>网易云音乐链接 - 非VIP（可选）</Label>
               <div className="relative">
                 <Input
                   value={defaultMessageData.raw_music_url || ''}
@@ -563,7 +563,7 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
               </div>
               
               <div>
-                <Label>网易云音乐链接（可选）</Label>
+                <Label>网易云音乐链接 - 非VIP（可选）</Label>
                 <div className="relative">
                   <Input
                     value={editingMessage.raw_music_link || ''}

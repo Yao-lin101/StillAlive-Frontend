@@ -12,6 +12,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { DefaultMessage } from '@/types/displayConfig';
+import { MusicPreview } from '../music/MusicPreview';
 
 interface DefaultMessageDialogProps {
   isOpen: boolean;
@@ -153,38 +154,7 @@ export const DefaultMessageDialog: React.FC<DefaultMessageDialogProps> = ({
           </div>
           
           {/* 音乐预览 */}
-          {parsedMusicLink && (
-            <div className="mt-4 border rounded-md p-3 bg-gray-50">
-              <Label className="text-xs text-gray-500 mb-2 block">音乐预览</Label>
-              <div className="w-full flex justify-center">
-                {(() => {
-                  // 确保使用HTTPS
-                  let secureLink = parsedMusicLink.replace('http://', 'https://');
-                  
-                  // 检测是否为移动设备
-                  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                  
-                  // 检查是否是网易云音乐的outchain播放器链接
-                  if (secureLink.includes('music.163.com/outchain/player')) {
-                    if (isMobile) {
-                      // 移动设备：添加/m/路径
-                      secureLink = secureLink.replace('/outchain/', '/m/outchain/');
-                    }
-                  }
-                  
-                  return (
-                    <iframe 
-                      style={{ border: 0 }}
-                      width={330} 
-                      height={100} 
-                      src={secureLink}
-                      className="mx-auto"
-                    ></iframe>
-                  );
-                })()}
-              </div>
-            </div>
-          )}
+          {parsedMusicLink && <MusicPreview musicLink={parsedMusicLink} />}
         </div>
         
         <DialogFooter>

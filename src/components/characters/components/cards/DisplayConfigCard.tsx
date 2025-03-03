@@ -18,10 +18,12 @@ import { parseNeteaseMusicLink } from '@/utils/musicLinkParser';
 interface DisplayConfig {
   default_message: string;
   default_music_url?: string;
+  default_cover_url?: string;
   timeout_messages: Array<{
     hours: number;
     message: string;
     music_link?: string;
+    cover_url?: string;
   }>;
 }
 
@@ -29,13 +31,15 @@ interface TimeoutMessage {
   hours: number;
   message: string;
   music_link?: string;
-  raw_music_link?: string; // 用户输入的原始链接
+  raw_music_link?: string;
+  cover_url?: string;
 }
 
 interface DefaultMessage {
   message: string;
   music_url?: string;
-  raw_music_url?: string; // 用户输入的原始链接
+  raw_music_url?: string;
+  cover_url?: string;
 }
 
 interface DisplayConfigCardProps {
@@ -58,7 +62,8 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
   const [defaultMessageData, setDefaultMessageData] = useState<DefaultMessage>({
     message: '',
     music_url: '',
-    raw_music_url: ''
+    raw_music_url: '',
+    cover_url: ''
   });
   const [musicLinkError, setMusicLinkError] = useState<string | null>(null);
   const [parsedMusicLink, setParsedMusicLink] = useState<string | null>(null);
@@ -67,12 +72,14 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
   const defaultConfig: DisplayConfig = {
     default_message: '状态良好',
     default_music_url: '',
+    default_cover_url: '',
     timeout_messages: []
   };
 
   const [localConfig, setLocalConfig] = useState<DisplayConfig>({
     default_message: config?.display?.default_message || defaultConfig.default_message,
     default_music_url: config?.display?.default_music_url || defaultConfig.default_music_url,
+    default_cover_url: config?.display?.default_cover_url || defaultConfig.default_cover_url,
     timeout_messages: config?.display?.timeout_messages || defaultConfig.timeout_messages
   });
 
@@ -80,6 +87,7 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
     setLocalConfig({
       default_message: config?.display?.default_message || defaultConfig.default_message,
       default_music_url: config?.display?.default_music_url || defaultConfig.default_music_url,
+      default_cover_url: config?.display?.default_cover_url || defaultConfig.default_cover_url,
       timeout_messages: config?.display?.timeout_messages || defaultConfig.timeout_messages
     });
   }, [config]);
@@ -92,7 +100,8 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
     setEditingMessageIndex(index);
     setEditingMessage({
       ...message,
-      raw_music_link: message.music_link || ''
+      raw_music_link: message.music_link || '',
+      cover_url: message.cover_url || ''
     });
     setMusicLinkError(null);
     setParsedMusicLink(message.music_link || null);
@@ -125,7 +134,8 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
       newMessages[editingMessageIndex] = {
         hours: editingMessage.hours,
         message: editingMessage.message,
-        music_link: parsedMusicLink || undefined
+        music_link: parsedMusicLink || undefined,
+        cover_url: editingMessage.cover_url || undefined
       };
       
       const updatedConfig = {
@@ -176,11 +186,11 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
   };
 
   const handleAddTimeoutMessage = () => {
-    const newMessage = { hours: 24, message: '', music_link: '', raw_music_link: '' };
+    const newMessage = { hours: 24, message: '', music_link: '', raw_music_link: '', cover_url: '' };
     const newIndex = localConfig.timeout_messages.length;
     setLocalConfig({
       ...localConfig,
-      timeout_messages: [...localConfig.timeout_messages, { hours: 24, message: '', music_link: undefined }]
+      timeout_messages: [...localConfig.timeout_messages, { hours: 24, message: '', music_link: undefined, cover_url: undefined }]
     });
     // 立即打开编辑对话框
     setEditingMessageIndex(newIndex);
@@ -193,7 +203,8 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
     setDefaultMessageData({
       message: localConfig.default_message,
       music_url: localConfig.default_music_url || '',
-      raw_music_url: localConfig.default_music_url || ''
+      raw_music_url: localConfig.default_music_url || '',
+      cover_url: localConfig.default_cover_url || ''
     });
     setIsEditingDefault(true);
     setMusicLinkError(null);
@@ -210,7 +221,8 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
     const updatedConfig = {
       ...localConfig,
       default_message: defaultMessageData.message,
-      default_music_url: parsedMusicLink || undefined
+      default_music_url: parsedMusicLink || undefined,
+      default_cover_url: defaultMessageData.cover_url || undefined
     };
     
     setLocalConfig(updatedConfig);
@@ -231,12 +243,14 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
     if (isDefault) {
       setDefaultMessageData({
         ...defaultMessageData,
-        raw_music_url: value
+        raw_music_url: value,
+        cover_url: defaultMessageData.cover_url || ''
       });
     } else if (editingMessage) {
       setEditingMessage({
         ...editingMessage,
-        raw_music_link: value
+        raw_music_link: value,
+        cover_url: editingMessage.cover_url || ''
       });
     }
     
@@ -434,6 +448,18 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
               </p>
             </div>
             
+            <div>
+              <Label>封面图片URL（可选）</Label>
+              <Input
+                value={defaultMessageData.cover_url || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDefaultMessageData({
+                  ...defaultMessageData,
+                  cover_url: e.target.value
+                })}
+                placeholder="音乐封面图片URL"
+              />
+            </div>
+            
             {/* 音乐预览 */}
             {parsedMusicLink && (
               <div className="mt-4 border rounded-md p-3 bg-gray-50">
@@ -548,13 +574,24 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
                 </p>
               </div>
               
+              <div>
+                <Label>封面图片URL（可选）</Label>
+                <Input
+                  value={editingMessage.cover_url || ''}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingMessage({
+                    ...editingMessage,
+                    cover_url: e.target.value
+                  })}
+                  placeholder="音乐封面图片URL"
+                />
+              </div>
+              
               {/* 音乐预览 */}
               {parsedMusicLink && (
                 <div className="mt-4 border rounded-md p-3 bg-gray-50">
                   <Label className="text-xs text-gray-500 mb-2 block">音乐预览</Label>
                   <div className="w-full flex justify-center">
                     <iframe 
-                      frameBorder="no" 
                       style={{ border: 0 }}
                       width={330} 
                       height={100} 

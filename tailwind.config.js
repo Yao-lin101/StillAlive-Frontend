@@ -58,7 +58,8 @@ export default {
   			meteor: 'meteor 5s linear infinite',
   			shine: 'shine var(--duration) infinite linear',
   			marquee: 'marquee var(--duration) infinite linear',
-  			'marquee-vertical': 'marquee-vertical var(--duration) linear infinite'
+  			'marquee-vertical': 'marquee-vertical var(--duration) linear infinite',
+            'spin-slow': 'spin 8s linear infinite'
   		},
   		keyframes: {
   			meteor: {
@@ -100,7 +101,15 @@ export default {
   				to: {
   					transform: 'translateY(calc(-100% - var(--gap)))'
   				}
-  			}
+  			},
+            spin: {
+                from: {
+                    transform: 'rotate(0deg)'
+                },
+                to: {
+                    transform: 'rotate(360deg)'
+                }
+            }
   		}
   	}
   },

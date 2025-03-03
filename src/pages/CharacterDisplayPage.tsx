@@ -9,6 +9,7 @@ import { Marquee } from "@/components/magicui/marquee";
 import { ShineBorder } from "@/components/magicui/shine-border";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import MusicPlayer from '../components/MusicPlayer';
 
 interface CharacterDisplay {
   name: string;
@@ -146,6 +147,7 @@ export const CharacterDisplayPage: React.FC = () => {
   const [bgImageError, setBgImageError] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
+  const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -206,8 +208,9 @@ export const CharacterDisplayPage: React.FC = () => {
       .sort((a, b) => b - a)[0];
     
     if (!latestUpdate) {
-      // 如果没有更新记录，使用默认音乐
+      // 如果没有更新记录，使用默认音乐和封面
       setCurrentMusicUrl(config.display.default_music_url || null);
+      setCurrentCoverUrl(config.display.default_cover_url || null);
       return;
     }
     
@@ -219,11 +222,13 @@ export const CharacterDisplayPage: React.FC = () => {
       ?.sort((a, b) => b.hours - a.hours)
       .find(msg => diffInHours >= msg.hours);
     
-    // 设置音乐URL
+    // 设置音乐URL和封面URL
     if (timeoutMessage?.music_link) {
       setCurrentMusicUrl(timeoutMessage.music_link);
+      setCurrentCoverUrl(timeoutMessage.cover_url || config.display.default_cover_url || null);
     } else {
       setCurrentMusicUrl(config.display.default_music_url || null);
+      setCurrentCoverUrl(config.display.default_cover_url || null);
     }
   };
 
@@ -424,13 +429,10 @@ export const CharacterDisplayPage: React.FC = () => {
             {/* 音乐播放器 */}
             {currentMusicUrl && (
               <div className="w-full flex justify-center">
-                <iframe 
-                  style={{ border: 0 }}
-                  width="100%" 
-                  height={100} 
-                  src={currentMusicUrl}
-                  className="mx-auto rounded-md"
-                ></iframe>
+                <MusicPlayer 
+                  musicUrl={currentMusicUrl} 
+                  coverUrl={currentCoverUrl || character?.avatar || undefined}
+                />
               </div>
             )}
 

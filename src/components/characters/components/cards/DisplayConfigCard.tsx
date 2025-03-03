@@ -604,7 +604,7 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
             </div>
           )}
           
-          <DialogFooter className="flex items-center justify-between">
+          <DialogFooter className="flex flex-row items-center justify-between w-full">
             <Button
               variant="outline"
               size="sm"
@@ -613,7 +613,7 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
               disabled={isSaving}
             >
               <TrashIcon className="h-4 w-4 mr-1" />
-              {isSaving ? '删除中...' : '删除'}
+              <span className="hidden sm:inline">{isSaving ? '删除中...' : '删除'}</span>
             </Button>
             
             <div className="flex gap-2">

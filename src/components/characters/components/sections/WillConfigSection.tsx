@@ -251,10 +251,11 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
         <h3 className="text-sm font-medium text-gray-500 mb-2 text-center">启用亡语功能</h3>
         <div className="flex justify-center items-center space-x-2">
           <AnimatedSubscribeButton 
+            key={`will-enabled-${isEnabled}`}
             className="w-32 h-9"
             subscribeStatus={isEnabled}
             onClick={handleToggleEnabled}
-            disabled={isTogglingEnabled || (!isEnabled && (!willConfig || !willConfig.target_email))}
+            disabled={isTogglingEnabled || (!isEnabled && !hasTargetEmail)}
           >
             <span className="group inline-flex items-center">
               <XIcon className="mr-2 size-4" />

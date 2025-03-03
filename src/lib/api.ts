@@ -7,11 +7,7 @@ export const authChangeEvent = new Event('auth-change');
 
 // Create axios instance
 const api: AxiosInstance = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  }
+  baseURL: API_URL
 });
 
 // Request interceptor to add auth token

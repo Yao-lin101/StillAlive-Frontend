@@ -40,7 +40,7 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
               className="text-white text-2xl font-medium cursor-pointer select-none"
             >
               <SpinningText
-                duration={8}
+                duration={30}
                 className="w-32 h-32"
               >
                 CLICK TO VIEW STATUS INFORMATION

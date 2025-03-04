@@ -10,6 +10,8 @@ import MusicPlayer from '../components/MusicPlayer';
 import { Background } from '@/components/characters/components/display/Background';
 import { StatusCard } from '@/components/characters/components/display/StatusCard';
 import { CharacterCard } from '@/components/characters/components/display/CharacterCard';
+import { AnimatedContent } from '@/components/characters/components/display/AnimatedContent';
+import '@/styles/animations.css';
 
 interface CharacterDisplay {
   name: string;
@@ -285,64 +287,32 @@ export const CharacterDisplayPage: React.FC = () => {
   };
 
   return (
-    <>
-      <style>{`
-        body {
-          margin: 0;
-          padding: 0;
-          height: 100vh;
-          width: 100vw;
-        }
-        #root {
-          height: 100vh;
-          width: 100vw;
-          overflow: hidden;
-        }
-        @keyframes textBreathing {
-          0%, 100% {
-            opacity: 0;
-          }
-          50% {
-            opacity: 0.6;
-          }
-        }
-      `}</style>
-      <div 
-        className="fixed inset-0 flex items-center justify-center overflow-hidden"
-        onClick={() => isCardHidden && setIsCardHidden(false)}
-      >
-        <Background
-          backgroundUrl={character.status_config?.theme?.background_url}
-          overlayOpacity={character.status_config?.theme?.overlay_opacity}
-          onBgImageError={() => {}}
-        />
-        
-        {isCardHidden ? (
-          <div 
-            className="text-white text-2xl font-medium cursor-pointer select-none"
-            style={{
-              animation: 'textBreathing 3s ease-in-out infinite'
-            }}
-          >
-            Click to view
-          </div>
-        ) : (
-          <CharacterCard
-            name={character.name}
-            avatar={character.avatar}
-            bio={character.bio}
-            statusMessage={getStatusMessage()}
-            lastUpdate={getLastUpdate()}
-            statusItems={statusItems}
-            onStatusClick={() => setShowStatusDialog(true)}
-            onHideClick={(e) => {
-              e.stopPropagation();
-              setIsCardHidden(true);
-            }}
-          />
-        )}
-      </div>
+    <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
+      <Background
+        backgroundUrl={character.status_config?.theme?.background_url}
+        overlayOpacity={character.status_config?.theme?.overlay_opacity}
+        onBgImageError={() => {}}
+      />
       
+      <AnimatedContent
+        isHidden={isCardHidden}
+        onShow={() => setIsCardHidden(false)}
+      >
+        <CharacterCard
+          name={character.name}
+          avatar={character.avatar}
+          bio={character.bio}
+          statusMessage={getStatusMessage()}
+          lastUpdate={getLastUpdate()}
+          statusItems={statusItems}
+          onStatusClick={() => setShowStatusDialog(true)}
+          onHideClick={(e) => {
+            e.stopPropagation();
+            setIsCardHidden(true);
+          }}
+        />
+      </AnimatedContent>
+
       {/* 音乐播放器 - 固定在底部 */}
       {currentMusicUrl && (
         <div className="fixed bottom-8 left-0 right-0 flex justify-center z-20">
@@ -376,6 +346,6 @@ export const CharacterDisplayPage: React.FC = () => {
           </div>
         </div>
       </Modal>
-    </>
+    </div>
   );
 }; 

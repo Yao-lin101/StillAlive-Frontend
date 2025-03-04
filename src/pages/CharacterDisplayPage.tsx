@@ -148,6 +148,7 @@ export const CharacterDisplayPage: React.FC = () => {
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
   const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
+  const [isCardHidden, setIsCardHidden] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -313,9 +314,18 @@ export const CharacterDisplayPage: React.FC = () => {
           width: 100vw;
           overflow: hidden;
         }
+        @keyframes textBreathing {
+          0%, 100% {
+            opacity: 0;
+          }
+          50% {
+            opacity: 0.6;
+          }
+        }
       `}</style>
       <div 
         className="fixed inset-0 flex items-center justify-center overflow-hidden"
+        onClick={() => isCardHidden && setIsCardHidden(false)}
       >
         <div className="absolute inset-0 overflow-hidden">
           {character.status_config?.theme?.background_url && !bgImageError && (
@@ -348,85 +358,109 @@ export const CharacterDisplayPage: React.FC = () => {
           </div>
         </div>
         
-        <Card className="relative max-w-2xl w-full mx-4 bg-white/80 backdrop-blur-sm overflow-hidden">
-          <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
-          <div className="p-8">
-            <div className="flex items-center space-x-6 mb-8">
-              {character.avatar ? (
-                <img
-                  src={character.avatar}
-                  alt={character.name}
-                  className="w-24 h-24 rounded-full object-cover ring-2 ring-white/50"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center ring-2 ring-white/50">
-                  <span className="text-4xl font-bold text-gray-400">
-                    {character.name[0]}
-                  </span>
+        {isCardHidden ? (
+          <div 
+            className="text-white text-2xl font-medium cursor-pointer select-none"
+            style={{
+              animation: 'textBreathing 3s ease-in-out infinite'
+            }}
+          >
+            Click to view
+          </div>
+        ) : (
+          <Card className="relative max-w-2xl w-full mx-4 bg-white/80 backdrop-blur-sm overflow-hidden">
+            <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsCardHidden(true);
+              }}
+              className="absolute top-4 right-4 z-10 p-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+              title="隐藏信息"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+            <div className="p-8">
+              <div className="flex items-center space-x-6 mb-8">
+                {character.avatar ? (
+                  <img
+                    src={character.avatar}
+                    alt={character.name}
+                    className="w-24 h-24 rounded-full object-cover ring-2 ring-white/50"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center ring-2 ring-white/50">
+                    <span className="text-4xl font-bold text-gray-400">
+                      {character.name[0]}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900 text-left">
+                    {character.name}
+                  </h1>
+                  {character.bio && (
+                    <p className="mt-2 text-gray-600 text-left">
+                      {character.bio}
+                    </p>
+                  )}
                 </div>
-              )}
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 text-left">
-                  {character.name}
-                </h1>
-                {character.bio && (
-                  <p className="mt-2 text-gray-600 text-left">
-                    {character.bio}
+              </div>
+              <div className="flex items-center justify-between mb-4">
+                {status && character.status_config?.display && (
+                  <p className="text-lg font-semibold text-gray-900">
+                    {(() => {
+                      const latestUpdate = Object.values(status.status_data)
+                        .map(s => new Date(s.updated_at).getTime())
+                        .sort((a, b) => b - a)[0];
+                        
+                      if (!latestUpdate) return '';
+                      
+                      const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
+                      
+                      const timeoutMessage = character.status_config?.display?.timeout_messages
+                        ?.sort((a, b) => b.hours - a.hours)
+                        .find(msg => diffInHours >= msg.hours);
+                          
+                      return timeoutMessage?.message || character.status_config?.display?.default_message || '';
+                    })()}
+                  </p>
+                )}
+                {status && (
+                  <p className="text-sm text-gray-500">
+                    {Object.values(status.status_data).length > 0 && 
+                      formatTimeElapsed(
+                        Object.values(status.status_data)
+                          .map(s => s.updated_at)
+                          .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0]
+                      )
+                    }
                   </p>
                 )}
               </div>
-            </div>
-            <div className="flex items-center justify-between mb-4">
-              {status && character.status_config?.display && (
-                <p className="text-lg font-semibold text-gray-900">
-                  {(() => {
-                    const latestUpdate = Object.values(status.status_data)
-                      .map(s => new Date(s.updated_at).getTime())
-                      .sort((a, b) => b - a)[0];
-                      
-                    if (!latestUpdate) return '';
-                    
-                    const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
-                    
-                    const timeoutMessage = character.status_config?.display?.timeout_messages
-                      ?.sort((a, b) => b.hours - a.hours)
-                      .find(msg => diffInHours >= msg.hours);
-                        
-                    return timeoutMessage?.message || character.status_config?.display?.default_message || '';
-                  })()}
-                </p>
-              )}
-              {status && (
-                <p className="text-sm text-gray-500">
-                  {Object.values(status.status_data).length > 0 && 
-                    formatTimeElapsed(
-                      Object.values(status.status_data)
-                        .map(s => s.updated_at)
-                        .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0]
-                    )
-                  }
-                </p>
-              )}
-            </div>
 
-            <div className="relative w-full">
-              <div className="relative">
-                <Marquee pauseOnHover className="[--duration:30s] [--gap:1rem]">
-                  {statusItems?.map(({ key, config, value }) => (
-                    <StatusCard
-                      key={key}
-                      label={config.label}
-                      description={config.description}
-                      value={value}
-                      suffix={config.valueType === 'number' ? config.suffix : undefined}
-                      onClick={() => setShowStatusDialog(true)}
-                    />
-                  ))}
-                </Marquee>
+              <div className="relative w-full">
+                <div className="relative">
+                  <Marquee pauseOnHover className="[--duration:30s] [--gap:1rem]">
+                    {statusItems?.map(({ key, config, value }) => (
+                      <StatusCard
+                        key={key}
+                        label={config.label}
+                        description={config.description}
+                        value={value}
+                        suffix={config.valueType === 'number' ? config.suffix : undefined}
+                        onClick={() => setShowStatusDialog(true)}
+                      />
+                    ))}
+                  </Marquee>
+                </div>
               </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        )}
       </div>
       
       {/* 音乐播放器 - 固定在底部 */}

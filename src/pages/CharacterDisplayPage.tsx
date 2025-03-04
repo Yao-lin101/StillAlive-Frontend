@@ -6,10 +6,10 @@ import { formatError } from '@/lib/utils';
 import { StatusConfigType } from '@/types/character';
 import { Marquee } from "@/components/magicui/marquee";
 import { ShineBorder } from "@/components/magicui/shine-border";
-import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import MusicPlayer from '../components/MusicPlayer';
 import { Background } from '@/components/characters/components/display/Background';
+import { StatusCard } from '@/components/characters/components/display/StatusCard';
 
 interface CharacterDisplay {
   name: string;
@@ -28,49 +28,6 @@ interface CharacterStatus {
     };
   };
 }
-
-const StatusCard = ({ label, description, value, suffix, onClick }: {
-  label: string;
-  description?: string;
-  value: any;
-  suffix?: string;
-  onClick?: () => void;
-}) => {
-  return (
-    <Card 
-      className={cn(
-        "relative w-64 h-[120px] overflow-hidden bg-white/50 backdrop-blur-sm group cursor-pointer",
-        "hover:bg-white/60 transition-colors duration-200"
-      )}
-      onClick={onClick}
-    >
-      <div className="p-4 h-full flex flex-col">
-        <h3 className="text-sm font-medium text-gray-900">{label}</h3>
-        <div className="relative flex-1">
-          {description && (
-            <p className="text-xs text-gray-500 mt-1 absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              {description}
-            </p>
-          )}
-          <div className="absolute bottom-0 left-0 right-0">
-            <span className="text-xl font-semibold text-gray-900">
-              {value !== undefined ? (
-                <>
-                  {value}
-                  {suffix && (
-                    <span className="text-sm ml-1 text-gray-500">{suffix}</span>
-                  )}
-                </>
-              ) : (
-                '--'
-              )}
-            </span>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-};
 
 const Modal = ({ 
   isOpen, 
@@ -458,33 +415,15 @@ export const CharacterDisplayPage: React.FC = () => {
         <div className="h-[55vh] overflow-y-auto pr-2 -mr-2">
           <div className="grid grid-cols-2 gap-4">
             {statusItems?.map(({ key, config, value, updatedAt }) => (
-              <Card key={key} className="p-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-sm font-medium">{config.label}</h3>
-                    {updatedAt && (
-                      <span className="text-xs text-gray-500">
-                        {formatTimeElapsed(new Date(updatedAt).toISOString())}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xl font-semibold">
-                    {value !== undefined ? (
-                      <>
-                        {value}
-                        {config.valueType === 'number' && config.suffix && (
-                          <span className="text-sm ml-1 text-gray-500">{config.suffix}</span>
-                        )}
-                      </>
-                    ) : (
-                      '--'
-                    )}
-                  </p>
-                  {config.description && (
-                    <p className="text-sm text-gray-500">{config.description}</p>
-                  )}
-                </div>
-              </Card>
+              <StatusCard
+                key={key}
+                variant="compact"
+                label={config.label}
+                description={config.description}
+                value={value}
+                suffix={config.valueType === 'number' ? config.suffix : undefined}
+                timestamp={updatedAt ? formatTimeElapsed(new Date(updatedAt).toISOString()) : undefined}
+              />
             ))}
           </div>
         </div>

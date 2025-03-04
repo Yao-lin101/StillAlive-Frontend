@@ -284,7 +284,15 @@ export const CharacterDisplayPage: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
+    <div 
+      className="fixed inset-0 flex items-center justify-center overflow-hidden"
+      onClick={() => {
+        if (isCardHidden) {
+          setIsCardHidden(false);
+          setIsMusicPlaying(true);
+        }
+      }}
+    >
       <Background
         backgroundUrl={character.status_config?.theme?.background_url}
         overlayOpacity={character.status_config?.theme?.overlay_opacity}
@@ -294,10 +302,7 @@ export const CharacterDisplayPage: React.FC = () => {
       
       <AnimatedContent
         isHidden={isCardHidden}
-        onShow={() => {
-          setIsCardHidden(false);
-          setIsMusicPlaying(true);
-        }}
+        onShow={() => {}}
       >
         <CharacterCard
           name={character.name}

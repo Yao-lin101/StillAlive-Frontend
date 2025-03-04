@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from "framer-motion";
+import { SpinningText } from "@/components/magicui/spinning-text";
 
 interface AnimatedContentProps {
   isHidden: boolean;
@@ -36,9 +37,14 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
                 duration: 0.4,
                 ease: "easeInOut"
               }}
-              className="text-white text-2xl font-medium cursor-pointer select-none breathing-text"
+              className="text-white text-2xl font-medium cursor-pointer select-none"
             >
-              Click to view
+              <SpinningText
+                duration={8}
+                className="w-32 h-32"
+              >
+                CLICK TO VIEW STATUS INFORMATION
+              </SpinningText>
             </motion.div>
           </motion.div>
         ) : (

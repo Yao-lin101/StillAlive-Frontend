@@ -4,12 +4,14 @@ import { Card } from '@/components/ui/card';
 import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
 import { StatusConfigType } from '@/types/character';
-import { Meteors } from "@/components/magicui/meteors";
-import { Marquee } from "@/components/magicui/marquee";
 import { ShineBorder } from "@/components/magicui/shine-border";
-import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import MusicPlayer from '../components/MusicPlayer';
+import { Background } from '@/components/characters/components/display/Background';
+import { StatusCard } from '@/components/characters/components/display/StatusCard';
+import { CharacterCard } from '@/components/characters/components/display/CharacterCard';
+import { AnimatedContent } from '@/components/characters/components/display/AnimatedContent';
+import '@/styles/animations.css';
 
 interface CharacterDisplay {
   name: string;
@@ -28,49 +30,6 @@ interface CharacterStatus {
     };
   };
 }
-
-const StatusCard = ({ label, description, value, suffix, onClick }: {
-  label: string;
-  description?: string;
-  value: any;
-  suffix?: string;
-  onClick?: () => void;
-}) => {
-  return (
-    <Card 
-      className={cn(
-        "relative w-64 h-[120px] overflow-hidden bg-white/50 backdrop-blur-sm group cursor-pointer",
-        "hover:bg-white/60 transition-colors duration-200"
-      )}
-      onClick={onClick}
-    >
-      <div className="p-4 h-full flex flex-col">
-        <h3 className="text-sm font-medium text-gray-900">{label}</h3>
-        <div className="relative flex-1">
-          {description && (
-            <p className="text-xs text-gray-500 mt-1 absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              {description}
-            </p>
-          )}
-          <div className="absolute bottom-0 left-0 right-0">
-            <span className="text-xl font-semibold text-gray-900">
-              {value !== undefined ? (
-                <>
-                  {value}
-                  {suffix && (
-                    <span className="text-sm ml-1 text-gray-500">{suffix}</span>
-                  )}
-                </>
-              ) : (
-                '--'
-              )}
-            </span>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-};
 
 const Modal = ({ 
   isOpen, 
@@ -114,7 +73,7 @@ const Modal = ({
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="relative max-w-2xl w-full"
-            onClick={e => e.stopPropagation()}
+            onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
           >
             <Card className="w-full overflow-hidden bg-white/90 backdrop-blur-sm">
               <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
@@ -144,7 +103,6 @@ export const CharacterDisplayPage: React.FC = () => {
   const [status, setStatus] = useState<CharacterStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [bgImageError, setBgImageError] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
   const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
@@ -300,169 +258,62 @@ export const CharacterDisplayPage: React.FC = () => {
     return `${diffInDays}天前`;
   };
 
-  return (
-    <>
-      <style>{`
-        body {
-          margin: 0;
-          padding: 0;
-          height: 100vh;
-          width: 100vw;
-        }
-        #root {
-          height: 100vh;
-          width: 100vw;
-          overflow: hidden;
-        }
-        @keyframes textBreathing {
-          0%, 100% {
-            opacity: 0;
-          }
-          50% {
-            opacity: 0.6;
-          }
-        }
-      `}</style>
-      <div 
-        className="fixed inset-0 flex items-center justify-center overflow-hidden"
-        onClick={() => isCardHidden && setIsCardHidden(false)}
-      >
-        <div className="absolute inset-0 overflow-hidden">
-          {character.status_config?.theme?.background_url && !bgImageError && (
-            <>
-              <img 
-                src={character.status_config.theme.background_url} 
-                alt="背景" 
-                className="absolute inset-0 w-full h-full object-cover"
-                onError={() => {
-                  setBgImageError(true);
-                }}
-                crossOrigin="anonymous"
-                referrerPolicy="no-referrer"
-              />
-              <div 
-                className="absolute inset-0"
-                style={{
-                  background: `linear-gradient(to bottom, 
-                    rgba(0,0,0,${character.status_config?.theme?.overlay_opacity || 0.5}), 
-                    rgba(0,0,0,0))`
-                }}
-              />
-            </>
-          )}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Meteors 
-              number={30}
-              className="text-white"
-            />
-          </div>
-        </div>
-        
-        {isCardHidden ? (
-          <div 
-            className="text-white text-2xl font-medium cursor-pointer select-none"
-            style={{
-              animation: 'textBreathing 3s ease-in-out infinite'
-            }}
-          >
-            Click to view
-          </div>
-        ) : (
-          <Card className="relative max-w-2xl w-full mx-4 bg-white/80 backdrop-blur-sm overflow-hidden">
-            <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsCardHidden(true);
-              }}
-              className="absolute top-4 right-4 z-10 p-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
-              title="隐藏信息"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-              </svg>
-            </button>
-            <div className="p-8">
-              <div className="flex items-center space-x-6 mb-8">
-                {character.avatar ? (
-                  <img
-                    src={character.avatar}
-                    alt={character.name}
-                    className="w-24 h-24 rounded-full object-cover ring-2 ring-white/50"
-                  />
-                ) : (
-                  <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center ring-2 ring-white/50">
-                    <span className="text-4xl font-bold text-gray-400">
-                      {character.name[0]}
-                    </span>
-                  </div>
-                )}
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900 text-left">
-                    {character.name}
-                  </h1>
-                  {character.bio && (
-                    <p className="mt-2 text-gray-600 text-left">
-                      {character.bio}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center justify-between mb-4">
-                {status && character.status_config?.display && (
-                  <p className="text-lg font-semibold text-gray-900">
-                    {(() => {
-                      const latestUpdate = Object.values(status.status_data)
-                        .map(s => new Date(s.updated_at).getTime())
-                        .sort((a, b) => b - a)[0];
-                        
-                      if (!latestUpdate) return '';
-                      
-                      const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
-                      
-                      const timeoutMessage = character.status_config?.display?.timeout_messages
-                        ?.sort((a, b) => b.hours - a.hours)
-                        .find(msg => diffInHours >= msg.hours);
-                          
-                      return timeoutMessage?.message || character.status_config?.display?.default_message || '';
-                    })()}
-                  </p>
-                )}
-                {status && (
-                  <p className="text-sm text-gray-500">
-                    {Object.values(status.status_data).length > 0 && 
-                      formatTimeElapsed(
-                        Object.values(status.status_data)
-                          .map(s => s.updated_at)
-                          .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0]
-                      )
-                    }
-                  </p>
-                )}
-              </div>
+  const getStatusMessage = () => {
+    if (!status || !character.status_config?.display) return '';
 
-              <div className="relative w-full">
-                <div className="relative">
-                  <Marquee pauseOnHover className="[--duration:30s] [--gap:1rem]">
-                    {statusItems?.map(({ key, config, value }) => (
-                      <StatusCard
-                        key={key}
-                        label={config.label}
-                        description={config.description}
-                        value={value}
-                        suffix={config.valueType === 'number' ? config.suffix : undefined}
-                        onClick={() => setShowStatusDialog(true)}
-                      />
-                    ))}
-                  </Marquee>
-                </div>
-              </div>
-            </div>
-          </Card>
-        )}
-      </div>
+    const latestUpdate = Object.values(status.status_data)
+      .map(s => new Date(s.updated_at).getTime())
+      .sort((a, b) => b - a)[0];
       
+    if (!latestUpdate) return '';
+    
+    const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
+    
+    const timeoutMessage = character.status_config?.display?.timeout_messages
+      ?.sort((a, b) => b.hours - a.hours)
+      .find(msg => diffInHours >= msg.hours);
+        
+    return timeoutMessage?.message || character.status_config?.display?.default_message || '';
+  };
+
+  const getLastUpdate = () => {
+    if (!status || Object.values(status.status_data).length === 0) return '';
+    
+    return formatTimeElapsed(
+      Object.values(status.status_data)
+        .map(s => s.updated_at)
+        .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0]
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
+      <Background
+        backgroundUrl={character.status_config?.theme?.background_url}
+        overlayOpacity={character.status_config?.theme?.overlay_opacity}
+        meteorsEnabled={character.status_config?.theme?.meteors_enabled}
+        onBgImageError={() => {}}
+      />
+      
+      <AnimatedContent
+        isHidden={isCardHidden}
+        onShow={() => setIsCardHidden(false)}
+      >
+        <CharacterCard
+          name={character.name}
+          avatar={character.avatar}
+          bio={character.bio}
+          statusMessage={getStatusMessage()}
+          lastUpdate={getLastUpdate()}
+          statusItems={statusItems}
+          onStatusClick={() => setShowStatusDialog(true)}
+          onHideClick={(e) => {
+            e.stopPropagation();
+            setIsCardHidden(true);
+          }}
+        />
+      </AnimatedContent>
+
       {/* 音乐播放器 - 固定在底部 */}
       {currentMusicUrl && (
         <div className="fixed bottom-8 left-0 right-0 flex justify-center z-20">
@@ -483,37 +334,19 @@ export const CharacterDisplayPage: React.FC = () => {
         <div className="h-[55vh] overflow-y-auto pr-2 -mr-2">
           <div className="grid grid-cols-2 gap-4">
             {statusItems?.map(({ key, config, value, updatedAt }) => (
-              <Card key={key} className="p-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-sm font-medium">{config.label}</h3>
-                    {updatedAt && (
-                      <span className="text-xs text-gray-500">
-                        {formatTimeElapsed(new Date(updatedAt).toISOString())}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xl font-semibold">
-                    {value !== undefined ? (
-                      <>
-                        {value}
-                        {config.valueType === 'number' && config.suffix && (
-                          <span className="text-sm ml-1 text-gray-500">{config.suffix}</span>
-                        )}
-                      </>
-                    ) : (
-                      '--'
-                    )}
-                  </p>
-                  {config.description && (
-                    <p className="text-sm text-gray-500">{config.description}</p>
-                  )}
-                </div>
-              </Card>
+              <StatusCard
+                key={key}
+                variant="compact"
+                label={config.label}
+                description={config.description}
+                value={value}
+                suffix={config.valueType === 'number' ? config.suffix : undefined}
+                timestamp={updatedAt ? formatTimeElapsed(new Date(updatedAt).toISOString()) : undefined}
+              />
             ))}
           </div>
         </div>
       </Modal>
-    </>
+    </div>
   );
 }; 

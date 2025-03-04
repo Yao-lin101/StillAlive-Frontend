@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Meteors } from "@/components/magicui/meteors";
 
+interface BackgroundTheme {
+  background_url: string;
+  mobile_background_url?: string;
+  overlay_opacity: number;
+  meteors_enabled?: boolean;
+}
+
 interface BackgroundProps {
-  backgroundUrl?: string;
-  mobileBackgroundUrl?: string;
-  overlayOpacity?: number;
-  meteorsEnabled?: boolean;
+  theme?: BackgroundTheme;
   onBgImageError: () => void;
 }
 
 export const Background: React.FC<BackgroundProps> = ({
-  backgroundUrl,
-  mobileBackgroundUrl,
-  overlayOpacity = 0.5,
-  meteorsEnabled = true,
+  theme,
   onBgImageError
 }) => {
   const [isMobile, setIsMobile] = useState(false);
@@ -30,7 +31,9 @@ export const Background: React.FC<BackgroundProps> = ({
   }, []);
 
   // 确定要使用的背景URL
-  const currentBackgroundUrl = isMobile && mobileBackgroundUrl ? mobileBackgroundUrl : backgroundUrl;
+  const currentBackgroundUrl = theme && isMobile && theme.mobile_background_url 
+    ? theme.mobile_background_url 
+    : theme?.background_url;
 
   return (
     <div className="absolute inset-0 overflow-hidden">
@@ -44,19 +47,19 @@ export const Background: React.FC<BackgroundProps> = ({
             crossOrigin="anonymous"
             referrerPolicy="no-referrer"
           />
-          {meteorsEnabled && (
+          {theme?.meteors_enabled && (
             <div 
               className="absolute inset-0"
               style={{
                 background: `linear-gradient(to bottom, 
-                  rgba(0,0,0,${overlayOpacity}), 
+                  rgba(0,0,0,${theme.overlay_opacity}), 
                   rgba(0,0,0,0))`
               }}
             />
           )}
         </>
       )}
-      {meteorsEnabled && (
+      {theme?.meteors_enabled && (
         <div className="absolute inset-0 flex items-center justify-center">
           <Meteors 
             number={30}

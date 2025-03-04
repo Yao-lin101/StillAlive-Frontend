@@ -294,10 +294,7 @@ export const CharacterDisplayPage: React.FC = () => {
       }}
     >
       <Background
-        backgroundUrl={character.status_config?.theme?.background_url}
-        mobileBackgroundUrl={character.status_config?.theme?.mobile_background_url}
-        overlayOpacity={character.status_config?.theme?.overlay_opacity}
-        meteorsEnabled={character.status_config?.theme?.meteors_enabled}
+        theme={character.status_config?.theme}
         onBgImageError={() => {}}
       />
       

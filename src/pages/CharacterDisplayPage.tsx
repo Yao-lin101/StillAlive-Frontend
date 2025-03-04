@@ -73,7 +73,7 @@ const Modal = ({
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="relative max-w-2xl w-full"
-            onClick={e => e.stopPropagation()}
+            onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
           >
             <Card className="w-full overflow-hidden bg-white/90 backdrop-blur-sm">
               <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />

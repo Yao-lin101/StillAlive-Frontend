@@ -101,7 +101,6 @@ export const CharacterDisplayPage: React.FC = () => {
   const [status, setStatus] = useState<CharacterStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [bgImageError, setBgImageError] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
   const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
@@ -315,7 +314,7 @@ export const CharacterDisplayPage: React.FC = () => {
         <Background
           backgroundUrl={character.status_config?.theme?.background_url}
           overlayOpacity={character.status_config?.theme?.overlay_opacity}
-          onBgImageError={() => setBgImageError(true)}
+          onBgImageError={() => {}}
         />
         
         {isCardHidden ? (

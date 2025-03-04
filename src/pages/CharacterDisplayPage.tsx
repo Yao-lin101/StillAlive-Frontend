@@ -4,12 +4,12 @@ import { Card } from '@/components/ui/card';
 import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
 import { StatusConfigType } from '@/types/character';
-import { Meteors } from "@/components/magicui/meteors";
 import { Marquee } from "@/components/magicui/marquee";
 import { ShineBorder } from "@/components/magicui/shine-border";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import MusicPlayer from '../components/MusicPlayer';
+import { Background } from '@/components/characters/components/display/Background';
 
 interface CharacterDisplay {
   name: string;
@@ -327,36 +327,11 @@ export const CharacterDisplayPage: React.FC = () => {
         className="fixed inset-0 flex items-center justify-center overflow-hidden"
         onClick={() => isCardHidden && setIsCardHidden(false)}
       >
-        <div className="absolute inset-0 overflow-hidden">
-          {character.status_config?.theme?.background_url && !bgImageError && (
-            <>
-              <img 
-                src={character.status_config.theme.background_url} 
-                alt="背景" 
-                className="absolute inset-0 w-full h-full object-cover"
-                onError={() => {
-                  setBgImageError(true);
-                }}
-                crossOrigin="anonymous"
-                referrerPolicy="no-referrer"
-              />
-              <div 
-                className="absolute inset-0"
-                style={{
-                  background: `linear-gradient(to bottom, 
-                    rgba(0,0,0,${character.status_config?.theme?.overlay_opacity || 0.5}), 
-                    rgba(0,0,0,0))`
-                }}
-              />
-            </>
-          )}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Meteors 
-              number={30}
-              className="text-white"
-            />
-          </div>
-        </div>
+        <Background
+          backgroundUrl={character.status_config?.theme?.background_url}
+          overlayOpacity={character.status_config?.theme?.overlay_opacity}
+          onBgImageError={() => setBgImageError(true)}
+        />
         
         {isCardHidden ? (
           <div 

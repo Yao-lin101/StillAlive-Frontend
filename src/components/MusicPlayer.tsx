@@ -12,7 +12,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   onPlayingChange
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [songId, setSongId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // 从网易云音乐URL中提取歌曲ID并设置音频源
@@ -23,8 +22,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       const id = url.searchParams.get('id');
       
       if (id) {
-        setSongId(id);
-        
         // 创建音频元素
         const audio = new Audio(`https://music.163.com/song/media/outer/url?id=${id}.mp3`);
         // 设置循环播放
@@ -35,12 +32,10 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         });
         audioRef.current = audio;
       } else {
-        setSongId(null);
         audioRef.current = null;
       }
     } catch (error) {
       console.error('Failed to parse music URL:', error);
-      setSongId(null);
       audioRef.current = null;
     }
 

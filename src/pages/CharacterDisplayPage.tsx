@@ -105,7 +105,8 @@ export const CharacterDisplayPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
-  const [isCardHidden, setIsCardHidden] = useState(false);
+  const [isCardHidden, setIsCardHidden] = useState(true);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -293,7 +294,10 @@ export const CharacterDisplayPage: React.FC = () => {
       
       <AnimatedContent
         isHidden={isCardHidden}
-        onShow={() => setIsCardHidden(false)}
+        onShow={() => {
+          setIsCardHidden(false);
+          setIsMusicPlaying(true);
+        }}
       >
         <CharacterCard
           name={character.name}
@@ -307,16 +311,18 @@ export const CharacterDisplayPage: React.FC = () => {
             e.stopPropagation();
             setIsCardHidden(true);
           }}
+          isMusicPlaying={isMusicPlaying}
+          onMusicToggle={currentMusicUrl ? () => setIsMusicPlaying(!isMusicPlaying) : undefined}
         />
       </AnimatedContent>
 
       {/* 音乐播放器 - 固定在底部 */}
       {currentMusicUrl && (
-        <div className="fixed bottom-8 left-0 right-0 flex justify-center z-20">
-          <MusicPlayer 
-            musicUrl={currentMusicUrl} 
-          />
-        </div>
+        <MusicPlayer 
+          musicUrl={currentMusicUrl}
+          isPlaying={isMusicPlaying}
+          onPlayingChange={setIsMusicPlaying}
+        />
       )}
 
       <Modal 

@@ -279,9 +279,9 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
       <DefaultMessageDialog 
         isOpen={isEditingDefault}
         onClose={() => {
-          setIsEditingDefault(false);
-          setMusicLinkError(null);
-          setParsedMusicLink(null);
+            setIsEditingDefault(false);
+            setMusicLinkError(null);
+            setParsedMusicLink(null);
         }}
         defaultMessageData={defaultMessageData}
         onDefaultMessageChange={setDefaultMessageData}
@@ -297,11 +297,11 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
       <TimeoutMessageDialog 
         isOpen={editingMessageIndex !== null}
         onClose={() => {
-          setEditingMessageIndex(null);
-          setEditingMessage(null);
-          setMusicLinkError(null);
-          setParsedMusicLink(null);
-        }}
+                  setEditingMessageIndex(null);
+                  setEditingMessage(null);
+                  setMusicLinkError(null);
+                  setParsedMusicLink(null);
+                }}
         timeoutMessage={editingMessage}
         onTimeoutMessageChange={setEditingMessage}
         onSave={handleSaveTimeoutMessage}

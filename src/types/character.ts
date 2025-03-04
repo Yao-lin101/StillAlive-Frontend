@@ -65,6 +65,7 @@ export interface StatusConfigType {
   };
   theme?: {
     background_url: string;
+    mobile_background_url?: string;
     overlay_opacity: number;
     meteors_enabled?: boolean;
   };

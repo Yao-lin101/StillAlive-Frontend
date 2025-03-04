@@ -17,30 +17,33 @@ export const Background: React.FC<BackgroundProps> = ({
   theme,
   onBgImageError
 }) => {
-  const [isMobile, setIsMobile] = useState(false);
+  const [backgroundUrl, setBackgroundUrl] = useState<string | undefined>(undefined);
 
+  // 检测设备类型并设置对应的背景URL
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+    const checkMobileAndSetBackground = () => {
+      if (!theme) return;
+      
+      // 根据设备类型选择背景URL
+      if (window.innerWidth <= 768 && theme.mobile_background_url) {
+        setBackgroundUrl(theme.mobile_background_url);
+      } else {
+        setBackgroundUrl(theme.background_url);
+      }
     };
     
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
+    checkMobileAndSetBackground();
+    window.addEventListener('resize', checkMobileAndSetBackground);
     
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // 确定要使用的背景URL
-  const currentBackgroundUrl = theme && isMobile && theme.mobile_background_url 
-    ? theme.mobile_background_url 
-    : theme?.background_url;
+    return () => window.removeEventListener('resize', checkMobileAndSetBackground);
+  }, [theme]);
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      {currentBackgroundUrl && (
+      {backgroundUrl && (
         <>
           <img 
-            src={currentBackgroundUrl} 
+            src={backgroundUrl} 
             alt="背景" 
             className="absolute inset-0 w-full h-full object-cover"
             onError={onBgImageError}

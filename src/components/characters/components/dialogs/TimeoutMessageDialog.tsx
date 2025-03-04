@@ -127,24 +127,6 @@ export const TimeoutMessageDialog: React.FC<TimeoutMessageDialogProps> = ({
             </p>
           </div>
           
-          <div>
-            <Label>封面图片URL（可选）</Label>
-            <ClearableInput
-              value={timeoutMessage.cover_url || ''}
-              onChange={(e) => 
-                onTimeoutMessageChange({
-                  ...timeoutMessage,
-                  cover_url: e.target.value
-                })
-              }
-              onClear={() => onTimeoutMessageChange({
-                ...timeoutMessage,
-                cover_url: ''
-              })}
-              placeholder="音乐封面图片URL"
-            />
-          </div>
-          
           {/* 音乐预览 */}
           {parsedMusicLink && <MusicPreview musicLink={parsedMusicLink} />}
         </div>

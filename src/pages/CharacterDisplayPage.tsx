@@ -105,7 +105,6 @@ export const CharacterDisplayPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
-  const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
   const [isCardHidden, setIsCardHidden] = useState(false);
 
   useEffect(() => {
@@ -167,9 +166,8 @@ export const CharacterDisplayPage: React.FC = () => {
       .sort((a, b) => b - a)[0];
     
     if (!latestUpdate) {
-      // 如果没有更新记录，使用默认音乐和封面
+      // 如果没有更新记录，使用默认音乐
       setCurrentMusicUrl(config.display.default_music_url || null);
-      setCurrentCoverUrl(config.display.default_cover_url || null);
       return;
     }
     
@@ -181,13 +179,11 @@ export const CharacterDisplayPage: React.FC = () => {
       ?.sort((a, b) => b.hours - a.hours)
       .find(msg => diffInHours >= msg.hours);
     
-    // 设置音乐URL和封面URL
+    // 设置音乐URL
     if (timeoutMessage?.music_link) {
       setCurrentMusicUrl(timeoutMessage.music_link);
-      setCurrentCoverUrl(timeoutMessage.cover_url || config.display.default_cover_url || null);
     } else {
       setCurrentMusicUrl(config.display.default_music_url || null);
-      setCurrentCoverUrl(config.display.default_cover_url || null);
     }
   };
 
@@ -319,7 +315,6 @@ export const CharacterDisplayPage: React.FC = () => {
         <div className="fixed bottom-8 left-0 right-0 flex justify-center z-20">
           <MusicPlayer 
             musicUrl={currentMusicUrl} 
-            coverUrl={currentCoverUrl || undefined}
           />
         </div>
       )}

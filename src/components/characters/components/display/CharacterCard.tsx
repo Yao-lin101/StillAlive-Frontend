@@ -37,7 +37,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
   onHideClick
 }) => {
   return (
-    <Card className="relative max-w-2xl w-full mx-4 bg-white/80 backdrop-blur-sm overflow-hidden">
+    <Card className="relative w-[calc(100vw-2rem)] sm:w-full max-w-2xl bg-white/80 backdrop-blur-sm overflow-hidden">
       <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
       <button
         onClick={onHideClick}

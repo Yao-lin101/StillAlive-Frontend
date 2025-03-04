@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Settings2 } from 'lucide-react';
 import { ClearableInput } from '../common/ClearableInput';
 import {
@@ -15,6 +16,7 @@ import {
 interface Theme {
   background_url: string;
   overlay_opacity: number;
+  meteors_enabled: boolean;
 }
 
 interface ThemeCardProps {
@@ -36,12 +38,14 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
   const [localTheme, setLocalTheme] = useState<Theme>({
     background_url: theme?.background_url || '',
     overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5,
+    meteors_enabled: theme?.meteors_enabled ?? true,
   });
   
   // 保存原始主题值，用于取消或关闭弹窗时重置
   const [originalTheme, setOriginalTheme] = useState<Theme>({
     background_url: theme?.background_url || '',
     overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5,
+    meteors_enabled: theme?.meteors_enabled ?? true,
   });
 
   useEffect(() => {
@@ -49,6 +53,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
       const updatedTheme = {
         background_url: theme.background_url || '',
         overlay_opacity: typeof theme.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5,
+        meteors_enabled: theme.meteors_enabled ?? true,
       };
       setLocalTheme(updatedTheme);
       setOriginalTheme(updatedTheme);
@@ -146,6 +151,31 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                 </span>
               </div>
               <p className="text-sm text-gray-500">调整顶部遮罩的透明度，较深的遮罩可以让流星特效更明显</p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>流星特效</Label>
+                  <p className="text-sm text-muted-foreground">
+                    开启或关闭背景流星特效
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {localTheme.meteors_enabled ? '开启' : '关闭'}
+                  </span>
+                  <Switch
+                    checked={localTheme.meteors_enabled}
+                    onCheckedChange={(checked) => {
+                      setLocalTheme(prev => ({
+                        ...prev,
+                        meteors_enabled: checked
+                      }));
+                    }}
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="flex justify-end space-x-2 pt-4">

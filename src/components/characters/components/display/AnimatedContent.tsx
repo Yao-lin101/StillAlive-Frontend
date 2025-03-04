@@ -43,7 +43,7 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
                 duration={30}
                 className="w-32 h-32"
               >
-                CLICK TO VIEW STATUS INFORMATION
+                CLICK TO VIEW STATUS DATA
               </SpinningText>
             </motion.div>
           </motion.div>

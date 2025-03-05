@@ -50,19 +50,19 @@ export const Background: React.FC<BackgroundProps> = ({
             crossOrigin="anonymous"
             referrerPolicy="no-referrer"
           />
-          {theme?.meteors_enabled && (
+          {(theme?.meteors_enabled ?? true) && (
             <div 
               className="absolute inset-0"
               style={{
                 background: `linear-gradient(to bottom, 
-                  rgba(0,0,0,${theme.overlay_opacity}), 
+                  rgba(0,0,0,${theme?.overlay_opacity}), 
                   rgba(0,0,0,0))`
               }}
             />
           )}
         </>
       )}
-      {theme?.meteors_enabled && (
+      {(theme?.meteors_enabled ?? true) && (
         <div className="absolute inset-0 flex items-center justify-center">
           <Meteors 
             number={30}

@@ -82,7 +82,10 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
                 duration: 0.4,
                 ease: "easeInOut"
               }}
-              className="text-white text-2xl font-medium cursor-pointer select-none"
+              className={cn(
+                "text-white text-2xl font-medium cursor-pointer select-none",
+                isMobile && "mt-32" // 移动端文字向下偏移
+              )}
             >
               {isMobile ? (
                 <div className={cn(

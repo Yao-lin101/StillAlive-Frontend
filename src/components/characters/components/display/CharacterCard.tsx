@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { ShineBorder } from "@/components/magicui/shine-border";
 import { Marquee } from "@/components/magicui/marquee";
@@ -40,6 +40,35 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
   isMusicPlaying,
   onMusicToggle
 }) => {
+  const [enableHover, setEnableHover] = useState(false);
+  const hasInteracted = useRef(false);
+
+  // 处理用户交互
+  const handleInteraction = useCallback(() => {
+    if (!hasInteracted.current) {
+      hasInteracted.current = true;
+      setEnableHover(true);
+    }
+  }, []);
+
+  // 组件挂载时添加交互监听
+  useEffect(() => {
+    const element = document.body;
+    
+    // 重置交互状态
+    hasInteracted.current = false;
+    setEnableHover(false);
+
+    // 监听触摸移动和新的触摸开始
+    element.addEventListener('touchmove', handleInteraction);
+    element.addEventListener('touchstart', handleInteraction);
+    
+    return () => {
+      element.removeEventListener('touchmove', handleInteraction);
+      element.removeEventListener('touchstart', handleInteraction);
+    };
+  }, [handleInteraction]);
+
   return (
     <Card className="relative w-[calc(100vw-2rem)] sm:w-full max-w-2xl bg-white/80 backdrop-blur-sm overflow-hidden">
       <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
@@ -115,7 +144,10 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
         {statusItems && statusItems.length > 0 && (
           <div className="relative w-full">
             <div className="relative">
-              <Marquee pauseOnHover className="[--duration:30s] [--gap:1rem]">
+              <Marquee 
+                pauseOnHover={enableHover} 
+                className="[--duration:30s] [--gap:1rem]"
+              >
                 {statusItems.map(({ key, config, value }) => (
                   <StatusCard
                     key={key}

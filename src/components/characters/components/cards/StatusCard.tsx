@@ -105,7 +105,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
           <div className="flex flex-col items-center justify-center space-y-2 text-center">
             <h5 className="text-sm font-medium">{config.label || statusKey}</h5>
             <p className="text-sm text-gray-500 truncate w-full">
-              类型: {config.valueType === 'number' ? '数值' : config.valueType === 'text' ? '文本' : config.valueType === 'boolean' ? '布尔值' : '字符串'}
+              类型: {config.valueType === 'number' ? '数值' : '文本' }
               {config.suffix ? `（${config.suffix}）` : ''}
             </p>
             {config.description && (
@@ -157,7 +157,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
                 <Select
                   value={localConfig.valueType}
                   onValueChange={(value) => {
-                    const valueType = value as 'number' | 'text' | 'string' | 'boolean';
+                    const valueType = value as 'number' | 'text' ;
                     setLocalConfig({
                       ...localConfig,
                       valueType,
@@ -171,8 +171,6 @@ export const StatusCard: React.FC<StatusCardProps> = ({
                   <SelectContent>
                     <SelectItem value="number">数值</SelectItem>
                     <SelectItem value="text">文本</SelectItem>
-                    <SelectItem value="string">字符串</SelectItem>
-                    <SelectItem value="boolean">布尔值</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

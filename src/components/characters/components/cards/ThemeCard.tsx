@@ -39,7 +39,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
   const [localTheme, setLocalTheme] = useState<Theme>({
     background_url: theme?.background_url || '',
     mobile_background_url: theme?.mobile_background_url || '',
-    overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5,
+    overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0,
     meteors_enabled: theme?.meteors_enabled ?? true,
   });
   
@@ -47,7 +47,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
   const [originalTheme, setOriginalTheme] = useState<Theme>({
     background_url: theme?.background_url || '',
     mobile_background_url: theme?.mobile_background_url || '',
-    overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5,
+    overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0,
     meteors_enabled: theme?.meteors_enabled ?? true,
   });
 
@@ -56,7 +56,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
       const updatedTheme = {
         background_url: theme.background_url || '',
         mobile_background_url: theme.mobile_background_url || '',
-        overlay_opacity: typeof theme.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5,
+        overlay_opacity: typeof theme.overlay_opacity === 'number' ? theme.overlay_opacity : 0,
         meteors_enabled: theme.meteors_enabled ?? true,
       };
       setLocalTheme(updatedTheme);

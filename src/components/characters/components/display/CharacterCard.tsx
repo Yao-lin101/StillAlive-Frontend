@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { ShineBorder } from "@/components/magicui/shine-border";
 import { Marquee } from "@/components/magicui/marquee";
@@ -24,6 +24,8 @@ interface CharacterCardProps {
   statusItems?: StatusItem[];
   onStatusClick?: () => void;
   onHideClick: (e: React.MouseEvent) => void;
+  isMusicPlaying?: boolean;
+  onMusicToggle?: () => void;
 }
 
 export const CharacterCard: React.FC<CharacterCardProps> = ({
@@ -34,21 +36,72 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
   lastUpdate,
   statusItems,
   onStatusClick,
-  onHideClick
+  onHideClick,
+  isMusicPlaying,
+  onMusicToggle
 }) => {
+  const [enableHover, setEnableHover] = useState(false);
+  const hasInteracted = useRef(false);
+
+  // 处理用户交互
+  const handleInteraction = useCallback(() => {
+    if (!hasInteracted.current) {
+      hasInteracted.current = true;
+      setEnableHover(true);
+    }
+  }, []);
+
+  // 组件挂载时添加交互监听
+  useEffect(() => {
+    const element = document.body;
+    
+    // 重置交互状态
+    hasInteracted.current = false;
+    setEnableHover(false);
+
+    // 监听触摸移动和新的触摸开始
+    element.addEventListener('touchmove', handleInteraction);
+    element.addEventListener('touchstart', handleInteraction);
+    
+    return () => {
+      element.removeEventListener('touchmove', handleInteraction);
+      element.removeEventListener('touchstart', handleInteraction);
+    };
+  }, [handleInteraction]);
+
   return (
     <Card className="relative w-[calc(100vw-2rem)] sm:w-full max-w-2xl bg-white/80 backdrop-blur-sm overflow-hidden">
       <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
-      <button
-        onClick={onHideClick}
-        className="absolute top-4 right-4 z-10 p-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
-        title="隐藏信息"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-          <line x1="1" y1="1" x2="23" y2="23"></line>
-        </svg>
-      </button>
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+        {onMusicToggle && (
+          <button
+            onClick={onMusicToggle}
+            className="p-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+            title={isMusicPlaying ? "暂停音乐" : "播放音乐"}
+          >
+            {isMusicPlaying ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+            )}
+          </button>
+        )}
+        <button
+          onClick={onHideClick}
+          className="p-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+          title="隐藏信息"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>
+        </button>
+      </div>
       <div className="p-8">
         <div className="flex items-center space-x-6 mb-8">
           {avatar ? (
@@ -91,7 +144,10 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
         {statusItems && statusItems.length > 0 && (
           <div className="relative w-full">
             <div className="relative">
-              <Marquee pauseOnHover className="[--duration:30s] [--gap:1rem]">
+              <Marquee 
+                pauseOnHover={enableHover} 
+                className="[--duration:30s] [--gap:1rem]"
+              >
                 {statusItems.map(({ key, config, value }) => (
                   <StatusCard
                     key={key}

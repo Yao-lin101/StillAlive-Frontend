@@ -105,8 +105,8 @@ export const CharacterDisplayPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
-  const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
-  const [isCardHidden, setIsCardHidden] = useState(false);
+  const [isCardHidden, setIsCardHidden] = useState(true);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -167,9 +167,8 @@ export const CharacterDisplayPage: React.FC = () => {
       .sort((a, b) => b - a)[0];
     
     if (!latestUpdate) {
-      // 如果没有更新记录，使用默认音乐和封面
+      // 如果没有更新记录，使用默认音乐
       setCurrentMusicUrl(config.display.default_music_url || null);
-      setCurrentCoverUrl(config.display.default_cover_url || null);
       return;
     }
     
@@ -181,13 +180,11 @@ export const CharacterDisplayPage: React.FC = () => {
       ?.sort((a, b) => b.hours - a.hours)
       .find(msg => diffInHours >= msg.hours);
     
-    // 设置音乐URL和封面URL
+    // 设置音乐URL
     if (timeoutMessage?.music_link) {
       setCurrentMusicUrl(timeoutMessage.music_link);
-      setCurrentCoverUrl(timeoutMessage.cover_url || config.display.default_cover_url || null);
     } else {
       setCurrentMusicUrl(config.display.default_music_url || null);
-      setCurrentCoverUrl(config.display.default_cover_url || null);
     }
   };
 
@@ -287,17 +284,23 @@ export const CharacterDisplayPage: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
+    <div 
+      className="fixed inset-0 flex items-center justify-center overflow-hidden"
+      onClick={() => {
+        if (isCardHidden) {
+          setIsCardHidden(false);
+          setIsMusicPlaying(true);
+        }
+      }}
+    >
       <Background
-        backgroundUrl={character.status_config?.theme?.background_url}
-        overlayOpacity={character.status_config?.theme?.overlay_opacity}
-        meteorsEnabled={character.status_config?.theme?.meteors_enabled}
+        theme={character.status_config?.theme}
         onBgImageError={() => {}}
       />
       
       <AnimatedContent
         isHidden={isCardHidden}
-        onShow={() => setIsCardHidden(false)}
+        onShow={() => {}}
       >
         <CharacterCard
           name={character.name}
@@ -311,17 +314,18 @@ export const CharacterDisplayPage: React.FC = () => {
             e.stopPropagation();
             setIsCardHidden(true);
           }}
+          isMusicPlaying={isMusicPlaying}
+          onMusicToggle={currentMusicUrl ? () => setIsMusicPlaying(!isMusicPlaying) : undefined}
         />
       </AnimatedContent>
 
       {/* 音乐播放器 - 固定在底部 */}
       {currentMusicUrl && (
-        <div className="fixed bottom-8 left-0 right-0 flex justify-center z-20">
-          <MusicPlayer 
-            musicUrl={currentMusicUrl} 
-            coverUrl={currentCoverUrl || undefined}
-          />
-        </div>
+        <MusicPlayer 
+          musicUrl={currentMusicUrl}
+          isPlaying={isMusicPlaying}
+          onPlayingChange={setIsMusicPlaying}
+        />
       )}
 
       <Modal 

@@ -104,24 +104,6 @@ export const DefaultMessageDialog: React.FC<DefaultMessageDialogProps> = ({
             </p>
           </div>
           
-          <div>
-            <Label>封面图片URL（可选）</Label>
-            <ClearableInput
-              value={defaultMessageData.cover_url || ''}
-              onChange={(e) => 
-                onDefaultMessageChange({
-                  ...defaultMessageData,
-                  cover_url: e.target.value
-                })
-              }
-              onClear={() => onDefaultMessageChange({
-                ...defaultMessageData,
-                cover_url: ''
-              })}
-              placeholder="音乐封面图片URL"
-            />
-          </div>
-          
           {/* 音乐预览 */}
           {parsedMusicLink && <MusicPreview musicLink={parsedMusicLink} />}
         </div>

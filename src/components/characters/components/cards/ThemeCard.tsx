@@ -15,6 +15,7 @@ import {
 
 interface Theme {
   background_url: string;
+  mobile_background_url: string;
   overlay_opacity: number;
   meteors_enabled: boolean;
 }
@@ -37,6 +38,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [localTheme, setLocalTheme] = useState<Theme>({
     background_url: theme?.background_url || '',
+    mobile_background_url: theme?.mobile_background_url || '',
     overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5,
     meteors_enabled: theme?.meteors_enabled ?? true,
   });
@@ -44,6 +46,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
   // 保存原始主题值，用于取消或关闭弹窗时重置
   const [originalTheme, setOriginalTheme] = useState<Theme>({
     background_url: theme?.background_url || '',
+    mobile_background_url: theme?.mobile_background_url || '',
     overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5,
     meteors_enabled: theme?.meteors_enabled ?? true,
   });
@@ -52,6 +55,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
     if (theme) {
       const updatedTheme = {
         background_url: theme.background_url || '',
+        mobile_background_url: theme.mobile_background_url || '',
         overlay_opacity: typeof theme.overlay_opacity === 'number' ? theme.overlay_opacity : 0.5,
         meteors_enabled: theme.meteors_enabled ?? true,
       };
@@ -127,7 +131,25 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                 })}
                 placeholder="https://example.com/background.jpg"
               />
-              <p className="text-sm text-gray-500">输入图片的URL地址</p>
+              <p className="text-sm text-gray-500">输入桌面端背景图片的URL地址</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="mobile_background_url">移动端背景图片URL（可选）</Label>
+              <ClearableInput
+                id="mobile_background_url"
+                value={localTheme.mobile_background_url}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalTheme({
+                  ...localTheme,
+                  mobile_background_url: e.target.value
+                })}
+                onClear={() => setLocalTheme({
+                  ...localTheme,
+                  mobile_background_url: ''
+                })}
+                placeholder="https://example.com/mobile-background.jpg"
+              />
+              <p className="text-sm text-gray-500">输入移动端背景图片的URL地址，如果不设置则使用桌面端背景</p>
             </div>
 
             <div className="space-y-2">

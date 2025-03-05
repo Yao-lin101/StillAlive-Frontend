@@ -80,7 +80,9 @@ export const StatusCard: React.FC<StatusCardProps> = ({
   const handleCancel = () => {
     setIsEditing(false);
     if (isNew) {
-      onDelete();
+      setTimeout(() => {
+        onDelete();
+      }, 150); // 保持和对话框关闭动画相同的延迟时间
     } else {
       setLocalConfig(config);
     }
@@ -118,7 +120,17 @@ export const StatusCard: React.FC<StatusCardProps> = ({
         </Card>
       )}
 
-      <Dialog open={isEditing} onOpenChange={isNew ? undefined : setIsEditing}>
+      <Dialog open={isEditing} onOpenChange={(open) => {
+        if (!open) {
+          setIsEditing(false);
+          // 等待对话框关闭动画完成后再执行删除操作
+          if (isNew) {
+            setTimeout(() => {
+              onDelete();
+            }, 150); // 动画持续时间
+          }
+        }
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{isNew ? '新增状态' : '编辑状态配置'}</DialogTitle>

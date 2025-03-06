@@ -60,7 +60,9 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
     setEditingMessageIndex(index);
     setEditingMessage({
       ...message,
-      raw_music_link: message.music_link || ''
+      raw_music_link: message.music_link || '',
+      __parent: localConfig,
+      __index: index
     });
     setMusicLinkError(null);
     setParsedMusicLink(message.music_link || null);
@@ -90,11 +92,25 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
       if (musicLinkError) return;
       
       const newMessages = [...localConfig.timeout_messages];
-      newMessages[editingMessageIndex] = {
-        hours: editingMessage.hours,
-        message: editingMessage.message,
-        music_link: parsedMusicLink || undefined
-      };
+      
+      // 如果是新增，则添加到数组末尾
+      if (editingMessageIndex === newMessages.length) {
+        newMessages.push({
+          hours: editingMessage.hours,
+          message: editingMessage.message,
+          music_link: parsedMusicLink || undefined
+        });
+      } else {
+        // 如果是编辑，则更新对应索引
+        newMessages[editingMessageIndex] = {
+          hours: editingMessage.hours,
+          message: editingMessage.message,
+          music_link: parsedMusicLink || undefined
+        };
+      }
+      
+      // 按超时时间从小到大排序
+      newMessages.sort((a, b) => a.hours - b.hours);
       
       const updatedConfig = {
         ...localConfig,
@@ -122,6 +138,9 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
       const newMessages = [...localConfig.timeout_messages];
       newMessages.splice(editingMessageIndex, 1);
       
+      // 按超时时间从小到大排序
+      newMessages.sort((a, b) => a.hours - b.hours);
+      
       const updatedConfig = {
         ...localConfig,
         timeout_messages: newMessages
@@ -144,14 +163,25 @@ export const DisplayConfigCard: React.FC<DisplayConfigCardProps> = ({
   };
 
   const handleAddTimeoutMessage = () => {
-    const newMessage = { hours: 24, message: '', music_link: '', raw_music_link: '' };
-    const newIndex = localConfig.timeout_messages.length;
-    setLocalConfig({
-      ...localConfig,
-      timeout_messages: [...localConfig.timeout_messages, { hours: 24, message: '', music_link: undefined }]
-    });
+    // 获取当前所有超时时间
+    const existingHours = localConfig.timeout_messages.map(msg => msg.hours);
+    
+    // 计算默认时间：最大时间 + 1小时，如果没有配置则默认24小时
+    const defaultHours = existingHours.length > 0 
+      ? Math.max(...existingHours) + 1 
+      : 24;
+
+    const newMessage = { 
+      hours: defaultHours, 
+      message: '', 
+      music_link: '', 
+      raw_music_link: '',
+      __parent: localConfig,
+      __index: localConfig.timeout_messages.length
+    };
+    
     // 立即打开编辑对话框
-    setEditingMessageIndex(newIndex);
+    setEditingMessageIndex(localConfig.timeout_messages.length);
     setEditingMessage(newMessage);
     setMusicLinkError(null);
     setParsedMusicLink(null);

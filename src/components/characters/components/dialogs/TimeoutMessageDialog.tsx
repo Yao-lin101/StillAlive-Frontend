@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, Loader2, TrashIcon } from 'lucide-react';
@@ -41,7 +41,30 @@ export const TimeoutMessageDialog: React.FC<TimeoutMessageDialogProps> = ({
   isParsingLink,
   onMusicLinkChange,
 }) => {
+  const [timeError, setTimeError] = useState<string | null>(null);
+
   if (!timeoutMessage) return null;
+
+  // 在保存时验证时间是否重复
+  const validateTime = () => {
+    const existingTimes = timeoutMessage.__parent?.timeout_messages
+      ?.filter((_, index) => index !== timeoutMessage.__index)
+      .map(msg => msg.hours) || [];
+    
+    if (existingTimes.includes(timeoutMessage.hours)) {
+      setTimeError('已存在相同的超时时间配置');
+      return false;
+    }
+    setTimeError(null);
+    return true;
+  };
+
+  const handleSave = async () => {
+    if (!validateTime()) {
+      return;
+    }
+    await onSave();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
@@ -63,18 +86,29 @@ export const TimeoutMessageDialog: React.FC<TimeoutMessageDialogProps> = ({
             <ClearableInput
               type="number"
               value={timeoutMessage.hours.toString()}
-              onChange={(e) => 
+              onChange={(e) => {
+                setTimeError(null); // 清除错误提示
                 onTimeoutMessageChange({
                   ...timeoutMessage,
                   hours: parseInt(e.target.value) || 0
-                })
-              }
-              onClear={() => onTimeoutMessageChange({
-                ...timeoutMessage,
-                hours: 0
-              })}
+                });
+              }}
+              onClear={() => {
+                setTimeError(null);
+                onTimeoutMessageChange({
+                  ...timeoutMessage,
+                  hours: 0
+                });
+              }}
+              error={!!timeError}
               placeholder="例如：24"
             />
+            {timeError && (
+              <p className="text-xs text-red-500 mt-1 flex items-center">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                {timeError}
+              </p>
+            )}
           </div>
           
           <div>
@@ -153,7 +187,7 @@ export const TimeoutMessageDialog: React.FC<TimeoutMessageDialogProps> = ({
               取消
             </Button>
             <Button 
-              onClick={onSave}
+              onClick={handleSave}
               disabled={isSaving || !!musicLinkError || isParsingLink}
             >
               {isSaving ? '保存中...' : '保存'}

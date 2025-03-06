@@ -15,6 +15,8 @@ export interface TimeoutMessage {
   message: string;
   music_link?: string;
   raw_music_link?: string;
+  __parent?: DisplayConfig;
+  __index?: number;
 }
 
 export interface DefaultMessage {

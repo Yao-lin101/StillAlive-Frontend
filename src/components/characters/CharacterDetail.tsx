@@ -427,9 +427,14 @@ export const CharacterDetail: React.FC = () => {
                       variant="outline"
                       onClick={() => handleAddStatusField('vital_signs')}
                       className="w-full h-[120px] flex items-center justify-center"
+                      disabled={Object.keys(statusConfig?.vital_signs || {}).length >= 10}
+                      title={Object.keys(statusConfig?.vital_signs || {}).length >= 10 ? "最多添加10个状态" : ""}
                     >
                       <PlusIcon className="h-4 w-4 mr-2" />
                       添加状态
+                      {Object.keys(statusConfig?.vital_signs || {}).length >= 10 && (
+                        <span className="ml-1 text-xs">(已达上限)</span>
+                      )}
                     </Button>
                     
                     {newStatusKey && (

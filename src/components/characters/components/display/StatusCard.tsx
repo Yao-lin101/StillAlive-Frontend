@@ -23,6 +23,18 @@ export const StatusCard: React.FC<StatusCardProps> = ({
   className,
   timestamp
 }) => {
+  // 处理长文本的函数
+  const formatValue = (val: any) => {
+    if (typeof val !== 'string') return val;
+    
+    // 如果文本长度超过20个字符，使用自动换行样式
+    return val.length > 20 ? (
+      <span className="break-words whitespace-pre-wrap text-base leading-normal">
+        {val}
+      </span>
+    ) : val;
+  };
+
   if (variant === 'compact') {
     return (
       <Card className={cn(
@@ -38,10 +50,13 @@ export const StatusCard: React.FC<StatusCardProps> = ({
               </span>
             )}
           </div>
-          <p className="text-xl font-semibold">
+          <div className={cn(
+            "font-semibold",
+            typeof value === 'string' && value.length > 20 ? "text-base" : "text-xl"
+          )}>
             {value !== undefined ? (
               <>
-                {value}
+                {formatValue(value)}
                 {suffix && (
                   <span className="text-sm ml-1 text-gray-500">{suffix}</span>
                 )}
@@ -49,7 +64,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
             ) : (
               '--'
             )}
-          </p>
+          </div>
           {description && (
             <p className="text-sm text-gray-500">{description}</p>
           )}
@@ -76,10 +91,13 @@ export const StatusCard: React.FC<StatusCardProps> = ({
             </p>
           )}
           <div className="absolute bottom-0 left-0 right-0">
-            <span className="text-xl font-semibold text-gray-900">
+            <span className={cn(
+              "font-semibold text-gray-900",
+              typeof value === 'string' && value.length > 20 ? "text-base" : "text-xl"
+            )}>
               {value !== undefined ? (
                 <>
-                  {value}
+                  {formatValue(value)}
                   {suffix && (
                     <span className="text-sm ml-1 text-gray-500">{suffix}</span>
                   )}

@@ -81,6 +81,7 @@ export const TimeoutMessageDialog: React.FC<TimeoutMessageDialogProps> = ({
             <Label>显示消息</Label>
             <ClearableInput
               value={timeoutMessage.message}
+              maxLength={100}
               onChange={(e) => 
                 onTimeoutMessageChange({
                   ...timeoutMessage,
@@ -105,6 +106,7 @@ export const TimeoutMessageDialog: React.FC<TimeoutMessageDialogProps> = ({
               ) : null}
               <ClearableInput
                 value={timeoutMessage.raw_music_link || ''}
+                maxLength={150}
                 onChange={(e) => onMusicLinkChange(e.target.value)}
                 onClear={() => {
                   onTimeoutMessageChange({

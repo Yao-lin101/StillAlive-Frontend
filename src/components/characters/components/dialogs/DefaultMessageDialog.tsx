@@ -58,6 +58,7 @@ export const DefaultMessageDialog: React.FC<DefaultMessageDialogProps> = ({
             <Label>默认状态文本</Label>
             <ClearableInput
               value={defaultMessageData.message}
+              maxLength={100}
               onChange={(e) => 
                 onDefaultMessageChange({
                   ...defaultMessageData,
@@ -82,6 +83,7 @@ export const DefaultMessageDialog: React.FC<DefaultMessageDialogProps> = ({
               ) : null}
               <ClearableInput
                 value={defaultMessageData.raw_music_url || ''}
+                maxLength={150}
                 onChange={(e) => onMusicLinkChange(e.target.value)}
                 onClear={() => {
                   onDefaultMessageChange({

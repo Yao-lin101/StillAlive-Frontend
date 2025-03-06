@@ -121,6 +121,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
               <ClearableInput
                 id="background_url"
                 value={localTheme.background_url}
+                maxLength={150}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalTheme({
                   ...localTheme,
                   background_url: e.target.value
@@ -139,6 +140,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
               <ClearableInput
                 id="mobile_background_url"
                 value={localTheme.mobile_background_url}
+                maxLength={150}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalTheme({
                   ...localTheme,
                   mobile_background_url: e.target.value

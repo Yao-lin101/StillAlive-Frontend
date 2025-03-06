@@ -23,9 +23,14 @@ export const TimeoutMessagesSection: React.FC<TimeoutMessagesSectionProps> = ({
           variant="outline" 
           size="sm" 
           onClick={onAdd}
+          disabled={config.timeout_messages.length >= 10}
+          title={config.timeout_messages.length >= 10 ? "最多添加10个超时状态" : ""}
         >
           <PlusIcon className="h-4 w-4 mr-1" />
           添加
+          {config.timeout_messages.length >= 10 && (
+            <span className="ml-1 text-xs">(已达上限)</span>
+          )}
         </Button>
       </div>
       

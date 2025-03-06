@@ -35,6 +35,7 @@ interface StatusConfig {
     }>;
   };
   __parent?: any;
+  __index?: number;
 }
 
 interface StatusCardProps {
@@ -58,22 +59,59 @@ export const StatusCard: React.FC<StatusCardProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(isNew);
   const [localConfig, setLocalConfig] = useState<StatusConfig>(config);
+  const [keyError, setKeyError] = useState<string | null>(null);
+
+  const validateKey = (value: string) => {
+    if (!value) {
+      setKeyError('键名不能为空');
+      return false;
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+      setKeyError('只能包含英文、数字和下划线');
+      return false;
+    }
+
+    // 检查键名是否重复，使用config.__parent获取最新的状态配置
+    const parentConfig = config.__parent || {};
+    const existingConfigs = Object.values(parentConfig.vital_signs || {})
+      .filter(cfg => {
+        // 如果是编辑现有状态，排除当前正在编辑的状态
+        if (!isNew) {
+          return (cfg as StatusConfig).key !== config.key;
+        }
+        return true;
+      });
+    
+    // 检查是否有相同的key字段
+    const hasExistingKey = existingConfigs.some(cfg => (cfg as StatusConfig).key === value);
+    if (hasExistingKey) {
+      setKeyError('键名已存在，请使用其他键名');
+      return false;
+    }
+
+    setKeyError(null);
+    return true;
+  };
 
   const handleSave = async () => {
-    console.log('StatusCard - Saving config for key:', statusKey, localConfig);
-    // 获取父组件的完整配置
-    const parentConfig = config.__parent || {};
-    // 更新特定状态的配置
-    const newConfig = {
-      ...parentConfig,
-      vital_signs: {
-        ...(parentConfig.vital_signs || {}),
-        [statusKey]: localConfig
-      }
+    // 在保存时再次验证，以防止并发编辑导致的重复
+    if (!validateKey(localConfig.key || '')) {
+      return;
+    }
+
+    // 清理掉内部使用的字段，只保留状态相关的字段
+    const cleanConfig = {
+      key: localConfig.key,
+      label: localConfig.label,
+      valueType: localConfig.valueType,
+      description: localConfig.description,
+      ...(localConfig.valueType === 'number' ? { suffix: localConfig.suffix } : {}),
     };
-    console.log('StatusCard - Full config to save:', newConfig);
-    onUpdate(localConfig);
-    await onSave(newConfig);
+
+    // 更新并保存
+    onUpdate(cleanConfig);
+    await onSave(cleanConfig);
     setIsEditing(false);
   };
 
@@ -123,11 +161,11 @@ export const StatusCard: React.FC<StatusCardProps> = ({
       <Dialog open={isEditing} onOpenChange={(open) => {
         if (!open) {
           setIsEditing(false);
-          // 等待对话框关闭动画完成后再执行删除操作
+          setKeyError(null);
           if (isNew) {
             setTimeout(() => {
               onDelete();
-            }, 150); // 动画持续时间
+            }, 150);
           }
         }
       }}>
@@ -142,25 +180,45 @@ export const StatusCard: React.FC<StatusCardProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>状态键名</Label>
-                <Input
-                  value={localConfig.key}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalConfig({
-                    ...localConfig,
-                    key: e.target.value
-                  })}
-                  placeholder="用于API通信的键名"
-                />
+                <div className="relative">
+                  <Input
+                    value={localConfig.key}
+                    maxLength={15}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const value = e.target.value;
+                      validateKey(value);
+                      setLocalConfig({
+                        ...localConfig,
+                        key: value
+                      });
+                    }}
+                    placeholder="用于API通信的键名"
+                    className={keyError ? 'border-red-500' : ''}
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                    {(localConfig.key || '').length}/15
+                  </span>
+                </div>
+                {keyError && (
+                  <p className="text-xs text-red-500 mt-1">{keyError}</p>
+                )}
               </div>
               <div>
                 <Label>显示名称</Label>
-                <Input
-                  value={localConfig.label}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalConfig({
-                    ...localConfig,
-                    label: e.target.value
-                  })}
-                  placeholder="在界面上显示的名称"
-                />
+                <div className="relative">
+                  <Input
+                    value={localConfig.label}
+                    maxLength={10}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalConfig({
+                      ...localConfig,
+                      label: e.target.value
+                    })}
+                    placeholder="在界面上显示的名称"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                    {localConfig.label.length}/10
+                  </span>
+                </div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -188,27 +246,39 @@ export const StatusCard: React.FC<StatusCardProps> = ({
               </div>
               <div>
                 <Label>描述</Label>
-                <Input
-                  value={localConfig.description || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalConfig({
-                    ...localConfig,
-                    description: e.target.value
-                  })}
-                  placeholder="状态的描述信息"
-                />
+                <div className="relative">
+                  <Input
+                    value={localConfig.description || ''}
+                    maxLength={30}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalConfig({
+                      ...localConfig,
+                      description: e.target.value
+                    })}
+                    placeholder="状态的描述信息"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                    {(localConfig.description || '').length}/50
+                  </span>
+                </div>
               </div>
             </div>
             {localConfig.valueType === 'number' && (
               <div>
                 <Label>单位</Label>
-                <Input
-                  value={localConfig.suffix || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalConfig({
-                    ...localConfig,
-                    suffix: e.target.value
-                  })}
-                  placeholder="例如：%、℃"
-                />
+                <div className="relative">
+                  <Input
+                    value={localConfig.suffix || ''}
+                    maxLength={5}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalConfig({
+                      ...localConfig,
+                      suffix: e.target.value
+                    })}
+                    placeholder="例如：%、℃"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                    {(localConfig.suffix || '').length}/5
+                  </span>
+                </div>
               </div>
             )}
             <div className="flex justify-between pt-4">

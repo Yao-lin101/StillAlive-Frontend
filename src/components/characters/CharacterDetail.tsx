@@ -147,13 +147,16 @@ export const CharacterDetail: React.FC = () => {
   const handleSaveNewStatus = async (newStatus: any) => {
     if (!newStatusKey) return;
     
-    setStatusConfig({
+    const newConfig = {
       ...statusConfig,
       vital_signs: {
         ...(statusConfig.vital_signs || {}),
         [newStatusKey]: newStatus
       }
-    });
+    };
+    
+    setStatusConfig(newConfig);
+    await handleStatusConfigUpdate(newConfig);
     setNewStatusKey(null);
   };
 
@@ -417,8 +420,15 @@ export const CharacterDetail: React.FC = () => {
                           });
                         }}
                         onDelete={() => handleRemoveStatusField('vital_signs', key)}
-                        onSave={async (config) => {
-                          await handleStatusConfigUpdate(config);
+                        onSave={async (updatedConfig) => {
+                          const newConfig = {
+                            ...statusConfig,
+                            vital_signs: {
+                              ...statusConfig.vital_signs,
+                              [key]: updatedConfig
+                            }
+                          };
+                          await handleStatusConfigUpdate(newConfig);
                         }}
                         isSaving={isSaving}
                       />
@@ -450,16 +460,7 @@ export const CharacterDetail: React.FC = () => {
                         }}
                         onUpdate={() => {}}
                         onDelete={() => setNewStatusKey(null)}
-                        onSave={async (config) => {
-                          await handleSaveNewStatus(config);
-                          await handleStatusConfigUpdate({
-                            ...statusConfig,
-                            vital_signs: {
-                              ...(statusConfig.vital_signs || {}),
-                              [newStatusKey]: config
-                            }
-                          });
-                        }}
+                        onSave={handleSaveNewStatus}
                         isSaving={isSaving}
                         isNew={true}
                       />

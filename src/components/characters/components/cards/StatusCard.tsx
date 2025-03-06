@@ -195,7 +195,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
                     placeholder="用于API通信的键名"
                     className={keyError ? 'border-red-500' : ''}
                   />
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none select-none">
                     {(localConfig.key || '').length}/15
                   </span>
                 </div>
@@ -215,7 +215,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
                     })}
                     placeholder="在界面上显示的名称"
                   />
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none select-none">
                     {localConfig.label.length}/10
                   </span>
                 </div>
@@ -255,9 +255,10 @@ export const StatusCard: React.FC<StatusCardProps> = ({
                       description: e.target.value
                     })}
                     placeholder="状态的描述信息"
+                    className="pr-12"
                   />
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-                    {(localConfig.description || '').length}/50
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none select-none">
+                    {(localConfig.description || '').length}/30
                   </span>
                 </div>
               </div>
@@ -274,8 +275,9 @@ export const StatusCard: React.FC<StatusCardProps> = ({
                       suffix: e.target.value
                     })}
                     placeholder="例如：%、℃"
+                    className="pr-10"
                   />
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none select-none">
                     {(localConfig.suffix || '').length}/5
                   </span>
                 </div>

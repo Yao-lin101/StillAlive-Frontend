@@ -136,7 +136,7 @@ export const FeatherFall = () => {
           },
           move: {
             ...baseConfig.particles.move,
-            speed: 1.2
+            speed: 0.6
           }
         }
       };

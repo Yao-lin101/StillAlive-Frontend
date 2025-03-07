@@ -27,12 +27,34 @@ export const StatusCard: React.FC<StatusCardProps> = ({
   const formatValue = (val: any) => {
     if (typeof val !== 'string') return val;
     
-    // 如果文本长度超过20个字符，使用自动换行样式
-    return val.length > 20 ? (
-      <span className="break-words whitespace-pre-wrap text-base leading-normal">
-        {val}
-      </span>
-    ) : val;
+    if (variant === 'compact') {
+      // compact模式保持原有的自动换行逻辑
+      return val.length > 20 ? (
+        <span className="break-words whitespace-pre-wrap text-base leading-normal">
+          {val}
+          {suffix && <span className="text-sm text-gray-500">{suffix}</span>}
+        </span>
+      ) : (
+        <span>
+          {val}
+          {suffix && <span className="text-sm text-gray-500">{suffix}</span>}
+        </span>
+      );
+    } else {
+      // default模式限制两行，保持换行符
+      return (
+        <span className="inline-flex items-baseline">
+          <span className="line-clamp-2 break-words whitespace-pre-line text-base leading-normal">
+            {val}
+          </span>
+          {suffix && (
+            <span className="text-sm text-gray-500">
+              {suffix}
+            </span>
+          )}
+        </span>
+      );
+    }
   };
 
   if (variant === 'compact') {
@@ -54,16 +76,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
             "font-semibold",
             typeof value === 'string' && value.length > 20 ? "text-base" : "text-xl"
           )}>
-            {value !== undefined ? (
-              <>
-                {formatValue(value)}
-                {suffix && (
-                  <span className="text-sm ml-1 text-gray-500">{suffix}</span>
-                )}
-              </>
-            ) : (
-              '--'
-            )}
+            {value !== undefined ? formatValue(value) : '--'}
           </div>
           {description && (
             <p className="text-sm text-gray-500">{description}</p>
@@ -95,16 +108,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
               "font-semibold text-gray-900",
               typeof value === 'string' && value.length > 20 ? "text-base" : "text-xl"
             )}>
-              {value !== undefined ? (
-                <>
-                  {formatValue(value)}
-                  {suffix && (
-                    <span className="text-sm ml-1 text-gray-500">{suffix}</span>
-                  )}
-                </>
-              ) : (
-                '--'
-              )}
+              {value !== undefined ? formatValue(value) : '--'}
             </span>
           </div>
         </div>

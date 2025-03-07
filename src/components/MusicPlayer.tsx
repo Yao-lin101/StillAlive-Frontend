@@ -4,6 +4,7 @@ interface MusicPlayerProps {
   musicUrl: string;
   isPlaying?: boolean;
   onPlayingChange?: (playing: boolean) => void;
+  className?: string;
 }
 
 const MusicPlayer: React.FC<MusicPlayerProps> = ({ 

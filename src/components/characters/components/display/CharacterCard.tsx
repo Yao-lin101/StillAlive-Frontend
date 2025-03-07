@@ -26,6 +26,7 @@ interface CharacterCardProps {
   onHideClick: (e: React.MouseEvent) => void;
   isMusicPlaying?: boolean;
   onMusicToggle?: () => void;
+  className?: string;
 }
 
 export const CharacterCard: React.FC<CharacterCardProps> = ({
@@ -38,7 +39,8 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
   onStatusClick,
   onHideClick,
   isMusicPlaying,
-  onMusicToggle
+  onMusicToggle,
+  className
 }) => {
   const [enableHover, setEnableHover] = useState(false);
   const hasInteracted = useRef(false);
@@ -70,7 +72,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
   }, [handleInteraction]);
 
   return (
-    <Card className="relative w-[calc(100vw-2rem)] sm:w-full max-w-2xl bg-white/80 backdrop-blur-sm overflow-hidden">
+    <Card className={`relative w-[calc(100vw-2rem)] sm:w-full max-w-2xl bg-white/80 backdrop-blur-sm overflow-hidden ${className || ''}`}>
       <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
       <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
         {onMusicToggle && (

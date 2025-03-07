@@ -33,6 +33,9 @@ export const FeatherFall = () => {
         background: {
           opacity: 0
         },
+        style: {
+          filter: "brightness(0) invert(1)"
+        },
         particles: {
           number: {
             value: 8,
@@ -42,14 +45,14 @@ export const FeatherFall = () => {
             }
           },
           color: {
-            value: "#a5ea73"
+            value: "#ffffff"
           },
           shape: {
             type: "image",
             image: {
               src: "https://www.svgrepo.com/show/159021/feather.svg",
-              width: 32,
-              height: 32
+              width: 64,
+              height: 64
             }
           },
           opacity: {
@@ -63,10 +66,10 @@ export const FeatherFall = () => {
             }
           },
           size: {
-            value: 16,
+            value: 32,
             random: {
               enable: true,
-              minimumValue: 8
+              minimumValue: 24
             }
           },
           move: {
@@ -115,7 +118,7 @@ export const FeatherFall = () => {
         },
         detectRetina: true
       }}
-      className="fixed inset-0 pointer-events-none z-10"
+      className="fixed inset-0 pointer-events-none z-10 [&_canvas]:invert [&_canvas]:brightness-0"
     />
   );
 }; 

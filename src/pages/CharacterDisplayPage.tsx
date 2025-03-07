@@ -108,6 +108,16 @@ export const CharacterDisplayPage: React.FC = () => {
   const [isCardHidden, setIsCardHidden] = useState(true);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
 
+  // 更新页面标题
+  useEffect(() => {
+    if (character?.name) {
+      document.title = `${character.name}${getStatusMessage()}`;
+      return () => {
+        document.title = 'StillAlive'; // 组件卸载时恢复默认标题
+      };
+    }
+  }, [character?.name]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {

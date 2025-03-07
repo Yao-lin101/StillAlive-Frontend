@@ -12,7 +12,6 @@ import { Background } from '@/components/characters/components/display/Backgroun
 import { StatusCard } from '@/components/characters/components/display/StatusCard';
 import { CharacterCard } from '@/components/characters/components/display/CharacterCard';
 import { AnimatedContent } from '@/components/characters/components/display/AnimatedContent';
-import { FeatherFall } from '@/components/effects/FeatherFall';
 import '@/styles/animations.css';
 
 interface CharacterDisplay {
@@ -310,8 +309,6 @@ export const CharacterDisplayPage: React.FC = () => {
           theme={character.status_config?.theme}
           onBgImageError={() => {}}
         />
-        
-        <FeatherFall />
         
         <AnimatedContent
           isHidden={isCardHidden}

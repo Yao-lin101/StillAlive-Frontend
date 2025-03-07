@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Meteors } from "@/components/magicui/meteors";
+import { FeatherFall } from "@/components/effects/FeatherFall";
 
 interface BackgroundTheme {
   background_url: string;
   mobile_background_url?: string;
   overlay_opacity: number;
   meteors_enabled?: boolean;
+  feathers_enabled?: boolean;
 }
 
 interface BackgroundProps {
@@ -70,6 +72,7 @@ export const Background: React.FC<BackgroundProps> = ({
           />
         </div>
       )}
+      {(theme?.feathers_enabled ?? false) && <FeatherFall />}
     </div>
   );
 }; 

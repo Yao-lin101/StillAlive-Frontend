@@ -18,6 +18,7 @@ interface Theme {
   mobile_background_url: string;
   overlay_opacity: number;
   meteors_enabled: boolean;
+  feathers_enabled: boolean;
 }
 
 interface ThemeCardProps {
@@ -41,6 +42,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
     mobile_background_url: theme?.mobile_background_url || '',
     overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0,
     meteors_enabled: theme?.meteors_enabled ?? true,
+    feathers_enabled: theme?.feathers_enabled ?? false,
   });
   
   // 保存原始主题值，用于取消或关闭弹窗时重置
@@ -49,6 +51,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
     mobile_background_url: theme?.mobile_background_url || '',
     overlay_opacity: typeof theme?.overlay_opacity === 'number' ? theme.overlay_opacity : 0,
     meteors_enabled: theme?.meteors_enabled ?? true,
+    feathers_enabled: theme?.feathers_enabled ?? false,
   });
 
   useEffect(() => {
@@ -58,6 +61,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
         mobile_background_url: theme.mobile_background_url || '',
         overlay_opacity: typeof theme.overlay_opacity === 'number' ? theme.overlay_opacity : 0,
         meteors_enabled: theme.meteors_enabled ?? true,
+        feathers_enabled: theme.feathers_enabled ?? false,
       };
       setLocalTheme(updatedTheme);
       setOriginalTheme(updatedTheme);
@@ -195,6 +199,31 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                       setLocalTheme(prev => ({
                         ...prev,
                         meteors_enabled: checked
+                      }));
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>羽毛飘落</Label>
+                  <p className="text-sm text-muted-foreground">
+                    开启或关闭背景羽毛飘落效果
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {localTheme.feathers_enabled ? '开启' : '关闭'}
+                  </span>
+                  <Switch
+                    checked={localTheme.feathers_enabled}
+                    onCheckedChange={(checked) => {
+                      setLocalTheme(prev => ({
+                        ...prev,
+                        feathers_enabled: checked
                       }));
                     }}
                   />

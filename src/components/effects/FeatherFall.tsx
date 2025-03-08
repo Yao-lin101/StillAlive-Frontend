@@ -3,6 +3,13 @@ import { useEffect, useState } from "react";
 import { Engine } from "tsparticles-engine";
 import { loadSlim } from "tsparticles-slim";
 
+const FEATHER_SOURCES = [
+  "https://www.svgrepo.com/show/27227/feather.svg",
+  "https://www.svgrepo.com/show/105100/feather.svg",
+  "https://www.svgrepo.com/show/68568/feather.svg",
+  "https://www.svgrepo.com/show/159021/feather.svg"
+];
+
 export const FeatherFall = () => {
   const [Particles, setParticles] = useState<any>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -51,12 +58,29 @@ export const FeatherFall = () => {
           value: "#ffffff"
         },
         shape: {
-          type: "image",
-          image: {
-            src: "https://www.svgrepo.com/show/159021/feather.svg",
-            width: 64,
-            height: 64
-          }
+          type: ["image", "image", "image", "image"],
+          image: [
+            {
+              src: FEATHER_SOURCES[0],
+              width: 64,
+              height: 64
+            },
+            {
+              src: FEATHER_SOURCES[1],
+              width: 64,
+              height: 64
+            },
+            {
+              src: FEATHER_SOURCES[2],
+              width: 64,
+              height: 64
+            },
+            {
+              src: FEATHER_SOURCES[3],
+              width: 64,
+              height: 64
+            }
+          ]
         },
         opacity: {
           value: 0.85,

@@ -5,7 +5,6 @@ import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
 import { StatusConfigType } from '@/types/character';
 import { ShineBorder } from "@/components/magicui/shine-border";
-import { CursorPointer } from "@/components/magicui/cursor-pointer";
 import { motion, AnimatePresence } from "framer-motion";
 import MusicPlayer from '../components/MusicPlayer';
 import { Background } from '@/components/characters/components/display/Background';
@@ -295,76 +294,74 @@ export const CharacterDisplayPage: React.FC = () => {
   };
 
   return (
-    <CursorPointer className="text-[#a5ea73]">
-      <div 
-        className="fixed inset-0 flex items-center justify-center overflow-hidden"
-        onClick={() => {
-          if (isCardHidden) {
-            setIsCardHidden(false);
-            setIsMusicPlaying(true);
-          }
-        }}
+    <div 
+      className="fixed inset-0 flex items-center justify-center overflow-hidden"
+      onClick={() => {
+        if (isCardHidden) {
+          setIsCardHidden(false);
+          setIsMusicPlaying(true);
+        }
+      }}
+    >
+      <Background
+        theme={character.status_config?.theme}
+        onBgImageError={() => {}}
+      />
+      
+      <AnimatedContent
+        isHidden={isCardHidden}
+        onShow={() => {}}
+        className="relative z-20"
       >
-        <Background
-          theme={character.status_config?.theme}
-          onBgImageError={() => {}}
+        <CharacterCard
+          name={character.name}
+          avatar={character.avatar}
+          bio={character.bio}
+          statusMessage={getStatusMessage()}
+          lastUpdate={getLastUpdate()}
+          statusItems={statusItems}
+          onStatusClick={() => setShowStatusDialog(true)}
+          onHideClick={(e) => {
+            e.stopPropagation();
+            setIsCardHidden(true);
+          }}
+          isMusicPlaying={isMusicPlaying}
+          onMusicToggle={currentMusicUrl ? () => setIsMusicPlaying(!isMusicPlaying) : undefined}
         />
-        
-        <AnimatedContent
-          isHidden={isCardHidden}
-          onShow={() => {}}
-          className="relative z-20"
-        >
-          <CharacterCard
-            name={character.name}
-            avatar={character.avatar}
-            bio={character.bio}
-            statusMessage={getStatusMessage()}
-            lastUpdate={getLastUpdate()}
-            statusItems={statusItems}
-            onStatusClick={() => setShowStatusDialog(true)}
-            onHideClick={(e) => {
-              e.stopPropagation();
-              setIsCardHidden(true);
-            }}
-            isMusicPlaying={isMusicPlaying}
-            onMusicToggle={currentMusicUrl ? () => setIsMusicPlaying(!isMusicPlaying) : undefined}
-          />
-        </AnimatedContent>
+      </AnimatedContent>
 
-        {/* 音乐播放器 - 固定在底部 */}
-        {currentMusicUrl && (
-          <MusicPlayer 
-            musicUrl={currentMusicUrl}
-            isPlaying={isMusicPlaying}
-            onPlayingChange={setIsMusicPlaying}
-          />
-        )}
+      {/* 音乐播放器 - 固定在底部 */}
+      {currentMusicUrl && (
+        <MusicPlayer 
+          musicUrl={currentMusicUrl}
+          isPlaying={isMusicPlaying}
+          onPlayingChange={setIsMusicPlaying}
+        />
+      )}
 
-        <Modal 
-          isOpen={showStatusDialog} 
-          onClose={() => setShowStatusDialog(false)}
-        >
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold leading-none tracking-tight">状态信息</h2>
+      <Modal 
+        isOpen={showStatusDialog} 
+        onClose={() => setShowStatusDialog(false)}
+      >
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold leading-none tracking-tight">状态信息</h2>
+        </div>
+        <div className="h-[55vh] overflow-y-auto pr-2 -mr-2">
+          <div className="grid grid-cols-2 gap-4">
+            {statusItems?.map(({ key, config, value, updatedAt }) => (
+              <StatusCard
+                key={key}
+                variant="compact"
+                label={config.label}
+                description={config.description}
+                value={value}
+                suffix={config.valueType === 'number' ? config.suffix : undefined}
+                timestamp={updatedAt ? formatTimeElapsed(new Date(updatedAt).toISOString()) : undefined}
+              />
+            ))}
           </div>
-          <div className="h-[55vh] overflow-y-auto pr-2 -mr-2">
-            <div className="grid grid-cols-2 gap-4">
-              {statusItems?.map(({ key, config, value, updatedAt }) => (
-                <StatusCard
-                  key={key}
-                  variant="compact"
-                  label={config.label}
-                  description={config.description}
-                  value={value}
-                  suffix={config.valueType === 'number' ? config.suffix : undefined}
-                  timestamp={updatedAt ? formatTimeElapsed(new Date(updatedAt).toISOString()) : undefined}
-                />
-              ))}
-            </div>
-          </div>
-        </Modal>
-      </div>
-    </CursorPointer>
+        </div>
+      </Modal>
+    </div>
   );
 }; 

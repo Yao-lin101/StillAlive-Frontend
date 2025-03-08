@@ -8,12 +8,14 @@ interface AnimatedContentProps {
   isHidden: boolean;
   onShow: () => void;
   children: React.ReactNode;
+  className?: string;
 }
 
 export const AnimatedContent: React.FC<AnimatedContentProps> = ({
   isHidden,
   onShow,
-  children
+  children,
+  className
 }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [showBreathing, setShowBreathing] = useState(false);
@@ -132,6 +134,7 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
                 duration: 0.4,
                 ease: "easeInOut"
               }}
+              className={className}
             >
               {children}
             </motion.div>

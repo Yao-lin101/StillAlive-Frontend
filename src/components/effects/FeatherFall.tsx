@@ -193,7 +193,7 @@ export const FeatherFall = () => {
       id="feathers"
       init={particlesInit}
       options={getParticlesConfig()}
-      className="fixed inset-0 pointer-events-none z-10 [&_canvas]:invert [&_canvas]:brightness-0"
+      className="fixed inset-0 pointer-events-none z-0 [&_canvas]:invert [&_canvas]:brightness-0"
     />
   );
 }; 

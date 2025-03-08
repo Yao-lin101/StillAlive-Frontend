@@ -313,6 +313,7 @@ export const CharacterDisplayPage: React.FC = () => {
         <AnimatedContent
           isHidden={isCardHidden}
           onShow={() => {}}
+          className="relative z-20"
         >
           <CharacterCard
             name={character.name}

@@ -26,7 +26,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
   // 处理长文本的函数
   const formatValue = (val: any) => {
     if (typeof val !== 'string') return val;
-    
+
     if (variant === 'compact') {
       // compact模式保持原有的自动换行逻辑
       return val.length > 20 ? (
@@ -87,7 +87,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
   }
 
   return (
-    <Card 
+    <Card
       className={cn(
         "relative w-64 h-[120px] overflow-hidden bg-white/50 backdrop-blur-sm group cursor-pointer",
         "hover:bg-white/60 transition-colors duration-200",
@@ -95,7 +95,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
       )}
       onClick={onClick}
     >
-      <div className="p-4 h-full flex flex-col">
+      <div className="p-4 h-full flex flex-col text-center">
         <h3 className="text-sm font-medium text-gray-900">{label}</h3>
         <div className="relative flex-1">
           {description && (

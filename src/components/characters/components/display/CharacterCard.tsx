@@ -161,7 +161,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
         </div>
 
         {statusItems && statusItems.length > 0 && (
-          <div className="relative w-full">
+          <div className="relative w-full flex justify-center">
             <div className="relative">
               <Marquee
                 pauseOnHover={enableHover}

@@ -18,11 +18,9 @@ const TRACK_COUNT = 15;  // Number of vertical tracks (covers ~600px height)
 
 const DanmakuItem = ({
     msg,
-    trackIndex,
     onClick
 }: {
     msg: Message;
-    trackIndex: number;
     onClick: (msg: Message) => void;
 }) => {
     const params = useMemo(() => {
@@ -35,8 +33,12 @@ const DanmakuItem = ({
         const isRecent = now - created < 20000;
 
         const delay = isRecent ? 0 : Math.random() * 20;
-        return { duration, delay };
-    }, [msg.created_at]);
+
+        // Random track based on message id for stable assignment
+        const trackIndex = Math.floor(Math.random() * TRACK_COUNT);
+
+        return { duration, delay, trackIndex };
+    }, [msg.id, msg.created_at]);
 
     return (
         <div
@@ -51,7 +53,7 @@ const DanmakuItem = ({
                 "hover:bg-black/60 hover:border-white/30 hover:scale-105 transition-all"
             )}
             style={{
-                top: `${trackIndex * TRACK_HEIGHT}px`,
+                top: `${params.trackIndex * TRACK_HEIGHT}px`,
                 left: '100%',
                 willChange: 'transform, left',
                 animationName: 'danmaku-scroll',
@@ -98,11 +100,10 @@ export function DanmakuList({ messages, className }: DanmakuListProps) {
           `}
                 </style>
 
-                {messages.map((msg, index) => (
+                {messages.map((msg) => (
                     <DanmakuItem
                         key={msg.id}
                         msg={msg}
-                        trackIndex={index % TRACK_COUNT}
                         onClick={setSelectedMsg}
                     />
                 ))}

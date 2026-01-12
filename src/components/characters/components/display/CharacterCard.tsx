@@ -161,7 +161,13 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
         </div>
 
         {statusItems && statusItems.length > 0 && (
-          <div className="relative w-full flex justify-center">
+          <div
+            className="relative w-full"
+            style={{
+              maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)'
+            }}
+          >
             <div className="relative">
               <Marquee
                 pauseOnHover={enableHover}

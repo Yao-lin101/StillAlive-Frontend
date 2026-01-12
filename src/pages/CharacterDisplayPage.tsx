@@ -340,14 +340,16 @@ export const CharacterDisplayPage: React.FC = () => {
         onBgImageError={() => { }}
       />
 
+      {/* 弹幕始终显示，不受隐藏卡片影响 */}
+      <div className="absolute inset-0 z-10 overflow-hidden">
+        <DanmakuList messages={messages} className="h-full" />
+      </div>
+
       <AnimatedContent
         isHidden={isCardHidden}
         onShow={() => { }}
         className="relative z-20 w-full min-h-full flex flex-col items-center py-12"
       >
-        <div className="absolute top-20 left-0 w-full z-10">
-          <DanmakuList messages={messages} className="h-40" />
-        </div>
 
         <div className="w-full max-w-md md:max-w-2xl flex flex-col gap-6 px-4 my-auto relative z-20">
           <CharacterCard

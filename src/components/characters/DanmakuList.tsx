@@ -13,8 +13,8 @@ interface DanmakuListProps {
     className?: string;
 }
 
-const TRACK_HEIGHT = 32; // Height per track in pixels
-const TRACK_COUNT = 4;   // Number of vertical tracks
+const TRACK_HEIGHT = 40; // Height per track in pixels
+const TRACK_COUNT = 15;  // Number of vertical tracks (covers ~600px height)
 
 const DanmakuItem = ({
     msg,
@@ -40,7 +40,10 @@ const DanmakuItem = ({
 
     return (
         <div
-            onClick={() => onClick(msg)}
+            onClick={(e) => {
+                e.stopPropagation();
+                onClick(msg);
+            }}
             className={cn(
                 "danmaku-item absolute flex items-center px-3 py-1.5 rounded-full",
                 "bg-black/20 backdrop-blur-sm border border-white/10 shadow-sm",
@@ -106,7 +109,11 @@ export function DanmakuList({ messages, className }: DanmakuListProps) {
             </div>
 
             <Dialog open={!!selectedMsg} onOpenChange={(open) => !open && setSelectedMsg(null)}>
-                <DialogContent className="sm:max-w-md bg-white/90 dark:bg-black/90 backdrop-blur-xl border-white/20">
+                <DialogContent
+                    className="sm:max-w-md bg-white/90 dark:bg-black/90 backdrop-blur-xl border-white/20"
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerDownOutside={(e) => e.stopPropagation()}
+                >
                     <DialogHeader>
                         <DialogTitle>弹幕详情</DialogTitle>
                     </DialogHeader>

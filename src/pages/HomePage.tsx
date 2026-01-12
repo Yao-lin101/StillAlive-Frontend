@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AuthContext } from '@/App';
 import { SparklesText } from "@/components/magicui/sparkles-text";
-import { InteractiveGridPattern } from "@/components/ui/interactive-grid-pattern";
-import { cn } from "@/lib/utils";
+import { Particles } from "@/components/ui/particles";
+
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -12,15 +12,12 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="relative min-h-[80vh] flex flex-col items-center justify-center p-4 overflow-hidden w-full">
-      <InteractiveGridPattern
-        width={60}
-        height={60}
-        squares={[40, 40]}
-        className={cn(
-          "[mask-image:radial-gradient(800px_circle_at_center,white,transparent)]",
-          "inset-y-[-20%] h-[150%] skew-y-6 opacity-60 ml-[-20%]"
-        )}
-        squaresClassName="hover:fill-[#E3F4FF] dark:hover:fill-blue-900/50 stroke-gray-400/20"
+      <Particles
+        className="absolute inset-0"
+        quantity={100}
+        ease={80}
+        color="#5fa2e9"
+        refresh
       />
       <div className="relative z-10 text-center space-y-8">
         <SparklesText

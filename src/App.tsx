@@ -6,12 +6,22 @@ import { HomePage } from './pages/HomePage';
 import { CharactersPage } from './pages/CharactersPage';
 import { CharacterDisplayPage } from '@/pages/CharacterDisplayPage';
 import { SurvivorsPage } from '@/pages/SurvivorsPage';
+import { Sidebar } from '@/components/layout/Sidebar';
 import authService from '@/lib/auth';
 import './App.css'
 import { Toaster } from 'sonner';
 
 // 创建认证上下文
 export const AuthContext = createContext<boolean>(false);
+
+// 带侧边栏的布局组件
+const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <Sidebar>
+      {children}
+    </Sidebar>
+  );
+};
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -50,43 +60,64 @@ function App() {
   return (
     <AuthContext.Provider value={isAuthenticated}>
       <Router>
-        <div className="min-h-screen bg-gray-100 flex flex-col">
-          <main className="flex-1 relative">
-            <Routes>
-              <Route
-                path="/login"
-                element={
-                  !isAuthenticated ? (
-                    <div className="absolute inset-0 flex items-center justify-center p-4">
-                      <LoginForm />
-                    </div>
-                  ) : (
-                    <Navigate to="/characters" replace />
-                  )
-                }
-              />
-              <Route
-                path="/register"
-                element={
-                  !isAuthenticated ? (
-                    <div className="absolute inset-0 flex items-center justify-center p-4">
-                      <RegisterForm />
-                    </div>
-                  ) : (
-                    <Navigate to="/characters" replace />
-                  )
-                }
-              />
-              <Route path="/" element={<HomePage />} />
-              <Route path="/survivors" element={<SurvivorsPage />} />
-              <Route
-                path="/characters/*"
-                element={isAuthenticated ? <CharactersPage /> : <Navigate to="/" replace />}
-              />
-              <Route path="/d/:code" element={<CharacterDisplayPage />} />
-            </Routes>
-          </main>
-        </div>
+        <Routes>
+          {/* 不需要侧边栏的页面 */}
+          <Route
+            path="/login"
+            element={
+              !isAuthenticated ? (
+                <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+                  <LoginForm />
+                </div>
+              ) : (
+                <Navigate to="/characters" replace />
+              )
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              !isAuthenticated ? (
+                <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+                  <RegisterForm />
+                </div>
+              ) : (
+                <Navigate to="/characters" replace />
+              )
+            }
+          />
+          <Route path="/d/:code" element={<CharacterDisplayPage />} />
+
+          {/* 需要侧边栏的页面 */}
+          <Route
+            path="/"
+            element={
+              <MainLayout>
+                <HomePage />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/survivors"
+            element={
+              <MainLayout>
+                <SurvivorsPage />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/characters/*"
+            element={
+              isAuthenticated ? (
+                <MainLayout>
+                  <CharactersPage />
+                </MainLayout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+        </Routes>
       </Router>
       <Toaster richColors />
     </AuthContext.Provider>
@@ -94,3 +125,4 @@ function App() {
 }
 
 export default App;
+

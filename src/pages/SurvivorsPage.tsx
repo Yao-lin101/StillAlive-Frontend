@@ -50,12 +50,12 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
                 {/* 在线状态指示器 */}
                 <div className="absolute top-3 right-3 z-10">
                     <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${survivor.is_online
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
-                            : 'bg-gray-100 text-gray-600 dark:bg-gray-700/50 dark:text-gray-400'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
+                        : 'bg-gray-100 text-gray-600 dark:bg-gray-700/50 dark:text-gray-400'
                         }`}>
                         <span className={`w-2 h-2 rounded-full ${survivor.is_online
-                                ? 'bg-green-500 animate-pulse'
-                                : 'bg-gray-400'
+                            ? 'bg-green-500 animate-pulse'
+                            : 'bg-gray-400'
                             }`} />
                         {survivor.is_online ? '在线' : '离线'}
                     </div>
@@ -102,13 +102,6 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
                             <p className="mt-1 text-sm text-purple-600 dark:text-purple-400 font-medium">
                                 {survivor.status_message || '未知状态'}
                             </p>
-
-                            {/* 简介 */}
-                            {survivor.bio && (
-                                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                                    {survivor.bio}
-                                </p>
-                            )}
 
                             {/* 最后更新时间 */}
                             <div className="mt-3 flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">

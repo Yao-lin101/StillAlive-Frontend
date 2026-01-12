@@ -167,7 +167,7 @@ export const SurvivorsPage: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30 dark:from-gray-900 dark:via-purple-900/10 dark:to-pink-900/10 flex items-center justify-center">
+            <div className="h-full flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-400 border-t-transparent" />
                     <p className="text-gray-500 dark:text-gray-400">加载中...</p>
@@ -178,7 +178,7 @@ export const SurvivorsPage: React.FC = () => {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30 dark:from-gray-900 dark:via-purple-900/10 dark:to-pink-900/10 flex items-center justify-center">
+            <div className="h-full flex items-center justify-center">
                 <div className="text-center p-8 max-w-md">
                     <h1 className="text-3xl font-bold mb-4">⚠️</h1>
                     <p className="text-gray-600 dark:text-gray-400">{error}</p>
@@ -188,7 +188,7 @@ export const SurvivorsPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30 dark:from-gray-900 dark:via-purple-900/10 dark:to-pink-900/10">
+        <div className="h-full flex flex-col">
             {/* Header */}
             <div className="sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-b border-gray-200/50 dark:border-gray-800/50">
                 <div className="max-w-6xl mx-auto px-4 py-6">
@@ -214,28 +214,30 @@ export const SurvivorsPage: React.FC = () => {
             </div>
 
             {/* Content */}
-            <div className="max-w-6xl mx-auto px-4 py-8">
-                {survivors.length === 0 ? (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-center py-20"
-                    >
-                        <div className="text-6xl mb-4">👻</div>
-                        <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                            暂无存活者
-                        </h2>
-                        <p className="text-gray-500 dark:text-gray-400">
-                            还没有任何角色被创建
-                        </p>
-                    </motion.div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {survivors.map((survivor, index) => (
-                            <SurvivorCard key={survivor.display_code} survivor={survivor} index={index} />
-                        ))}
-                    </div>
-                )}
+            <div className="flex-1 overflow-auto">
+                <div className="max-w-6xl mx-auto px-4 py-8">
+                    {survivors.length === 0 ? (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-center py-20"
+                        >
+                            <div className="text-6xl mb-4">👻</div>
+                            <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                暂无存活者
+                            </h2>
+                            <p className="text-gray-500 dark:text-gray-400">
+                                还没有任何角色被创建
+                            </p>
+                        </motion.div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {survivors.map((survivor, index) => (
+                                <SurvivorCard key={survivor.display_code} survivor={survivor} index={index} />
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

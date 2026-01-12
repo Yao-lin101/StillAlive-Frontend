@@ -23,7 +23,7 @@ export const HomePage: React.FC = () => {
             <Button
               onClick={() => navigate('/characters')}
               size="lg"
-              className="bg-[#E3F4FF] hover:bg-[#d0ecff] text-[#5fa2e9] hover:text-[#5fa2e9] font-medium shadow-[0_0_15px_#d0ecff] hover:shadow-[0_0_20px_#FFE1E1] border border-[#d0ecff] transition-all duration-300"
+              className="bg-[#E3F4FF] hover:bg-[#d0ecff] text-[#5fa2e9] hover:text-[#5fa2e9] font-medium shadow-[0_0_15px_#d0ecff] hover:shadow-[0_0_20px_#d0ecff] border border-[#d0ecff] transition-all duration-300"
             >
               进入角色管理
             </Button>
@@ -31,7 +31,7 @@ export const HomePage: React.FC = () => {
             <Button
               onClick={() => navigate('/login')}
               size="lg"
-              className="bg-[#E3F4FF] hover:bg-[#d0ecff] text-[#5fa2e9] hover:text-[#5fa2e9] font-medium shadow-[0_0_15px_#d0ecff] hover:shadow-[0_0_20px_#FFE1E1] border border-[#d0ecff] transition-all duration-300"
+              className="bg-[#E3F4FF] hover:bg-[#d0ecff] text-[#5fa2e9] hover:text-[#5fa2e9] font-medium shadow-[0_0_15px_#d0ecff] hover:shadow-[0_0_20px_#d0ecff] border border-[#d0ecff] transition-all duration-300"
             >
               立即登录
             </Button>

@@ -201,7 +201,7 @@ export const SurvivorsPage: React.FC = () => {
                                 className="text-3xl md:text-4xl font-bold"
                             />
                             <p className="mt-2 text-gray-500 dark:text-gray-400">
-                                探索所有存活者的实时状态
+                                都还活着没？
                             </p>
                         </div>
                         <div className="flex items-center gap-2 px-3 py-1.5 bg-[#E3F4FF] dark:bg-slate-900/30 rounded-full">

@@ -34,7 +34,7 @@ export const DockNav: React.FC<{ children: React.ReactNode }> = ({ children }) =
     });
 
     return (
-        <div className="h-screen overflow-hidden bg-gradient-to-br from-[#FFE1E1] to-[#E3F4FF] dark:from-gray-900 dark:to-gray-800">
+        <div className="h-screen overflow-hidden bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30 dark:from-gray-900 dark:via-purple-900/10 dark:to-pink-900/10">
             {/* 主内容区 - 减去底部 Dock 的高度 */}
             <main className="h-[calc(100vh-90px)] overflow-auto">
                 {children}

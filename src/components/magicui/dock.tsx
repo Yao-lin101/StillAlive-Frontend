@@ -117,7 +117,7 @@ const DockIcon = ({
             className={cn(
                 "relative flex aspect-square cursor-pointer items-center justify-center rounded-xl transition-colors",
                 isActive
-                    ? "bg-gradient-to-br from-slate-600 to-slate-800 text-white shadow-lg"
+                    ? "bg-gradient-to-br from-[#FFE1E1] to-[#E3F4FF] text-slate-700 shadow-lg"
                     : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300",
                 className,
             )}

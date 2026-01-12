@@ -27,6 +27,8 @@ interface CharacterCardProps {
   isMusicPlaying?: boolean;
   onMusicToggle?: () => void;
   className?: string;
+  isOwner?: boolean;
+  onManageDanmaku?: () => void;
 }
 
 export const CharacterCard: React.FC<CharacterCardProps> = ({
@@ -40,7 +42,9 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
   onHideClick,
   isMusicPlaying,
   onMusicToggle,
-  className
+  className,
+  isOwner,
+  onManageDanmaku
 }) => {
   const [enableHover, setEnableHover] = useState(false);
   const hasInteracted = useRef(false);
@@ -56,7 +60,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
   // 组件挂载时添加交互监听
   useEffect(() => {
     const element = document.body;
-    
+
     // 重置交互状态
     hasInteracted.current = false;
     setEnableHover(false);
@@ -64,7 +68,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
     // 监听触摸移动和新的触摸开始
     element.addEventListener('touchmove', handleInteraction);
     element.addEventListener('touchstart', handleInteraction);
-    
+
     return () => {
       element.removeEventListener('touchmove', handleInteraction);
       element.removeEventListener('touchstart', handleInteraction);
@@ -75,6 +79,19 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
     <Card className={`relative w-[calc(100vw-2rem)] sm:w-full max-w-2xl bg-white/80 backdrop-blur-sm overflow-hidden ${className || ''}`}>
       <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
       <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+        {isOwner && onManageDanmaku && (
+          <button
+            onClick={onManageDanmaku}
+            className="p-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+            title="管理弹幕"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              <line x1="9" y1="9" x2="15" y2="9" />
+              <line x1="9" y1="13" x2="15" y2="13" />
+            </svg>
+          </button>
+        )}
         {onMusicToggle && (
           <button
             onClick={onMusicToggle}
@@ -146,8 +163,8 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
         {statusItems && statusItems.length > 0 && (
           <div className="relative w-full">
             <div className="relative">
-              <Marquee 
-                pauseOnHover={enableHover} 
+              <Marquee
+                pauseOnHover={enableHover}
                 className="[--duration:30s] [--gap:1rem]"
               >
                 {statusItems.map(({ key, config, value }) => (

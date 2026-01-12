@@ -8,6 +8,7 @@ export interface Character {
   updated_at: string;
   is_active: boolean;
   is_public: boolean;
+  is_owner?: boolean;
 }
 
 export type StatusValueType = 'number' | 'text';
@@ -100,4 +101,12 @@ export interface WillConfig {
   cc_emails: string[];
   timeout_hours: number;
   created_at: string;
+}
+
+export interface Message {
+  id: number;
+  content: string;
+  created_at: string;
+  ip_address?: string;
+  location?: string;
 } 

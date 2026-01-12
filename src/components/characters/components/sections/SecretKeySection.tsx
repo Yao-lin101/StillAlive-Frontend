@@ -40,11 +40,11 @@ export const SecretKeySection: React.FC<SecretKeySectionProps> = ({
     <div className="pt-4 border-t">
       <h3 className="text-sm font-medium text-gray-500 mb-2">密钥管理</h3>
       <div className="space-y-2">
-        <div className="p-4 bg-gray-50 rounded-md">
+        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md">
           {secretKey ? (
-            <p className="font-mono text-sm break-all">{secretKey}</p>
+            <p className="font-mono text-sm break-all text-gray-900 dark:text-gray-100">{secretKey}</p>
           ) : (
-            <p className="text-sm text-gray-500">密钥未生成</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">密钥未生成</p>
           )}
         </div>
         <div className="space-x-2">

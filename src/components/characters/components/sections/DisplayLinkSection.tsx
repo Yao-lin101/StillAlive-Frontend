@@ -31,11 +31,11 @@ export const DisplayLinkSection: React.FC<DisplayLinkSectionProps> = ({
     <div className="pt-4 border-t">
       <h3 className="text-sm font-medium text-gray-500 mb-2">展示链接</h3>
       <div className="space-y-2">
-        <div className="p-4 bg-gray-50 rounded-md">
+        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md">
           {displayUrl ? (
-            <p className="font-mono text-sm break-all">{displayUrl}</p>
+            <p className="font-mono text-sm break-all text-gray-900 dark:text-gray-100">{displayUrl}</p>
           ) : (
-            <p className="text-sm text-gray-500">展示链接未生成</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">展示链接未生成</p>
           )}
         </div>
         <div className="space-x-2">

@@ -100,4 +100,10 @@ export interface WillConfig {
   cc_emails: string[];
   timeout_hours: number;
   created_at: string;
+}
+
+export interface Message {
+  id: number;
+  content: string;
+  created_at: string;
 } 

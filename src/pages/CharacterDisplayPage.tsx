@@ -10,6 +10,7 @@ import MusicPlayer from '../components/MusicPlayer';
 import { Background } from '@/components/characters/components/display/Background';
 import { StatusCard } from '@/components/characters/components/display/StatusCard';
 import { CharacterCard } from '@/components/characters/components/display/CharacterCard';
+import { CharacterMessages } from '@/components/characters/CharacterMessages';
 import { AnimatedContent } from '@/components/characters/components/display/AnimatedContent';
 import '@/styles/animations.css';
 
@@ -31,25 +32,25 @@ interface CharacterStatus {
   };
 }
 
-const Modal = ({ 
-  isOpen, 
-  onClose, 
-  children 
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
+const Modal = ({
+  isOpen,
+  onClose,
+  children
+}: {
+  isOpen: boolean;
+  onClose: () => void;
   children: React.ReactNode;
 }) => {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
-    
+
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
     }
-    
+
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
@@ -129,7 +130,7 @@ export const CharacterDisplayPage: React.FC = () => {
         ]);
         setCharacter(characterData);
         setStatus(statusData);
-        
+
         // 初始化音乐
         if (characterData.status_config?.display) {
           updateMusicPlayer(characterData.status_config, statusData);
@@ -153,7 +154,7 @@ export const CharacterDisplayPage: React.FC = () => {
       try {
         const statusData = await characterService.getCharacterStatus(code);
         setStatus(statusData);
-        
+
         // 更新音乐播放器
         if (character?.status_config?.display) {
           updateMusicPlayer(character.status_config, statusData);
@@ -170,26 +171,26 @@ export const CharacterDisplayPage: React.FC = () => {
   // 根据状态更新音乐播放器
   const updateMusicPlayer = (config: StatusConfigType, statusData: CharacterStatus | null) => {
     if (!statusData || !config.display) return;
-    
+
     // 获取最新更新时间
     const latestUpdate = Object.values(statusData.status_data)
       .map(s => new Date(s.updated_at).getTime())
       .sort((a, b) => b - a)[0];
-    
+
     if (!latestUpdate) {
       // 如果没有更新记录，使用默认音乐
       setCurrentMusicUrl(config.display.default_music_url || null);
       return;
     }
-    
+
     // 计算距离最后更新的小时数
     const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
-    
+
     // 查找匹配的超时消息
     const timeoutMessage = config.display.timeout_messages
       ?.sort((a, b) => b.hours - a.hours)
       .find(msg => diffInHours >= msg.hours);
-    
+
     // 设置音乐URL
     if (timeoutMessage?.music_link) {
       setCurrentMusicUrl(timeoutMessage.music_link);
@@ -200,12 +201,12 @@ export const CharacterDisplayPage: React.FC = () => {
 
   const statusItems = character?.status_config && Object.entries(character.status_config)
     .filter(([key]) => key !== 'display' && key !== 'theme')
-    .flatMap(([_, configs]) => 
+    .flatMap(([_, configs]) =>
       Object.entries(configs as Record<string, any>).map(([key, config]) => {
         const configKey = config.key || key;
         let latestValue: any;
         let latestUpdate: number | undefined;
-        
+
         if (status?.status_data) {
           Object.entries(status.status_data).forEach(([_, typeData]) => {
             if (typeData.data && configKey in typeData.data) {
@@ -254,13 +255,13 @@ export const CharacterDisplayPage: React.FC = () => {
     const lastUpdate = new Date(timestamp);
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - lastUpdate.getTime()) / (1000 * 60));
-    
+
     if (diffInMinutes < 1) return '刚刚';
     if (diffInMinutes < 60) return `${diffInMinutes}分钟前`;
-    
+
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours}小时前`;
-    
+
     const diffInDays = Math.floor(diffInHours / 24);
     return `${diffInDays}天前`;
   };
@@ -271,21 +272,21 @@ export const CharacterDisplayPage: React.FC = () => {
     const latestUpdate = Object.values(status.status_data)
       .map(s => new Date(s.updated_at).getTime())
       .sort((a, b) => b - a)[0];
-      
+
     if (!latestUpdate) return '';
-    
+
     const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
-    
+
     const timeoutMessage = character.status_config?.display?.timeout_messages
       ?.sort((a, b) => b.hours - a.hours)
       .find(msg => diffInHours >= msg.hours);
-        
+
     return timeoutMessage?.message || character.status_config?.display?.default_message || '';
   };
 
   const getLastUpdate = () => {
     if (!status || Object.values(status.status_data).length === 0) return '';
-    
+
     return formatTimeElapsed(
       Object.values(status.status_data)
         .map(s => s.updated_at)
@@ -294,7 +295,7 @@ export const CharacterDisplayPage: React.FC = () => {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 flex items-center justify-center overflow-hidden"
       onClick={() => {
         if (isCardHidden) {
@@ -305,42 +306,45 @@ export const CharacterDisplayPage: React.FC = () => {
     >
       <Background
         theme={character.status_config?.theme}
-        onBgImageError={() => {}}
+        onBgImageError={() => { }}
       />
-      
+
       <AnimatedContent
         isHidden={isCardHidden}
-        onShow={() => {}}
-        className="relative z-20"
+        onShow={() => { }}
+        className="relative z-20 w-full min-h-full flex flex-col items-center py-12"
       >
-        <CharacterCard
-          name={character.name}
-          avatar={character.avatar}
-          bio={character.bio}
-          statusMessage={getStatusMessage()}
-          lastUpdate={getLastUpdate()}
-          statusItems={statusItems}
-          onStatusClick={() => setShowStatusDialog(true)}
-          onHideClick={(e) => {
-            e.stopPropagation();
-            setIsCardHidden(true);
-          }}
-          isMusicPlaying={isMusicPlaying}
-          onMusicToggle={currentMusicUrl ? () => setIsMusicPlaying(!isMusicPlaying) : undefined}
-        />
+        <div className="w-full max-w-md md:max-w-2xl flex flex-col gap-8 px-4 my-auto">
+          <CharacterCard
+            name={character.name}
+            avatar={character.avatar}
+            bio={character.bio}
+            statusMessage={getStatusMessage()}
+            lastUpdate={getLastUpdate()}
+            statusItems={statusItems}
+            onStatusClick={() => setShowStatusDialog(true)}
+            onHideClick={(e) => {
+              e.stopPropagation();
+              setIsCardHidden(true);
+            }}
+            isMusicPlaying={isMusicPlaying}
+            onMusicToggle={currentMusicUrl ? () => setIsMusicPlaying(!isMusicPlaying) : undefined}
+          />
+          <CharacterMessages displayCode={code!} />
+        </div>
       </AnimatedContent>
 
       {/* 音乐播放器 - 固定在底部 */}
       {currentMusicUrl && (
-        <MusicPlayer 
+        <MusicPlayer
           musicUrl={currentMusicUrl}
           isPlaying={isMusicPlaying}
           onPlayingChange={setIsMusicPlaying}
         />
       )}
 
-      <Modal 
-        isOpen={showStatusDialog} 
+      <Modal
+        isOpen={showStatusDialog}
         onClose={() => setShowStatusDialog(false)}
       >
         <div className="mb-4">

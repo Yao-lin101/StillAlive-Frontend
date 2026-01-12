@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Character, CharacterDetail, CreateCharacterData, UpdateCharacterData, WillConfig } from '@/types/character';
+import { Character, CharacterDetail, CreateCharacterData, UpdateCharacterData, WillConfig, Message } from '@/types/character';
 
 import { API_URL } from '@/config';
 import api from '@/lib/api';
@@ -141,5 +141,16 @@ export const characterService = {
       }
       throw error;
     }
+  },
+
+  // 留言相关
+  async getMessages(code: string): Promise<Message[]> {
+    const response = await axios.get(`${API_URL}/d/${code}/messages/`);
+    return response.data;
+  },
+
+  async sendMessage(code: string, content: string): Promise<Message> {
+    const response = await axios.post(`${API_URL}/d/${code}/messages/`, { content });
+    return response.data;
   },
 };

@@ -24,10 +24,10 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -44,7 +44,7 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
   }, [isMobile, isHidden]);
 
   return (
-    <div className="relative">
+    <div className="relative w-full h-full">
       <style>
         {`
           @keyframes breathing {
@@ -69,7 +69,7 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ 
+            transition={{
               duration: 0.4,
               ease: "easeInOut"
             }}
@@ -80,7 +80,7 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
               initial={{ y: 20 }}
               animate={{ y: 0 }}
               exit={{ y: -20 }}
-              transition={{ 
+              transition={{
                 duration: 0.4,
                 ease: "easeInOut"
               }}
@@ -120,17 +120,20 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ 
+            transition={{
               duration: 0.4,
               ease: "easeInOut"
             }}
-            className="absolute inset-0 flex items-center justify-center"
+            className={cn(
+              "absolute inset-0",
+              isHidden ? "flex items-center justify-center" : "overflow-y-auto"
+            )}
           >
             <motion.div
               initial={{ y: 20, scale: 0.95 }}
               animate={{ y: 0, scale: 1 }}
               exit={{ y: -20, scale: 0.95 }}
-              transition={{ 
+              transition={{
                 duration: 0.4,
                 ease: "easeInOut"
               }}

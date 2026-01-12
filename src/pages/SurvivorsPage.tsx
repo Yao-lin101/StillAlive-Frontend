@@ -130,6 +130,7 @@ export const SurvivorsPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    // 首次加载
     useEffect(() => {
         const fetchSurvivors = async () => {
             try {
@@ -145,9 +146,22 @@ export const SurvivorsPage: React.FC = () => {
         };
 
         fetchSurvivors();
+    }, []);
 
-        // 每30秒刷新一次
-        const intervalId = setInterval(fetchSurvivors, 30000);
+    // 静默刷新（不显示加载状态）
+    useEffect(() => {
+        const silentRefresh = async () => {
+            try {
+                const data = await characterService.getSurvivors();
+                setSurvivors(data.results);
+            } catch (err) {
+                // 静默刷新时忽略错误，保持当前数据
+                console.error('Silent refresh failed:', err);
+            }
+        };
+
+        // 每30秒静默刷新一次
+        const intervalId = setInterval(silentRefresh, 30000);
         return () => clearInterval(intervalId);
     }, []);
 

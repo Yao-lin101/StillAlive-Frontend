@@ -62,7 +62,7 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
           }
         `}
       </style>
-      <AnimatePresence initial={false}>
+      <AnimatePresence>
         {isHidden ? (
           <motion.div
             key="text"

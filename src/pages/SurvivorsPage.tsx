@@ -237,13 +237,6 @@ export const SurvivorsPage: React.FC = () => {
                     </div>
                 )}
             </div>
-
-            {/* Footer */}
-            <div className="border-t border-gray-200/50 dark:border-gray-800/50 mt-auto">
-                <div className="max-w-6xl mx-auto px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
-                    <p>StillAlive · 点击任意角色卡片查看详情</p>
-                </div>
-            </div>
         </div>
     );
 };

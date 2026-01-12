@@ -9,6 +9,7 @@ export interface Character {
   is_active: boolean;
   is_public: boolean;
   is_owner?: boolean;
+  experience?: number;
 }
 
 export type StatusValueType = 'number' | 'text';

@@ -23,7 +23,7 @@ export const HomePage: React.FC = () => {
             <Button
               onClick={() => navigate('/characters')}
               size="lg"
-              className="bg-[#E3F4FF] hover:bg-[#d0ecff] text-slate-700 font-medium shadow-[0_0_15px_#FFE1E1] hover:shadow-[0_0_20px_#FFE1E1] border border-[#d0ecff] transition-all duration-300"
+              className="bg-[#E3F4FF] hover:bg-[#d0ecff] text-[#5fa2e9] font-medium shadow-[0_0_15px_#d0ecff] hover:shadow-[0_0_20px_#FFE1E1] border border-[#d0ecff] transition-all duration-300"
             >
               进入角色管理
             </Button>
@@ -31,7 +31,7 @@ export const HomePage: React.FC = () => {
             <Button
               onClick={() => navigate('/login')}
               size="lg"
-              className="bg-[#E3F4FF] hover:bg-[#d0ecff] text-slate-700 font-medium shadow-[0_0_15px_#FFE1E1] hover:shadow-[0_0_20px_#FFE1E1] border border-[#d0ecff] transition-all duration-300"
+              className="bg-[#E3F4FF] hover:bg-[#d0ecff] text-[#5fa2e9] font-medium shadow-[0_0_15px_#d0ecff] hover:shadow-[0_0_20px_#FFE1E1] border border-[#d0ecff] transition-all duration-300"
             >
               立即登录
             </Button>
@@ -41,9 +41,9 @@ export const HomePage: React.FC = () => {
             onClick={() => navigate('/survivors')}
             size="lg"
             variant="outline"
-            className="bg-[#FFE1E1] hover:bg-[#ffd1d1] text-slate-700 font-medium shadow-[0_0_15px_#E3F4FF] hover:shadow-[0_0_20px_#E3F4FF] border border-[#ffd1d1] transition-all duration-300"
+            className="bg-[#FFE1E1] hover:bg-[#ffd1d1] text-[#dc879b] font-medium shadow-[0_0_15px_#ffd1d1] hover:shadow-[0_0_20px_#ffd1d1] border border-[#ffd1d1] transition-all duration-300"
           >
-            🌟 探索存活者
+            探索存活者
           </Button>
         </div>
       </div>

@@ -196,7 +196,7 @@ export const SurvivorsPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <SparklesText
-                                text="Survivors"
+                                text="Pokemon Gettodaze"
                                 colors={{ first: "#FFB5B5", second: "#90D5FF" }}
                                 className="text-3xl md:text-4xl font-bold"
                             />

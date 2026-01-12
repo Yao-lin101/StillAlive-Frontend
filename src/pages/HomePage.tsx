@@ -52,7 +52,7 @@ export const HomePage: React.FC = () => {
             variant="outline"
             className="bg-[#FFE1E1] hover:bg-[#ffd1d1] text-[#dc879b] hover:text-[#dc879b] font-medium shadow-[0_0_15px_#ffd1d1] hover:shadow-[0_0_20px_#ffd1d1] border border-[#ffd1d1] transition-all duration-300"
           >
-            探索存活者
+            Pokemon Gettodaze！
           </Button>
         </div>
       </div>

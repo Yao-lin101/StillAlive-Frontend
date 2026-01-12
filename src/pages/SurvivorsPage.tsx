@@ -62,13 +62,13 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
                 </div>
 
                 {/* 渐变背景装饰 */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-500/5 via-gray-500/5 to-zinc-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 <div className="relative p-6">
                     <div className="flex items-start gap-4">
                         {/* 头像 */}
                         <div className="relative flex-shrink-0">
-                            <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-purple-200 dark:ring-purple-800 group-hover:ring-purple-400 transition-all duration-300">
+                            <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-slate-200 dark:ring-slate-800 group-hover:ring-slate-400 transition-all duration-300">
                                 {survivor.avatar ? (
                                     <img
                                         src={survivor.avatar}
@@ -79,7 +79,7 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
                                         }}
                                     />
                                 ) : (
-                                    <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-2xl font-bold">
+                                    <div className="w-full h-full bg-gradient-to-br from-slate-400 to-gray-400 flex items-center justify-center text-white text-2xl font-bold">
                                         {survivor.name.charAt(0).toUpperCase()}
                                     </div>
                                 )}
@@ -94,12 +94,12 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
 
                         {/* 信息 */}
                         <div className="flex-1 min-w-0">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate group-hover:text-slate-600 dark:group-hover:text-slate-400 transition-colors">
                                 {survivor.name}
                             </h3>
 
                             {/* 状态消息 */}
-                            <p className="mt-1 text-sm text-purple-600 dark:text-purple-400 font-medium">
+                            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 font-medium">
                                 {survivor.status_message || '未知状态'}
                             </p>
 
@@ -114,7 +114,7 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
 
                         {/* 箭头指示器 */}
                         <div className="flex-shrink-0 self-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                         </div>
@@ -169,7 +169,7 @@ export const SurvivorsPage: React.FC = () => {
         return (
             <div className="h-full flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-400 border-t-transparent" />
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-400 border-t-transparent" />
                     <p className="text-gray-500 dark:text-gray-400">加载中...</p>
                 </div>
             </div>
@@ -196,16 +196,16 @@ export const SurvivorsPage: React.FC = () => {
                         <div>
                             <SparklesText
                                 text="Survivors"
-                                colors={{ first: "#A07CFE", second: "#FE8FB5" }}
+                                colors={{ first: "#64748b", second: "#94a3b8" }}
                                 className="text-3xl md:text-4xl font-bold"
                             />
                             <p className="mt-2 text-gray-500 dark:text-gray-400">
                                 探索所有存活者的实时状态
                             </p>
                         </div>
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-900/30 rounded-full">
                             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                            <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                 {survivors.filter(s => s.is_online).length} 人在线
                             </span>
                         </div>

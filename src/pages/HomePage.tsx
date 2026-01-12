@@ -13,7 +13,7 @@ export const HomePage: React.FC = () => {
       <div className="text-center space-y-8">
         <SparklesText
           text="StillAlive"
-          colors={{ first: "#A07CFE", second: "#FE8FB5" }}
+          colors={{ first: "#64748b", second: "#94a3b8" }}
           className="text-5xl font-bold"
         />
         <p className="text-xl text-gray-600 dark:text-gray-400 mt-4">开始创建和管理您的角色</p>
@@ -23,7 +23,7 @@ export const HomePage: React.FC = () => {
             <Button
               onClick={() => navigate('/characters')}
               size="lg"
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gradient-to-r from-slate-600 to-slate-800 hover:from-slate-700 hover:to-slate-900 text-white shadow-lg hover:shadow-xl transition-all duration-300"
             >
               进入角色管理
             </Button>
@@ -31,7 +31,7 @@ export const HomePage: React.FC = () => {
             <Button
               onClick={() => navigate('/login')}
               size="lg"
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gradient-to-r from-slate-600 to-slate-800 hover:from-slate-700 hover:to-slate-900 text-white shadow-lg hover:shadow-xl transition-all duration-300"
             >
               立即登录
             </Button>
@@ -41,7 +41,7 @@ export const HomePage: React.FC = () => {
             onClick={() => navigate('/survivors')}
             size="lg"
             variant="outline"
-            className="border-purple-300 text-purple-600 hover:bg-purple-50 dark:border-purple-700 dark:text-purple-400 dark:hover:bg-purple-900/20 transition-all duration-300"
+            className="border-slate-400 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-900/20 transition-all duration-300"
           >
             🌟 探索存活者
           </Button>

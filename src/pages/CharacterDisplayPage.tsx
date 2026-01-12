@@ -11,7 +11,9 @@ import { Background } from '@/components/characters/components/display/Backgroun
 import { StatusCard } from '@/components/characters/components/display/StatusCard';
 import { CharacterCard } from '@/components/characters/components/display/CharacterCard';
 import { CharacterMessages } from '@/components/characters/CharacterMessages';
+import { DanmakuList } from '@/components/characters/DanmakuList';
 import { AnimatedContent } from '@/components/characters/components/display/AnimatedContent';
+import { Message } from '@/types/character';
 import '@/styles/animations.css';
 
 interface CharacterDisplay {
@@ -108,6 +110,17 @@ export const CharacterDisplayPage: React.FC = () => {
   const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
   const [isCardHidden, setIsCardHidden] = useState(true);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const fetchMessages = async () => {
+    if (!code) return;
+    try {
+      const data = await characterService.getMessages(code);
+      setMessages(data);
+    } catch (error) {
+      console.error('Failed to fetch messages', error);
+    }
+  };
 
   // 更新页面标题
   useEffect(() => {
@@ -124,12 +137,14 @@ export const CharacterDisplayPage: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const [characterData, statusData] = await Promise.all([
+        const [characterData, statusData, messagesData] = await Promise.all([
           characterService.getPublicDisplay(code!),
-          characterService.getCharacterStatus(code!)
+          characterService.getCharacterStatus(code!),
+          characterService.getMessages(code!)
         ]);
         setCharacter(characterData);
         setStatus(statusData);
+        setMessages(messagesData);
 
         // 初始化音乐
         if (characterData.status_config?.display) {
@@ -314,7 +329,8 @@ export const CharacterDisplayPage: React.FC = () => {
         onShow={() => { }}
         className="relative z-20 w-full min-h-full flex flex-col items-center py-12"
       >
-        <div className="w-full max-w-md md:max-w-2xl flex flex-col gap-8 px-4 my-auto">
+        <div className="w-full max-w-md md:max-w-2xl flex flex-col gap-6 px-4 my-auto">
+          <DanmakuList messages={messages} className="h-32 mb-2" />
           <CharacterCard
             name={character.name}
             avatar={character.avatar}
@@ -330,7 +346,11 @@ export const CharacterDisplayPage: React.FC = () => {
             isMusicPlaying={isMusicPlaying}
             onMusicToggle={currentMusicUrl ? () => setIsMusicPlaying(!isMusicPlaying) : undefined}
           />
-          <CharacterMessages displayCode={code!} />
+          <CharacterMessages
+            displayCode={code!}
+            onMessageSent={fetchMessages}
+            className="mt-4"
+          />
         </div>
       </AnimatedContent>
 

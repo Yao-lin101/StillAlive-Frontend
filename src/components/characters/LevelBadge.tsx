@@ -29,7 +29,7 @@ export const LevelBadge: React.FC<LevelBadgeProps> = ({ experience = 0, classNam
 
     return (
         <span className={cn(
-            'flex-shrink-0 px-1.5 py-0.5 text-xs font-medium rounded shadow-sm',
+            'flex-shrink-0 px-1.5 py-0.5 text-xs font-medium rounded shadow-sm scale-[0.7] origin-left',
             colorClass,
             className
         )}>

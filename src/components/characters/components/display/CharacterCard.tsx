@@ -126,25 +126,29 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
       </div>
       <div className="p-8">
         <div className="flex items-center space-x-6 mb-8">
-          {avatar ? (
-            <img
-              src={avatar}
-              alt={name}
-              className="w-24 h-24 rounded-full object-cover ring-2 ring-white/50"
-            />
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center ring-2 ring-white/50">
-              <span className="text-4xl font-bold text-gray-400">
-                {name[0]}
-              </span>
+          <div className="relative">
+            {avatar ? (
+              <img
+                src={avatar}
+                alt={name}
+                className="w-24 h-24 rounded-full object-cover ring-2 ring-white/50"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center ring-2 ring-white/50">
+                <span className="text-4xl font-bold text-gray-400">
+                  {name[0]}
+                </span>
+              </div>
+            )}
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20">
+              <LevelBadge experience={experience} className="scale-[0.85] shadow-md border border-white/20" />
             </div>
-          )}
+          </div>
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold text-gray-900 text-left">
                 {name}
               </h1>
-              <LevelBadge experience={experience} />
             </div>
             {bio && (
               <p className="mt-2 text-gray-600 text-left">

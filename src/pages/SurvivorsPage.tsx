@@ -64,7 +64,6 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
                 </div>
 
                 {/* 渐变背景装饰 */}
-                {/* 渐变背景装饰 */}
                 <div className="absolute inset-0 bg-gradient-to-br from-[#FFE1E1]/30 via-[#E3F4FF]/30 to-[#FFE1E1]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 <div className="relative p-6">
@@ -87,22 +86,18 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
                                     </div>
                                 )}
                             </div>
-                            {/* 在线呼吸动效 */}
-                            {survivor.is_online && (
-                                <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center">
-                                    <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-ping" />
-                                </div>
-                            )}
+
+                            {/* 等级标志 - 头像下方内切 */}
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20">
+                                <LevelBadge experience={survivor.experience} className="scale-[0.8] shadow-md border border-white/20" />
+                            </div>
                         </div>
 
                         {/* 信息 */}
                         <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate group-hover:text-[#90D5FF] dark:group-hover:text-[#90D5FF] transition-colors">
-                                    {survivor.name}
-                                </h3>
-                                <LevelBadge experience={survivor.experience} />
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate group-hover:text-[#90D5FF] dark:group-hover:text-[#90D5FF] transition-colors">
+                                {survivor.name}
+                            </h3>
 
                             {/* 状态消息 */}
                             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 font-medium group-hover:text-[#FFB5B5] transition-colors">
@@ -126,8 +121,8 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
                         </div>
                     </div>
                 </div>
-            </Card>
-        </motion.div>
+            </Card >
+        </motion.div >
     );
 };
 

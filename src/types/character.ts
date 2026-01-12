@@ -106,4 +106,6 @@ export interface Message {
   id: number;
   content: string;
   created_at: string;
+  ip_address?: string;
+  location?: string;
 } 

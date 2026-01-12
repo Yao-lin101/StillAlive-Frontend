@@ -112,12 +112,10 @@ export function DanmakuList({ messages, className }: DanmakuListProps) {
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="space-y-2">
-                            <h4 className="font-medium leading-none text-gray-500">内容</h4>
                             <p className="text-lg font-medium dark:text-gray-100 break-words">{selectedMsg?.content}</p>
                         </div>
                         <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 border-t pt-4 dark:border-gray-800">
                             <div className="flex flex-col gap-1">
-                                <span>发送时间</span>
                                 <span className="font-mono text-xs opacity-70">
                                     {selectedMsg?.created_at && new Date(selectedMsg.created_at).toLocaleString()}
                                 </span>
@@ -125,7 +123,7 @@ export function DanmakuList({ messages, className }: DanmakuListProps) {
                             <div className="flex flex-col gap-1 text-right">
                                 <div className="flex flex-col items-end">
                                     <span className="font-medium text-xs text-gray-900 dark:text-gray-100">
-                                        {selectedMsg?.location || '异世界'}
+                                        {selectedMsg?.location ? `${selectedMsg.location}网友` : '异世界网友'}
                                     </span>
                                 </div>
                             </div>

@@ -3,7 +3,6 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogDescription,
 } from "@/components/ui/dialog";
 import { Message } from "@/types/character";
 import { Button } from "@/components/ui/button";
@@ -21,9 +20,6 @@ export function DanmakuManager({ open, onOpenChange, messages, onDelete }: Danma
             <DialogContent className="sm:max-w-lg h-[80vh] flex flex-col bg-white/90 dark:bg-black/90 backdrop-blur-xl border-white/20">
                 <DialogHeader>
                     <DialogTitle>弹幕管理</DialogTitle>
-                    <DialogDescription>
-                        您可以删除不当的弹幕留言。
-                    </DialogDescription>
                 </DialogHeader>
                 <div className="flex-1 overflow-y-auto pr-2 space-y-2 mt-4 custom-scrollbar">
                     {messages.length === 0 ? (

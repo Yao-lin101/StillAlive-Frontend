@@ -329,8 +329,11 @@ export const CharacterDisplayPage: React.FC = () => {
         onShow={() => { }}
         className="relative z-20 w-full min-h-full flex flex-col items-center py-12"
       >
-        <div className="w-full max-w-md md:max-w-2xl flex flex-col gap-6 px-4 my-auto">
-          <DanmakuList messages={messages} className="h-32 mb-2" />
+        <div className="absolute top-20 left-0 w-full z-10">
+          <DanmakuList messages={messages} className="h-40" />
+        </div>
+
+        <div className="w-full max-w-md md:max-w-2xl flex flex-col gap-6 px-4 my-auto relative z-20">
           <CharacterCard
             name={character.name}
             avatar={character.avatar}

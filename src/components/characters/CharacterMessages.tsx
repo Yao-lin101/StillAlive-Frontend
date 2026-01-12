@@ -32,7 +32,7 @@ export const CharacterMessages: React.FC<CharacterMessagesProps> = ({ displayCod
 
     return (
         <div className={`w-full max-w-2xl mx-auto ${className || ''}`}>
-            <div className="flex items-center gap-2 bg-white/60 dark:bg-black/40 p-2 rounded-full backdrop-blur-md shadow-lg border border-white/20 dark:border-white/10">
+            <div className="flex items-center gap-2 bg-white/60 dark:bg-black/40 p-2 rounded-full backdrop-blur-md shadow-lg border border-white/20 dark:border-white/10 opacity-70 hover:opacity-100 focus-within:opacity-100 transition-all duration-300">
                 <input
                     value={newMessage}
                     type="text"

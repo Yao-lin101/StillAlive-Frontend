@@ -37,7 +37,7 @@ const DanmakuItem = ({
             className={cn(
                 "danmaku-item absolute flex items-center px-3 py-1.5 rounded-full",
                 "bg-black/20 backdrop-blur-sm border border-white/10 shadow-sm",
-                "text-white/90 text-sm font-medium whitespace-nowrap cursor-pointer",
+                "text-white/90 text-sm font-medium whitespace-nowrap cursor-pointer pointer-events-auto",
                 "hover:bg-black/60 hover:border-white/30 hover:scale-105 transition-all"
             )}
             style={{
@@ -67,7 +67,7 @@ export function DanmakuList({ messages, className }: DanmakuListProps) {
         <>
             <div
                 className={cn(
-                    "relative w-full overflow-hidden select-none",
+                    "relative w-full overflow-hidden select-none pointer-events-none",
                     className
                 )}
                 style={{

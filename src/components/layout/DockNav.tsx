@@ -66,7 +66,7 @@ export const DockNav: React.FC<{ children: React.ReactNode }> = ({ children }) =
                     <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1" />
 
                     <DockIcon tooltip="切换主题">
-                        <AnimatedThemeToggler className="w-full h-full flex items-center justify-center [&_svg]:w-5 [&_svg]:h-5" />
+                        <AnimatedThemeToggler className="w-full h-full flex items-center justify-center bg-transparent border-0 p-0 hover:bg-transparent text-neutral-500 dark:text-neutral-400 [&_svg]:w-5 [&_svg]:h-5" />
                     </DockIcon>
 
                     {/* 分隔线 */}

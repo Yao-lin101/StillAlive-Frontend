@@ -9,7 +9,7 @@ export const HomePage: React.FC = () => {
   const isAuthenticated = React.useContext(AuthContext);
 
   return (
-    <div className="h-full flex flex-col items-center justify-center p-4">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center p-4">
       <div className="text-center space-y-8">
         <SparklesText
           text="StillAlive"

@@ -6,7 +6,7 @@ import { HomePage } from './pages/HomePage';
 import { CharactersPage } from './pages/CharactersPage';
 import { CharacterDisplayPage } from '@/pages/CharacterDisplayPage';
 import { SurvivorsPage } from '@/pages/SurvivorsPage';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { DockNav } from '@/components/layout/DockNav';
 import authService from '@/lib/auth';
 import './App.css'
 import { Toaster } from 'sonner';
@@ -14,12 +14,12 @@ import { Toaster } from 'sonner';
 // 创建认证上下文
 export const AuthContext = createContext<boolean>(false);
 
-// 带侧边栏的布局组件
+// 带 Dock 导航的布局组件
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <Sidebar>
+    <DockNav>
       {children}
-    </Sidebar>
+    </DockNav>
   );
 };
 

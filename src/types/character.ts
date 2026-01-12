@@ -7,6 +7,7 @@ export interface Character {
   created_at: string;
   updated_at: string;
   is_active: boolean;
+  is_public: boolean;
 }
 
 export type StatusValueType = 'number' | 'text';
@@ -89,6 +90,7 @@ export interface UpdateCharacterData {
   avatar?: string;
   status_config?: StatusConfigType;
   is_active?: boolean;
+  is_public?: boolean;
 }
 
 export interface WillConfig {

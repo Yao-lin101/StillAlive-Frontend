@@ -26,7 +26,7 @@ export const characterService = {
         formData.append(key, value);
       }
     });
-    
+
     const response = await api.post('/characters/', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -37,7 +37,7 @@ export const characterService = {
 
   async update(uid: string, data: UpdateCharacterData): Promise<Character> {
     const formData = new FormData();
-    
+
     // 处理非文件字段
     Object.entries(data).forEach(([key, value]) => {
       if (key === 'avatar' && value instanceof File) {
@@ -90,6 +90,23 @@ export const characterService = {
     return response.data;
   },
 
+  // 获取所有存活者列表（公开）
+  async getSurvivors(): Promise<{
+    count: number;
+    results: Array<{
+      display_code: string;
+      name: string;
+      avatar: string | null;
+      bio: string | null;
+      is_online: boolean;
+      last_updated: string | null;
+      status_message: string;
+    }>;
+  }> {
+    const response = await axios.get(`${API_URL}/survivors/`);
+    return response.data;
+  },
+
   // 获取遗嘱配置
   async getWillConfig(uid: string): Promise<WillConfig> {
     try {
@@ -114,7 +131,7 @@ export const characterService = {
           throw new Error('启用遗嘱功能时必须提供目标邮箱');
         }
       }
-      
+
       // 直接使用POST请求，让后端决定是创建还是更新
       const response = await api.post(`/characters/${uid}/will/`, data);
       return response.data;

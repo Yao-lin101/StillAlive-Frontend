@@ -8,6 +8,7 @@ export interface Character {
   updated_at: string;
   is_active: boolean;
   is_public: boolean;
+  is_owner?: boolean;
 }
 
 export type StatusValueType = 'number' | 'text';

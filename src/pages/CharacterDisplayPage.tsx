@@ -14,6 +14,8 @@ import { CharacterMessages } from '@/components/characters/CharacterMessages';
 import { DanmakuList } from '@/components/characters/DanmakuList';
 import { AnimatedContent } from '@/components/characters/components/display/AnimatedContent';
 import { Message } from '@/types/character';
+import { toast } from 'sonner';
+import { DanmakuManager } from '@/components/characters/DanmakuManager';
 import '@/styles/animations.css';
 
 interface CharacterDisplay {
@@ -21,6 +23,7 @@ interface CharacterDisplay {
   avatar: string | null;
   bio: string | null;
   status_config?: StatusConfigType;
+  is_owner?: boolean;
 }
 
 interface CharacterStatus {
@@ -111,6 +114,7 @@ export const CharacterDisplayPage: React.FC = () => {
   const [isCardHidden, setIsCardHidden] = useState(true);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [showDanmakuManager, setShowDanmakuManager] = useState(false);
 
   const fetchMessages = async () => {
     if (!code) return;
@@ -119,6 +123,18 @@ export const CharacterDisplayPage: React.FC = () => {
       setMessages(data);
     } catch (error) {
       console.error('Failed to fetch messages', error);
+    }
+  };
+
+  const handleDeleteMessage = async (msgId: number) => {
+    try {
+      if (!code) return;
+      await characterService.deleteMessage(code, msgId);
+      toast.success('删除成功');
+      fetchMessages();
+    } catch (error) {
+      toast.error('删除失败');
+      console.error(error);
     }
   };
 
@@ -348,6 +364,8 @@ export const CharacterDisplayPage: React.FC = () => {
             }}
             isMusicPlaying={isMusicPlaying}
             onMusicToggle={currentMusicUrl ? () => setIsMusicPlaying(!isMusicPlaying) : undefined}
+            isOwner={character.is_owner}
+            onManageDanmaku={() => setShowDanmakuManager(true)}
           />
           <CharacterMessages
             displayCode={code!}
@@ -389,6 +407,13 @@ export const CharacterDisplayPage: React.FC = () => {
           </div>
         </div>
       </Modal>
-    </div>
+
+      <DanmakuManager
+        open={showDanmakuManager}
+        onOpenChange={setShowDanmakuManager}
+        messages={messages}
+        onDelete={handleDeleteMessage}
+      />
+    </div >
   );
 }; 

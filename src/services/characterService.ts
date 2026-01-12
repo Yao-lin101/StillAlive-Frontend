@@ -81,12 +81,12 @@ export const characterService = {
   },
 
   async getPublicDisplay(code: string) {
-    const response = await axios.get(`${API_URL}/d/${code}/`);
+    const response = await api.get(`/d/${code}/`);
     return response.data;
   },
 
   async getCharacterStatus(code: string) {
-    const response = await axios.get(`${API_URL}/d/${code}/status/`);
+    const response = await api.get(`/d/${code}/status/`);
     return response.data;
   },
 
@@ -145,12 +145,16 @@ export const characterService = {
 
   // 留言相关
   async getMessages(code: string): Promise<Message[]> {
-    const response = await axios.get(`${API_URL}/d/${code}/messages/`);
+    const response = await axios.get(`${API_URL}/characters/${code}/messages/`);
     return response.data;
   },
 
   async sendMessage(code: string, content: string): Promise<Message> {
-    const response = await axios.post(`${API_URL}/d/${code}/messages/`, { content });
+    const response = await axios.post(`${API_URL}/characters/${code}/messages/`, { content });
     return response.data;
+  },
+
+  async deleteMessage(code: string, msgId: number): Promise<void> {
+    await api.delete(`/characters/${code}/messages/${msgId}/`);
   },
 };

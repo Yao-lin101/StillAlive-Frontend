@@ -74,8 +74,6 @@ button:focus-visible {
   }
 }
 
-
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -132,8 +130,6 @@ button:focus-visible {
   }
 }
 
-
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -141,4 +137,9 @@ button:focus-visible {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+::view-transition-old(root), ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
 }

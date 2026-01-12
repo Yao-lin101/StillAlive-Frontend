@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Users, User, Home, LogOut, LogIn } from 'lucide-react';
 import { Dock, DockIcon } from '@/components/magicui/dock';
+import { AnimatedThemeToggler } from '@/components/ui/animated-theme-toggler';
 import { AuthContext } from '@/App';
 import authService from '@/lib/auth';
 
@@ -58,6 +59,15 @@ export const DockNav: React.FC<{ children: React.ReactNode }> = ({ children }) =
                             </DockIcon>
                         );
                     })}
+
+
+
+                    {/* 分隔线 */}
+                    <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1" />
+
+                    <DockIcon tooltip="切换主题">
+                        <AnimatedThemeToggler className="w-full h-full flex items-center justify-center [&_svg]:w-5 [&_svg]:h-5" />
+                    </DockIcon>
 
                     {/* 分隔线 */}
                     <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1" />

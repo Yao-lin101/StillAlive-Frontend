@@ -369,7 +369,13 @@ export const CharacterDisplayPage: React.FC = () => {
           />
           <CharacterMessages
             displayCode={code!}
-            onMessageSent={fetchMessages}
+            onMessageSent={(newMsg) => {
+              if (newMsg) {
+                setMessages(prev => [...prev, newMsg]);
+              } else {
+                fetchMessages();
+              }
+            }}
             className="mt-4"
           />
         </div>

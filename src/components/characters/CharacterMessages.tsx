@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { characterService } from '@/services/characterService';
 import { Button } from '@/components/ui/button';
+import { Message } from '@/types/character';
 
 import { toast } from 'sonner';
 
 interface CharacterMessagesProps {
     displayCode: string;
-    onMessageSent: () => void;
+    onMessageSent: (msg?: Message) => void;
     className?: string;
 }
 
@@ -19,9 +20,9 @@ export const CharacterMessages: React.FC<CharacterMessagesProps> = ({ displayCod
 
         setLoading(true);
         try {
-            await characterService.sendMessage(displayCode, newMessage);
+            const msg = await characterService.sendMessage(displayCode, newMessage);
             setNewMessage('');
-            onMessageSent();
+            onMessageSent(msg);
             toast.success('弹幕发送成功');
         } catch (error) {
             toast.error('发送失败');

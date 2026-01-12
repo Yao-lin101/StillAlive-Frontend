@@ -27,9 +27,16 @@ const DanmakuItem = ({
 }) => {
     const params = useMemo(() => {
         const duration = 15 + Math.random() * 10;
-        const delay = Math.random() * 20;
+
+        // Check if message is recent (within 20 seconds)
+        // This ensures newly sent messages appear immediately
+        const created = new Date(msg.created_at).getTime();
+        const now = Date.now();
+        const isRecent = now - created < 20000;
+
+        const delay = isRecent ? 0 : Math.random() * 20;
         return { duration, delay };
-    }, []);
+    }, [msg.created_at]);
 
     return (
         <div

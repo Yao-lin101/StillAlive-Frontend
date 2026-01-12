@@ -19,6 +19,7 @@ import { ThemeCard } from './components/cards/ThemeCard';
 import { DisplayConfigCard } from './components/cards/DisplayConfigCard';
 import {
   CharacterStatusSection,
+  PublicStatusSection,
   DisplayLinkSection,
   SecretKeySection,
   DangerZoneSection,
@@ -52,7 +53,7 @@ export const CharacterDetail: React.FC = () => {
         console.error('Failed to fetch secret key:', err);
       }
     };
-    
+
     if (uid) {
       fetchSecretKey();
     }
@@ -61,7 +62,7 @@ export const CharacterDetail: React.FC = () => {
   useEffect(() => {
     const fetchWillConfig = async () => {
       if (!uid) return;
-      
+
       try {
         setIsLoadingWill(true);
         const config = await characterService.getWillConfig(uid);
@@ -74,7 +75,7 @@ export const CharacterDetail: React.FC = () => {
         setIsLoadingWill(false);
       }
     };
-    
+
     fetchWillConfig();
   }, [uid]);
 
@@ -104,7 +105,7 @@ export const CharacterDetail: React.FC = () => {
       setIsRegeneratingKey(true);
       const key = await characterService.regenerateSecretKey(uid!);
       setSecretKey(key);
-      
+
       // 尝试复制到剪贴板，但不影响主流程
       try {
         await navigator.clipboard.writeText(key);
@@ -126,12 +127,12 @@ export const CharacterDetail: React.FC = () => {
     if (category === 'vital_signs') {
       const currentFields = { ...(statusConfig.vital_signs || {}) };
       delete currentFields[key];
-      
+
       const newConfig = {
         ...statusConfig,
         vital_signs: currentFields
       };
-      
+
       setStatusConfig(newConfig);
       await handleStatusConfigUpdate(newConfig);
     }
@@ -146,7 +147,7 @@ export const CharacterDetail: React.FC = () => {
 
   const handleSaveNewStatus = async (newStatus: any) => {
     if (!newStatusKey) return;
-    
+
     const newConfig = {
       ...statusConfig,
       vital_signs: {
@@ -154,7 +155,7 @@ export const CharacterDetail: React.FC = () => {
         [newStatusKey]: newStatus
       }
     };
-    
+
     setStatusConfig(newConfig);
     await handleStatusConfigUpdate(newConfig);
     setNewStatusKey(null);
@@ -162,10 +163,10 @@ export const CharacterDetail: React.FC = () => {
 
   const handleStatusConfigUpdate = async (newConfig: StatusConfigType) => {
     if (!character) return;
-    
+
     try {
       setIsSaving(true);
-      await characterService.update(uid!, { 
+      await characterService.update(uid!, {
         name: character.name,
         status_config: newConfig
       });
@@ -193,7 +194,7 @@ export const CharacterDetail: React.FC = () => {
   // 处理亡语配置更新
   const handleWillConfigUpdate = async (field: keyof WillConfig, value: any) => {
     if (!uid) return;
-    
+
     try {
       setIsSaving(true);
       const updatedConfig = await characterService.updateWillConfig(uid, { [field]: value });
@@ -252,13 +253,13 @@ export const CharacterDetail: React.FC = () => {
               try {
                 setIsSaving(true);
                 setUpdateError(null);
-                
+
                 const updateData: UpdateCharacterData = {
                   name: data.name,
                   bio: data.bio,
                   avatar: data.avatar
                 };
-                
+
                 await characterService.update(uid!, updateData);
                 setIsEditing(false);
                 await silentRefetch();
@@ -310,13 +311,28 @@ export const CharacterDetail: React.FC = () => {
                 <TabsTrigger value="sync">同步</TabsTrigger>
                 <TabsTrigger value="will">亡语</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="basic" className="space-y-6">
                 <CharacterStatusSection
                   isActive={character.is_active}
                   onStatusChange={async (status) => {
                     try {
                       await characterService.updateStatus(uid!, status);
+                      await silentRefetch();
+                    } catch (err) {
+                      setUpdateError(formatError(err));
+                    }
+                  }}
+                />
+
+                <PublicStatusSection
+                  isPublic={character.is_public}
+                  onStatusChange={async (status) => {
+                    try {
+                      await characterService.update(uid!, {
+                        name: character.name,
+                        is_public: status
+                      });
                       await silentRefetch();
                     } catch (err) {
                       setUpdateError(formatError(err));
@@ -446,7 +462,7 @@ export const CharacterDetail: React.FC = () => {
                         <span className="ml-1 text-xs">(已达上限)</span>
                       )}
                     </Button>
-                    
+
                     {newStatusKey && (
                       <StatusCard
                         statusKey={newStatusKey}
@@ -458,7 +474,7 @@ export const CharacterDetail: React.FC = () => {
                           suffix: '',
                           __parent: statusConfig
                         }}
-                        onUpdate={() => {}}
+                        onUpdate={() => { }}
                         onDelete={() => setNewStatusKey(null)}
                         onSave={handleSaveNewStatus}
                         isSaving={isSaving}

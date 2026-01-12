@@ -5,6 +5,7 @@ import RegisterForm from './components/auth/RegisterForm';
 import { HomePage } from './pages/HomePage';
 import { CharactersPage } from './pages/CharactersPage';
 import { CharacterDisplayPage } from '@/pages/CharacterDisplayPage';
+import { SurvivorsPage } from '@/pages/SurvivorsPage';
 import authService from '@/lib/auth';
 import './App.css'
 import { Toaster } from 'sonner';
@@ -39,7 +40,7 @@ function App() {
 
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('auth-change', handleAuthChange);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('auth-change', handleAuthChange);
@@ -52,8 +53,8 @@ function App() {
         <div className="min-h-screen bg-gray-100 flex flex-col">
           <main className="flex-1 relative">
             <Routes>
-              <Route 
-                path="/login" 
+              <Route
+                path="/login"
                 element={
                   !isAuthenticated ? (
                     <div className="absolute inset-0 flex items-center justify-center p-4">
@@ -62,10 +63,10 @@ function App() {
                   ) : (
                     <Navigate to="/characters" replace />
                   )
-                } 
+                }
               />
-              <Route 
-                path="/register" 
+              <Route
+                path="/register"
                 element={
                   !isAuthenticated ? (
                     <div className="absolute inset-0 flex items-center justify-center p-4">
@@ -74,9 +75,10 @@ function App() {
                   ) : (
                     <Navigate to="/characters" replace />
                   )
-                } 
+                }
               />
               <Route path="/" element={<HomePage />} />
+              <Route path="/survivors" element={<SurvivorsPage />} />
               <Route
                 path="/characters/*"
                 element={isAuthenticated ? <CharactersPage /> : <Navigate to="/" replace />}

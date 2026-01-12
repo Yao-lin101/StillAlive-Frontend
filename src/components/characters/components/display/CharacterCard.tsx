@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { ShineBorder } from "@/components/magicui/shine-border";
 import { Marquee } from "@/components/magicui/marquee";
 import { StatusCard } from './StatusCard';
+import { LevelBadge } from '@/components/characters/LevelBadge';
 
 interface StatusItem {
   key: string;
@@ -29,6 +30,7 @@ interface CharacterCardProps {
   className?: string;
   isOwner?: boolean;
   onManageDanmaku?: () => void;
+  experience?: number;
 }
 
 export const CharacterCard: React.FC<CharacterCardProps> = ({
@@ -44,7 +46,8 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
   onMusicToggle,
   className,
   isOwner,
-  onManageDanmaku
+  onManageDanmaku,
+  experience
 }) => {
   const [enableHover, setEnableHover] = useState(false);
   const hasInteracted = useRef(false);
@@ -137,9 +140,12 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
             </div>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 text-left">
-              {name}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-gray-900 text-left">
+                {name}
+              </h1>
+              <LevelBadge experience={experience} />
+            </div>
             {bio && (
               <p className="mt-2 text-gray-600 text-left">
                 {bio}

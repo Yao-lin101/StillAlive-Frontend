@@ -5,6 +5,7 @@ import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
 import { SparklesText } from "@/components/magicui/sparkles-text";
 import { motion } from "framer-motion";
+import { LevelBadge } from "@/components/characters/LevelBadge";
 
 interface Survivor {
     display_code: string;
@@ -16,24 +17,6 @@ interface Survivor {
     status_message: string;
     experience?: number;
 }
-
-// 等级系统：根据经验值返回等级和对应颜色
-// 等级 6 (渐变): > 2^16 (65536)
-// 等级 5 (红色): > 2^15 (32768)
-// 等级 4 (橙色): > 2^13 (8192)
-// 等级 3 (蓝色): > 2^10 (1024)
-// 等级 2 (绿色): > 2^6 (64)
-// 等级 1 (白色): > 2^1 (2)
-// 等级 0 (白色): >= 0
-const getLevelInfo = (experience: number = 0): { level: number; colorClass: string } => {
-    if (experience > 65536) return { level: 6, colorClass: 'bg-gradient-to-r from-[#FFB5B5] to-[#90D5FF] text-white' };
-    if (experience > 32768) return { level: 5, colorClass: 'bg-red-500 text-white' };
-    if (experience > 8192) return { level: 4, colorClass: 'bg-orange-500 text-white' };
-    if (experience > 1024) return { level: 3, colorClass: 'bg-blue-500 text-white' };
-    if (experience > 64) return { level: 2, colorClass: 'bg-green-500 text-white' };
-    if (experience > 2) return { level: 1, colorClass: 'bg-white/80 text-gray-700 border border-gray-200' };
-    return { level: 0, colorClass: 'bg-white/80 text-gray-700 border border-gray-200' };
-};
 
 const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivor, index }) => {
     const navigate = useNavigate();
@@ -118,14 +101,7 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate group-hover:text-[#90D5FF] dark:group-hover:text-[#90D5FF] transition-colors">
                                     {survivor.name}
                                 </h3>
-                                {(() => {
-                                    const { level, colorClass } = getLevelInfo(survivor.experience);
-                                    return (
-                                        <span className={`flex-shrink-0 px-1.5 py-0.5 text-xs font-medium rounded shadow-sm ${colorClass}`}>
-                                            Lv.{level}
-                                        </span>
-                                    );
-                                })()}
+                                <LevelBadge experience={survivor.experience} />
                             </div>
 
                             {/* 状态消息 */}

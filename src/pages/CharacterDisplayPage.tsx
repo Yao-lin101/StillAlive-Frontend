@@ -24,6 +24,7 @@ interface CharacterDisplay {
   bio: string | null;
   status_config?: StatusConfigType;
   is_owner?: boolean;
+  experience?: number;
 }
 
 interface CharacterStatus {
@@ -368,6 +369,7 @@ export const CharacterDisplayPage: React.FC = () => {
             onMusicToggle={currentMusicUrl ? () => setIsMusicPlaying(!isMusicPlaying) : undefined}
             isOwner={character.is_owner}
             onManageDanmaku={() => setShowDanmakuManager(true)}
+            experience={character.experience}
           />
           <CharacterMessages
             displayCode={code!}

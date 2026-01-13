@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { cn } from "@/lib/utils";
 import { Message } from "@/types/character";
 import {
@@ -70,8 +70,25 @@ const DanmakuItem = ({
 
 export function DanmakuList({ messages, className }: DanmakuListProps) {
     const [selectedMsg, setSelectedMsg] = useState<Message | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
 
-    if (!messages || messages.length === 0) {
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    const displayMessages = useMemo(() => {
+        if (!messages) return [];
+        // On mobile, limit to 10 messages to prevent overcrowding
+        if (isMobile) {
+            return messages.slice(-10);
+        }
+        return messages;
+    }, [messages, isMobile]);
+
+    if (!displayMessages || displayMessages.length === 0) {
         return <div className={cn("relative w-full overflow-hidden", className)} />;
     }
 
@@ -100,7 +117,7 @@ export function DanmakuList({ messages, className }: DanmakuListProps) {
           `}
                 </style>
 
-                {messages.map((msg) => (
+                {displayMessages.map((msg) => (
                     <DanmakuItem
                         key={msg.id}
                         msg={msg}

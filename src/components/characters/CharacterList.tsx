@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useCharacters } from '@/hooks/useCharacters';
 import { Character } from '@/types/character';
-import { LogOut, Ticket } from 'lucide-react';
+import { Ticket } from 'lucide-react';
 import authService from '@/lib/auth';
 import {
   Dialog,
@@ -35,10 +35,7 @@ export const CharacterList = React.memo(() => {
 
   const isSuperuser = useMemo(() => user?.is_superuser ?? false, [user]);
 
-  const handleLogout = useCallback(() => {
-    authService.clearTokens();
-    window.dispatchEvent(new Event('auth-change'));
-  }, []);
+
 
   const fetchInvitationCodes = useCallback(async () => {
     try {
@@ -164,7 +161,7 @@ export const CharacterList = React.memo(() => {
   return (
     <div className="space-y-6">
       <div className="sticky top-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/30 border-b border-white/20 dark:border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
-        <div className="flex justify-between items-center px-4 py-4 max-w-6xl mx-auto">
+        <div className="flex justify-between items-center px-4 py-6 max-w-6xl mx-auto">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white pl-2">我的角色</h1>
           <div className="flex items-center gap-4">
             <Button
@@ -231,15 +228,7 @@ export const CharacterList = React.memo(() => {
                 </DialogContent>
               </Dialog>
             )}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleLogout}
-              title="退出登录"
-              className="bg-white/50 border-white/40 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
+
           </div>
         </div>
       </div>

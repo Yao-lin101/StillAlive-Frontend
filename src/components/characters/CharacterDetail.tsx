@@ -229,19 +229,19 @@ export const CharacterDetail: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="sticky top-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/30 border-b border-white/20 dark:border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
-        <div className="flex justify-between items-center px-4 py-4 max-w-6xl mx-auto w-full">
+        <div className="flex justify-between items-center px-4 py-6 max-w-6xl mx-auto w-full">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white pl-2">角色详情</h1>
           <div className="space-x-2">
             <Button
               variant="outline"
               onClick={() => navigate('/characters')}
-              className="bg-white/50 border-white/40 hover:bg-white/70 dark:bg-white/10 dark:hover:bg-white/20"
+              className="bg-white/50 border-white/40 hover:bg-white/70 dark:bg-white/10 dark:hover:bg-white/20 text-slate-800 dark:text-white"
             >
               返回列表
             </Button>
             <Button
               onClick={() => setIsEditing(!isEditing)}
-              className="bg-white/50 border-white/40 hover:bg-white/70 dark:bg-white/10 dark:hover:bg-white/20 border"
+              className="bg-white/50 border-white/40 hover:bg-white/70 dark:bg-white/10 dark:hover:bg-white/20 border text-slate-800 dark:text-white"
             >
               {isEditing ? '取消编辑' : '编辑'}
             </Button>
@@ -317,69 +317,90 @@ export const CharacterDetail: React.FC = () => {
                   <TabsTrigger value="will">亡语</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="basic" className="space-y-6">
-                  <CharacterStatusSection
-                    isActive={character.is_active}
-                    onStatusChange={async (status) => {
-                      try {
-                        await characterService.updateStatus(uid!, status);
-                        await silentRefetch();
-                      } catch (err) {
-                        setUpdateError(formatError(err));
-                      }
-                    }}
-                  />
+                <TabsContent value="basic" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  {/* 状态管理区域 */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-slate-800 dark:text-white flex items-center gap-2">
+                      <span className="w-1 h-4 bg-[#90D5FF] rounded-full"></span>
+                      状态管理
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <CharacterStatusSection
+                        isActive={character.is_active}
+                        onStatusChange={async (status) => {
+                          try {
+                            await characterService.updateStatus(uid!, status);
+                            await silentRefetch();
+                          } catch (err) {
+                            setUpdateError(formatError(err));
+                          }
+                        }}
+                      />
 
-                  <PublicStatusSection
-                    isPublic={character.is_public}
-                    onStatusChange={async (status) => {
-                      try {
-                        await characterService.update(uid!, {
-                          name: character.name,
-                          is_public: status
-                        });
-                        await silentRefetch();
-                      } catch (err) {
-                        setUpdateError(formatError(err));
-                      }
-                    }}
-                  />
+                      <PublicStatusSection
+                        isPublic={character.is_public}
+                        onStatusChange={async (status) => {
+                          try {
+                            await characterService.update(uid!, {
+                              name: character.name,
+                              is_public: status
+                            });
+                            await silentRefetch();
+                          } catch (err) {
+                            setUpdateError(formatError(err));
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
 
-                  <DisplayLinkSection
-                    displayCode={character.display_code}
-                    baseUrl={import.meta.env.VITE_CHARACTER_DISPLAY_BASE_URL}
-                    onRegenerateLink={async () => {
-                      try {
-                        setIsSaving(true);
-                        await characterService.regenerateDisplayCode(uid!);
-                        await silentRefetch();
-                        toast.success("展示链接已重新生成");
-                      } catch (err) {
-                        setUpdateError(formatError(err));
-                        toast.error("重新生成链接失败");
-                      } finally {
-                        setIsSaving(false);
-                      }
-                    }}
-                    isSaving={isSaving}
-                  />
+                  {/* 连接配置区域 */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-slate-800 dark:text-white flex items-center gap-2">
+                      <span className="w-1 h-4 bg-[#FFB5B5] rounded-full"></span>
+                      连接配置
+                    </h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <DisplayLinkSection
+                        displayCode={character.display_code}
+                        baseUrl={import.meta.env.VITE_CHARACTER_DISPLAY_BASE_URL}
+                        onRegenerateLink={async () => {
+                          try {
+                            setIsSaving(true);
+                            await characterService.regenerateDisplayCode(uid!);
+                            await silentRefetch();
+                            toast.success("展示链接已重新生成");
+                          } catch (err) {
+                            setUpdateError(formatError(err));
+                            toast.error("重新生成链接失败");
+                          } finally {
+                            setIsSaving(false);
+                          }
+                        }}
+                        isSaving={isSaving}
+                      />
 
-                  <SecretKeySection
-                    secretKey={secretKey}
-                    isRegeneratingKey={isRegeneratingKey}
-                    showRegenerateConfirm={showRegenerateConfirm}
-                    onRegenerateKey={handleRegenerateSecretKey}
-                    onCancelRegenerate={() => setShowRegenerateConfirm(false)}
-                    onShowRegenerateConfirm={() => setShowRegenerateConfirm(true)}
-                  />
+                      <SecretKeySection
+                        secretKey={secretKey}
+                        isRegeneratingKey={isRegeneratingKey}
+                        showRegenerateConfirm={showRegenerateConfirm}
+                        onRegenerateKey={handleRegenerateSecretKey}
+                        onCancelRegenerate={() => setShowRegenerateConfirm(false)}
+                        onShowRegenerateConfirm={() => setShowRegenerateConfirm(true)}
+                      />
+                    </div>
+                  </div>
 
-                  <DangerZoneSection
-                    showDeleteConfirm={showDeleteConfirm}
-                    isDeleting={isDeleting}
-                    onDelete={handleDelete}
-                    onCancelDelete={() => setShowDeleteConfirm(false)}
-                    onShowDeleteConfirm={() => setShowDeleteConfirm(true)}
-                  />
+                  {/* 危险区域 */}
+                  <div className="pt-4">
+                    <DangerZoneSection
+                      showDeleteConfirm={showDeleteConfirm}
+                      isDeleting={isDeleting}
+                      onDelete={handleDelete}
+                      onCancelDelete={() => setShowDeleteConfirm(false)}
+                      onShowDeleteConfirm={() => setShowDeleteConfirm(true)}
+                    />
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="display" className="space-y-6">

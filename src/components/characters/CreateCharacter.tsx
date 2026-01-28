@@ -75,9 +75,9 @@ export const CreateCharacter: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
+    <div className="space-y-6">
       <div className="sticky top-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/30 border-b border-white/20 dark:border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
-        <div className="flex justify-between items-center px-4 py-4 max-w-2xl mx-auto w-full">
+        <div className="flex justify-between items-center px-4 py-6 max-w-2xl mx-auto w-full">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white pl-2">创建角色</h1>
           <Button
             variant="outline"
@@ -89,7 +89,7 @@ export const CreateCharacter: React.FC = () => {
         </div>
       </div>
 
-      <div className="px-4 pb-8">
+      <div className="px-4 pb-8 max-w-2xl mx-auto">
         <Card className="p-8 backdrop-blur-xl bg-white/30 dark:bg-black/30 border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-3xl">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">

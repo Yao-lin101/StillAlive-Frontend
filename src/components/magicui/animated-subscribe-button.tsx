@@ -43,7 +43,7 @@ export const AnimatedSubscribeButton = React.forwardRef<
           <motion.button
             ref={ref}
             className={cn(
-              "relative flex h-10 w-fit items-center justify-center overflow-hidden rounded-lg bg-primary px-6 text-primary-foreground",
+              "relative flex h-10 w-fit items-center justify-center overflow-hidden rounded-lg bg-emerald-500 dark:bg-emerald-600 px-6 text-white",
               className,
             )}
             onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -68,7 +68,7 @@ export const AnimatedSubscribeButton = React.forwardRef<
           <motion.button
             ref={ref}
             className={cn(
-              "relative flex h-10 w-fit cursor-pointer items-center justify-center rounded-lg border-none bg-primary px-6 text-primary-foreground",
+              "relative flex h-10 w-fit cursor-pointer items-center justify-center rounded-lg border-none bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-200 px-6",
               className,
             )}
             onClick={(e) => {

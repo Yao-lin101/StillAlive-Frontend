@@ -137,7 +137,7 @@ export const CharacterList = React.memo(() => {
   ), [handleNavigateToCharacter]);
 
   const charactersList = useMemo(() => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-in-out">
       {characters.map(renderCharacterCard)}
     </div>
   ), [characters, renderCharacterCard]);

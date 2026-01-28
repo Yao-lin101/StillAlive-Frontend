@@ -75,98 +75,103 @@ export const CreateCharacter: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">创建角色</h1>
-        <Button
-          variant="outline"
-          onClick={() => navigate('/characters')}
-        >
-          返回列表
-        </Button>
+    <div className="space-y-6 max-w-2xl mx-auto">
+      <div className="sticky top-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/30 border-b border-white/20 dark:border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+        <div className="flex justify-between items-center px-4 py-4 max-w-2xl mx-auto w-full">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white pl-2">创建角色</h1>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/characters')}
+            className="bg-white/50 border-white/40 hover:bg-white/70 dark:bg-white/10 dark:hover:bg-white/20"
+          >
+            返回列表
+          </Button>
+        </div>
       </div>
 
-      <Card className="p-6">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">角色名称</label>
-            <Input
-              {...register('name')}
-              error={errors.name?.message}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="px-4 pb-8">
+        <Card className="p-8 backdrop-blur-xl bg-white/30 dark:bg-black/30 border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-3xl">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium">QQ号</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">角色名称</label>
               <Input
-                type="text"
-                placeholder="输入QQ号自动获取头像"
-                {...register('qqNumber')}
-                error={errors.qqNumber?.message}
+                {...register('name')}
+                error={errors.name?.message}
               />
-              <p className="text-xs text-gray-500">
-                输入QQ号自动获取头像
-              </p>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">QQ号</label>
+                <Input
+                  type="text"
+                  placeholder="输入QQ号自动获取头像"
+                  {...register('qqNumber')}
+                  error={errors.qqNumber?.message}
+                />
+                <p className="text-xs text-gray-500">
+                  输入QQ号自动获取头像
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">头像URL</label>
+                <Input
+                  type="text"
+                  placeholder="https://example.com/avatar.jpg"
+                  {...register('avatar')}
+                  error={errors.avatar?.message}
+                />
+                <p className="text-xs text-gray-500">
+                  也可以直接输入头像图片的URL地址
+                </p>
+              </div>
+            </div>
+
+            {previewAvatar && (
+              <div className="flex items-center space-x-4">
+                <img
+                  src={previewAvatar}
+                  alt="头像预览"
+                  className="w-16 h-16 rounded-full object-cover"
+                  onError={() => setPreviewAvatar(null)}
+                />
+                <span className="text-sm text-gray-500">头像预览</span>
+              </div>
+            )}
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">头像URL</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">简介</label>
               <Input
-                type="text"
-                placeholder="https://example.com/avatar.jpg"
-                {...register('avatar')}
-                error={errors.avatar?.message}
+                {...register('bio')}
+                error={errors.bio?.message}
               />
-              <p className="text-xs text-gray-500">
-                也可以直接输入头像图片的URL地址
-              </p>
             </div>
-          </div>
 
-          {previewAvatar && (
-            <div className="flex items-center space-x-4">
-              <img
-                src={previewAvatar}
-                alt="头像预览"
-                className="w-16 h-16 rounded-full object-cover"
-                onError={() => setPreviewAvatar(null)}
-              />
-              <span className="text-sm text-gray-500">头像预览</span>
+            {error && (
+              <div className="text-sm text-red-500">
+                {error}
+              </div>
+            )}
+
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/characters')}
+              >
+                取消
+              </Button>
+              <Button
+                type="submit"
+                disabled={isCreating}
+              >
+                {isCreating ? '创建中...' : '创建'}
+              </Button>
             </div>
-          )}
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">简介</label>
-            <Input
-              {...register('bio')}
-              error={errors.bio?.message}
-            />
-          </div>
-
-          {error && (
-            <div className="text-sm text-red-500">
-              {error}
-            </div>
-          )}
-
-          <div className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate('/characters')}
-            >
-              取消
-            </Button>
-            <Button
-              type="submit"
-              disabled={isCreating}
-            >
-              {isCreating ? '创建中...' : '创建'}
-            </Button>
-          </div>
-        </form>
-      </Card>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 }; 

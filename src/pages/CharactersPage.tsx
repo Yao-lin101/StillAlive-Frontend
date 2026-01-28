@@ -6,12 +6,17 @@ import { CharacterDetail } from '@/components/characters/CharacterDetail';
 
 export const CharactersPage: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Routes>
-        <Route path="/" element={<CharacterList />} />
-        <Route path="/new" element={<CreateCharacter />} />
-        <Route path="/:uid" element={<CharacterDetail />} />
-      </Routes>
+    <div className="relative min-h-screen">
+      {/* 固定背景 */}
+      <div className="fixed inset-0 z-0 bg-gradient-to-br from-[#FFE1E1] to-[#E3F4FF] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950" />
+
+      <div className="relative z-10 container mx-auto">
+        <Routes>
+          <Route path="/" element={<CharacterList />} />
+          <Route path="/new" element={<CreateCharacter />} />
+          <Route path="/:uid" element={<CharacterDetail />} />
+        </Routes>
+      </div>
     </div>
   );
 }; 

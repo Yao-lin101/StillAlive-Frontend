@@ -228,281 +228,287 @@ export const CharacterDetail: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">角色详情</h1>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/characters')}
-          >
-            返回列表
-          </Button>
-          <Button
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            {isEditing ? '取消编辑' : '编辑'}
-          </Button>
+      <div className="sticky top-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/30 border-b border-white/20 dark:border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+        <div className="flex justify-between items-center px-4 py-4 max-w-6xl mx-auto w-full">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white pl-2">角色详情</h1>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/characters')}
+              className="bg-white/50 border-white/40 hover:bg-white/70 dark:bg-white/10 dark:hover:bg-white/20"
+            >
+              返回列表
+            </Button>
+            <Button
+              onClick={() => setIsEditing(!isEditing)}
+              className="bg-white/50 border-white/40 hover:bg-white/70 dark:bg-white/10 dark:hover:bg-white/20 border"
+            >
+              {isEditing ? '取消编辑' : '编辑'}
+            </Button>
+          </div>
         </div>
       </div>
 
-      <Card className="p-6">
-        {isEditing ? (
-          <CharacterForm
-            character={character}
-            onSubmit={async (data) => {
-              try {
-                setIsSaving(true);
-                setUpdateError(null);
+      <div className="px-4 pb-8 max-w-6xl mx-auto">
+        <Card className="p-6 backdrop-blur-xl bg-white/30 dark:bg-black/30 border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-3xl">
+          {isEditing ? (
+            <CharacterForm
+              character={character}
+              onSubmit={async (data) => {
+                try {
+                  setIsSaving(true);
+                  setUpdateError(null);
 
-                const updateData: UpdateCharacterData = {
-                  name: data.name,
-                  bio: data.bio,
-                  avatar: data.avatar
-                };
+                  const updateData: UpdateCharacterData = {
+                    name: data.name,
+                    bio: data.bio,
+                    avatar: data.avatar
+                  };
 
-                await characterService.update(uid!, updateData);
-                setIsEditing(false);
-                await silentRefetch();
-              } catch (err) {
-                setUpdateError(formatError(err));
-              } finally {
-                setIsSaving(false);
-              }
-            }}
-            onCancel={() => setIsEditing(false)}
-            isSaving={isSaving}
-            updateError={updateError}
-          />
-        ) : (
-          <div className="space-y-6">
-            <div className="flex items-center space-x-4">
-              {character.avatar ? (
-                <img
-                  src={character.avatar}
-                  alt={character.name}
-                  className="w-24 h-24 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-3xl text-gray-500">
-                    {character.name[0]}
-                  </span>
+                  await characterService.update(uid!, updateData);
+                  setIsEditing(false);
+                  await silentRefetch();
+                } catch (err) {
+                  setUpdateError(formatError(err));
+                } finally {
+                  setIsSaving(false);
+                }
+              }}
+              onCancel={() => setIsEditing(false)}
+              isSaving={isSaving}
+              updateError={updateError}
+            />
+          ) : (
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4">
+                {character.avatar ? (
+                  <img
+                    src={character.avatar}
+                    alt={character.name}
+                    className="w-24 h-24 rounded-full object-cover ring-4 ring-white/30 dark:ring-white/10 shadow-lg"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#FFB5B5] to-[#90D5FF] flex items-center justify-center ring-4 ring-white/30 dark:ring-white/10 shadow-lg">
+                    <span className="text-3xl text-white font-bold">
+                      {character.name[0]}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-800 dark:text-white">{character.name}</h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    创建于 {new Date(character.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+
+              {character.bio && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">简介</h3>
+                  <p className="mt-1">{character.bio}</p>
                 </div>
               )}
-              <div>
-                <h2 className="text-xl font-semibold">{character.name}</h2>
-                <p className="text-sm text-gray-500">
-                  创建于 {new Date(character.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
 
-            {character.bio && (
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">简介</h3>
-                <p className="mt-1">{character.bio}</p>
-              </div>
-            )}
+              <Tabs defaultValue="basic" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="basic">基础</TabsTrigger>
+                  <TabsTrigger value="display">展示</TabsTrigger>
+                  <TabsTrigger value="sync">同步</TabsTrigger>
+                  <TabsTrigger value="will">亡语</TabsTrigger>
+                </TabsList>
 
-            <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="basic">基础</TabsTrigger>
-                <TabsTrigger value="display">展示</TabsTrigger>
-                <TabsTrigger value="sync">同步</TabsTrigger>
-                <TabsTrigger value="will">亡语</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="basic" className="space-y-6">
-                <CharacterStatusSection
-                  isActive={character.is_active}
-                  onStatusChange={async (status) => {
-                    try {
-                      await characterService.updateStatus(uid!, status);
-                      await silentRefetch();
-                    } catch (err) {
-                      setUpdateError(formatError(err));
-                    }
-                  }}
-                />
-
-                <PublicStatusSection
-                  isPublic={character.is_public}
-                  onStatusChange={async (status) => {
-                    try {
-                      await characterService.update(uid!, {
-                        name: character.name,
-                        is_public: status
-                      });
-                      await silentRefetch();
-                    } catch (err) {
-                      setUpdateError(formatError(err));
-                    }
-                  }}
-                />
-
-                <DisplayLinkSection
-                  displayCode={character.display_code}
-                  baseUrl={import.meta.env.VITE_CHARACTER_DISPLAY_BASE_URL}
-                  onRegenerateLink={async () => {
-                    try {
-                      setIsSaving(true);
-                      await characterService.regenerateDisplayCode(uid!);
-                      await silentRefetch();
-                      toast.success("展示链接已重新生成");
-                    } catch (err) {
-                      setUpdateError(formatError(err));
-                      toast.error("重新生成链接失败");
-                    } finally {
-                      setIsSaving(false);
-                    }
-                  }}
-                  isSaving={isSaving}
-                />
-
-                <SecretKeySection
-                  secretKey={secretKey}
-                  isRegeneratingKey={isRegeneratingKey}
-                  showRegenerateConfirm={showRegenerateConfirm}
-                  onRegenerateKey={handleRegenerateSecretKey}
-                  onCancelRegenerate={() => setShowRegenerateConfirm(false)}
-                  onShowRegenerateConfirm={() => setShowRegenerateConfirm(true)}
-                />
-
-                <DangerZoneSection
-                  showDeleteConfirm={showDeleteConfirm}
-                  isDeleting={isDeleting}
-                  onDelete={handleDelete}
-                  onCancelDelete={() => setShowDeleteConfirm(false)}
-                  onShowDeleteConfirm={() => setShowDeleteConfirm(true)}
-                />
-              </TabsContent>
-
-              <TabsContent value="display" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* 背景主题配置 */}
-                  <ThemeCard
-                    theme={statusConfig?.theme}
-                    config={statusConfig}
-                    onUpdate={(theme) => {
-                      setStatusConfig({
-                        ...statusConfig,
-                        theme
-                      });
+                <TabsContent value="basic" className="space-y-6">
+                  <CharacterStatusSection
+                    isActive={character.is_active}
+                    onStatusChange={async (status) => {
+                      try {
+                        await characterService.updateStatus(uid!, status);
+                        await silentRefetch();
+                      } catch (err) {
+                        setUpdateError(formatError(err));
+                      }
                     }}
-                    onSave={async (config) => {
-                      await handleStatusConfigUpdate(config);
+                  />
+
+                  <PublicStatusSection
+                    isPublic={character.is_public}
+                    onStatusChange={async (status) => {
+                      try {
+                        await characterService.update(uid!, {
+                          name: character.name,
+                          is_public: status
+                        });
+                        await silentRefetch();
+                      } catch (err) {
+                        setUpdateError(formatError(err));
+                      }
+                    }}
+                  />
+
+                  <DisplayLinkSection
+                    displayCode={character.display_code}
+                    baseUrl={import.meta.env.VITE_CHARACTER_DISPLAY_BASE_URL}
+                    onRegenerateLink={async () => {
+                      try {
+                        setIsSaving(true);
+                        await characterService.regenerateDisplayCode(uid!);
+                        await silentRefetch();
+                        toast.success("展示链接已重新生成");
+                      } catch (err) {
+                        setUpdateError(formatError(err));
+                        toast.error("重新生成链接失败");
+                      } finally {
+                        setIsSaving(false);
+                      }
                     }}
                     isSaving={isSaving}
                   />
 
-                  {/* 状态显示配置 */}
-                  <DisplayConfigCard
-                    config={statusConfig}
-                    onUpdate={(newConfig) => {
-                      setStatusConfig(newConfig);
-                    }}
-                    onSave={async (newConfig) => {
-                      await handleStatusConfigUpdate(newConfig);
-                    }}
-                    isSaving={isSaving}
+                  <SecretKeySection
+                    secretKey={secretKey}
+                    isRegeneratingKey={isRegeneratingKey}
+                    showRegenerateConfirm={showRegenerateConfirm}
+                    onRegenerateKey={handleRegenerateSecretKey}
+                    onCancelRegenerate={() => setShowRegenerateConfirm(false)}
+                    onShowRegenerateConfirm={() => setShowRegenerateConfirm(true)}
                   />
-                </div>
-              </TabsContent>
 
-              <TabsContent value="sync" className="space-y-6">
-                <div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {Object.entries(statusConfig?.vital_signs || {}).map(([key, config]) => (
-                      <StatusCard
-                        key={key}
-                        statusKey={key}
-                        config={{
-                          ...config,
-                          key: config.key || key,
-                          label: config.label || key,
-                          valueType: config.valueType || 'text',
-                          description: config.description,
-                          suffix: config.suffix,
-                          color: config.color,
-                          __parent: statusConfig
-                        }}
-                        onUpdate={(updatedConfig) => {
-                          setStatusConfig({
-                            ...statusConfig,
-                            vital_signs: {
-                              ...statusConfig.vital_signs,
-                              [key]: updatedConfig
-                            }
-                          });
-                        }}
-                        onDelete={() => handleRemoveStatusField('vital_signs', key)}
-                        onSave={async (updatedConfig) => {
-                          const newConfig = {
-                            ...statusConfig,
-                            vital_signs: {
-                              ...statusConfig.vital_signs,
-                              [key]: updatedConfig
-                            }
-                          };
-                          await handleStatusConfigUpdate(newConfig);
-                        }}
-                        isSaving={isSaving}
-                      />
-                    ))}
-                    <Button
-                      variant="outline"
-                      onClick={() => handleAddStatusField('vital_signs')}
-                      className="w-full h-[120px] flex items-center justify-center"
-                      disabled={Object.keys(statusConfig?.vital_signs || {}).length >= 10}
-                      title={Object.keys(statusConfig?.vital_signs || {}).length >= 10 ? "最多添加10个状态" : ""}
-                    >
-                      <PlusIcon className="h-4 w-4 mr-2" />
-                      添加状态
-                      {Object.keys(statusConfig?.vital_signs || {}).length >= 10 && (
-                        <span className="ml-1 text-xs">(已达上限)</span>
+                  <DangerZoneSection
+                    showDeleteConfirm={showDeleteConfirm}
+                    isDeleting={isDeleting}
+                    onDelete={handleDelete}
+                    onCancelDelete={() => setShowDeleteConfirm(false)}
+                    onShowDeleteConfirm={() => setShowDeleteConfirm(true)}
+                  />
+                </TabsContent>
+
+                <TabsContent value="display" className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* 背景主题配置 */}
+                    <ThemeCard
+                      theme={statusConfig?.theme}
+                      config={statusConfig}
+                      onUpdate={(theme) => {
+                        setStatusConfig({
+                          ...statusConfig,
+                          theme
+                        });
+                      }}
+                      onSave={async (config) => {
+                        await handleStatusConfigUpdate(config);
+                      }}
+                      isSaving={isSaving}
+                    />
+
+                    {/* 状态显示配置 */}
+                    <DisplayConfigCard
+                      config={statusConfig}
+                      onUpdate={(newConfig) => {
+                        setStatusConfig(newConfig);
+                      }}
+                      onSave={async (newConfig) => {
+                        await handleStatusConfigUpdate(newConfig);
+                      }}
+                      isSaving={isSaving}
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="sync" className="space-y-6">
+                  <div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {Object.entries(statusConfig?.vital_signs || {}).map(([key, config]) => (
+                        <StatusCard
+                          key={key}
+                          statusKey={key}
+                          config={{
+                            ...config,
+                            key: config.key || key,
+                            label: config.label || key,
+                            valueType: config.valueType || 'text',
+                            description: config.description,
+                            suffix: config.suffix,
+                            color: config.color,
+                            __parent: statusConfig
+                          }}
+                          onUpdate={(updatedConfig) => {
+                            setStatusConfig({
+                              ...statusConfig,
+                              vital_signs: {
+                                ...statusConfig.vital_signs,
+                                [key]: updatedConfig
+                              }
+                            });
+                          }}
+                          onDelete={() => handleRemoveStatusField('vital_signs', key)}
+                          onSave={async (updatedConfig) => {
+                            const newConfig = {
+                              ...statusConfig,
+                              vital_signs: {
+                                ...statusConfig.vital_signs,
+                                [key]: updatedConfig
+                              }
+                            };
+                            await handleStatusConfigUpdate(newConfig);
+                          }}
+                          isSaving={isSaving}
+                        />
+                      ))}
+                      <Button
+                        variant="outline"
+                        onClick={() => handleAddStatusField('vital_signs')}
+                        className="w-full h-[120px] flex items-center justify-center"
+                        disabled={Object.keys(statusConfig?.vital_signs || {}).length >= 10}
+                        title={Object.keys(statusConfig?.vital_signs || {}).length >= 10 ? "最多添加10个状态" : ""}
+                      >
+                        <PlusIcon className="h-4 w-4 mr-2" />
+                        添加状态
+                        {Object.keys(statusConfig?.vital_signs || {}).length >= 10 && (
+                          <span className="ml-1 text-xs">(已达上限)</span>
+                        )}
+                      </Button>
+
+                      {newStatusKey && (
+                        <StatusCard
+                          statusKey={newStatusKey}
+                          config={{
+                            key: newStatusKey,
+                            label: '',
+                            valueType: 'text',
+                            description: '',
+                            suffix: '',
+                            __parent: statusConfig
+                          }}
+                          onUpdate={() => { }}
+                          onDelete={() => setNewStatusKey(null)}
+                          onSave={handleSaveNewStatus}
+                          isSaving={isSaving}
+                          isNew={true}
+                        />
                       )}
-                    </Button>
-
-                    {newStatusKey && (
-                      <StatusCard
-                        statusKey={newStatusKey}
-                        config={{
-                          key: newStatusKey,
-                          label: '',
-                          valueType: 'text',
-                          description: '',
-                          suffix: '',
-                          __parent: statusConfig
-                        }}
-                        onUpdate={() => { }}
-                        onDelete={() => setNewStatusKey(null)}
-                        onSave={handleSaveNewStatus}
-                        isSaving={isSaving}
-                        isNew={true}
-                      />
-                    )}
+                    </div>
                   </div>
-                </div>
-              </TabsContent>
+                </TabsContent>
 
-              <TabsContent value="will" className="space-y-6">
-                {isLoadingWill ? (
-                  <div className="flex items-center justify-center min-h-[200px]">
-                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
-                  </div>
-                ) : (
-                  <WillConfigSection
-                    characterUid={uid!}
-                    willConfig={willConfig}
-                    onUpdate={handleWillConfigUpdate}
-                    isLoading={isSaving}
-                  />
-                )}
-              </TabsContent>
-            </Tabs>
-          </div>
-        )}
-      </Card>
+                <TabsContent value="will" className="space-y-6">
+                  {isLoadingWill ? (
+                    <div className="flex items-center justify-center min-h-[200px]">
+                      <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+                    </div>
+                  ) : (
+                    <WillConfigSection
+                      characterUid={uid!}
+                      willConfig={willConfig}
+                      onUpdate={handleWillConfigUpdate}
+                      isLoading={isSaving}
+                    />
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
-}; 
+};

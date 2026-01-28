@@ -66,7 +66,7 @@ function App() {
             path="/login"
             element={
               !isAuthenticated ? (
-                <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+                <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#FFE1E1] to-[#E3F4FF] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
                   <LoginForm />
                 </div>
               ) : (
@@ -78,7 +78,7 @@ function App() {
             path="/register"
             element={
               !isAuthenticated ? (
-                <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+                <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#FFE1E1] to-[#E3F4FF] dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
                   <RegisterForm />
                 </div>
               ) : (

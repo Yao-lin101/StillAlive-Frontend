@@ -11,7 +11,7 @@ export const HomePage: React.FC = () => {
   const isAuthenticated = React.useContext(AuthContext);
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#FFE1E1] to-[#E3F4FF] dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 w-full z-0">
+    <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#FFE1E1] to-[#E3F4FF] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 w-full z-0">
       {/* Decorative background orbs with animation */}
       {/* Decorative background orbs with animation - REMOVED */}
 

@@ -35,7 +35,7 @@ export const DockNav: React.FC<{ children: React.ReactNode }> = ({ children }) =
     });
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30 dark:from-gray-900 dark:via-purple-900/10 dark:to-pink-900/10">
+        <div className="min-h-screen">
             {/* 主内容区 - 添加底部 padding 防止被 Dock 遮挡 */}
             <main className="pb-32">
                 {children}

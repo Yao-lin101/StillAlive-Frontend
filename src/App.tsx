@@ -10,6 +10,7 @@ import { DockNav } from '@/components/layout/DockNav';
 import authService from '@/lib/auth';
 import './App.css'
 import { Toaster } from 'sonner';
+import { Particles } from "@/components/ui/particles";
 
 // 创建认证上下文
 export const AuthContext = createContext<boolean>(false);
@@ -66,9 +67,20 @@ function App() {
             path="/login"
             element={
               !isAuthenticated ? (
-                <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#FFE1E1] to-[#E3F4FF] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-                  <LoginForm />
-                </div>
+                <MainLayout>
+                  <div className="relative min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#FFE1E1] to-[#E3F4FF] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-hidden">
+                    <Particles
+                      className="absolute inset-0 z-0 pointer-events-none"
+                      quantity={100}
+                      ease={80}
+                      color="#ffffff"
+                      refresh
+                    />
+                    <div className="relative z-10 w-full max-w-md">
+                      <LoginForm />
+                    </div>
+                  </div>
+                </MainLayout>
               ) : (
                 <Navigate to="/characters" replace />
               )
@@ -78,9 +90,20 @@ function App() {
             path="/register"
             element={
               !isAuthenticated ? (
-                <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#FFE1E1] to-[#E3F4FF] dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
-                  <RegisterForm />
-                </div>
+                <MainLayout>
+                  <div className="relative min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#FFE1E1] to-[#E3F4FF] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-hidden">
+                    <Particles
+                      className="absolute inset-0 z-0 pointer-events-none"
+                      quantity={100}
+                      ease={80}
+                      color="#ffffff"
+                      refresh
+                    />
+                    <div className="relative z-10 w-full max-w-md">
+                      <RegisterForm />
+                    </div>
+                  </div>
+                </MainLayout>
               ) : (
                 <Navigate to="/characters" replace />
               )

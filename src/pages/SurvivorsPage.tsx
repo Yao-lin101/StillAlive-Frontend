@@ -46,14 +46,14 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
             whileTap={{ scale: 0.98 }}
         >
             <Card
-                className="group relative overflow-hidden cursor-pointer bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="group relative overflow-hidden cursor-pointer backdrop-blur-xl bg-white/30 dark:bg-black/30 border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] transition-all duration-300 rounded-2xl"
                 onClick={() => navigate(`/d/${survivor.display_code}`)}
             >
                 {/* 在线状态指示器 */}
                 <div className="absolute top-3 right-3 z-10">
-                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${survivor.is_online
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
-                        : 'bg-gray-100 text-gray-600 dark:bg-gray-700/50 dark:text-gray-400'
+                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium backdrop-blur-md border border-white/20 shadow-sm ${survivor.is_online
+                        ? 'bg-green-100/80 text-green-700 dark:bg-green-900/50 dark:text-green-400'
+                        : 'bg-gray-100/80 text-gray-600 dark:bg-gray-700/50 dark:text-gray-400'
                         }`}>
                         <span className={`w-2 h-2 rounded-full ${survivor.is_online
                             ? 'bg-green-500 animate-pulse'
@@ -64,13 +64,14 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
                 </div>
 
                 {/* 渐变背景装饰 */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#FFE1E1]/30 via-[#E3F4FF]/30 to-[#FFE1E1]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                {/* 渐变背景装饰 - 更新为更柔和的玻璃光泽 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent dark:from-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
                 <div className="relative p-6">
                     <div className="flex items-start gap-4">
                         {/* 头像 */}
                         <div className="relative flex-shrink-0">
-                            <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-slate-200 dark:ring-slate-800 group-hover:ring-[#90D5FF] transition-all duration-300">
+                            <div className="w-16 h-16 rounded-full overflow-hidden ring-4 ring-white/30 dark:ring-white/10 group-hover:ring-[#90D5FF] dark:group-hover:ring-[#90D5FF] transition-all duration-300 shadow-lg">
                                 {survivor.avatar ? (
                                     <img
                                         src={survivor.avatar}
@@ -95,7 +96,7 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
 
                         {/* 信息 */}
                         <div className="flex-1 min-w-0">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate group-hover:text-[#90D5FF] dark:group-hover:text-[#90D5FF] transition-colors">
+                            <h3 className="text-lg font-semibold text-slate-800 dark:text-white truncate group-hover:text-[#90D5FF] dark:group-hover:text-[#90D5FF] transition-colors">
                                 {survivor.name}
                             </h3>
 
@@ -105,7 +106,7 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
                             </p>
 
                             {/* 最后更新时间 */}
-                            <div className="mt-3 flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
+                            <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -166,6 +167,11 @@ export const SurvivorsPage: React.FC = () => {
         return () => clearInterval(intervalId);
     }, []);
 
+    // 页面整体容器样式 (Glassmorphism 背景 - 这里的类名仅用于内容区的布局，背景由外部div处理)
+    const pageBgClass = "relative w-full z-10";
+    // 头部样式
+    const headerClass = "sticky top-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/30 border-b border-white/20 dark:border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]";
+
     if (isLoading) {
         return (
             <div className="min-h-[50vh] flex items-center justify-center">
@@ -189,54 +195,59 @@ export const SurvivorsPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-[calc(100vh-128px)]">
-            {/* Header */}
-            <div className="sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-b border-gray-200/50 dark:border-gray-800/50">
-                <div className="max-w-6xl mx-auto px-4 py-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <SparklesText
-                                text="Pokemon Gettodaze"
-                                colors={{ first: "#FFB5B5", second: "#90D5FF" }}
-                                className="text-3xl md:text-4xl font-bold"
-                            />
-                            <p className="mt-2 text-gray-500 dark:text-gray-400">
-                                都还活着没？
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-[#E3F4FF] dark:bg-slate-900/30 rounded-full">
-                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                {survivors.filter(s => s.is_online).length} 人在线
-                            </span>
+        <div className="relative min-h-screen">
+            {/* 固定背景 */}
+            <div className="fixed inset-0 z-0 bg-gradient-to-br from-[#FFE1E1] to-[#E3F4FF] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950" />
+
+            <div className={pageBgClass}>
+                {/* Header */}
+                <div className={headerClass}>
+                    <div className="max-w-6xl mx-auto px-4 py-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <SparklesText
+                                    text="Pokemon Gettodaze"
+                                    colors={{ first: "#90D5FF", second: "#FFB5B5" }}
+                                    className="text-3xl md:text-4xl font-bold"
+                                />
+                                <p className="mt-2 text-slate-600 dark:text-gray-400">
+                                    都还活着没？
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm border border-white/30 dark:border-white/10 rounded-full shadow-sm">
+                                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    {survivors.filter(s => s.is_online).length} 人在线
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Content */}
-            <div className="max-w-6xl mx-auto px-4 py-8">
-                {survivors.length === 0 ? (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-center py-20"
-                    >
-                        <div className="text-6xl mb-4">👻</div>
-                        <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                            暂无存活者
-                        </h2>
-                        <p className="text-gray-500 dark:text-gray-400">
-                            还没有任何角色被创建
-                        </p>
-                    </motion.div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {survivors.map((survivor, index) => (
-                            <SurvivorCard key={survivor.display_code} survivor={survivor} index={index} />
-                        ))}
-                    </div>
-                )}
+                {/* Content */}
+                <div className="max-w-6xl mx-auto px-4 py-8">
+                    {survivors.length === 0 ? (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-center py-20"
+                        >
+                            <div className="text-6xl mb-4">👻</div>
+                            <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                暂无存活者
+                            </h2>
+                            <p className="text-gray-500 dark:text-gray-400">
+                                还没有任何角色被创建
+                            </p>
+                        </motion.div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {survivors.map((survivor, index) => (
+                                <SurvivorCard key={survivor.display_code} survivor={survivor} index={index} />
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

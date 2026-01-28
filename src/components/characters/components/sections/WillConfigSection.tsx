@@ -24,7 +24,7 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
   const [timeoutHours, setTimeoutHours] = useState<number>(24); // 默认24小时
   const [content, setContent] = useState<string>('');
   const [emailError, setEmailError] = useState<string>('');
-  
+
   // 为各个操作添加独立的loading状态
   const [isUpdatingEmail, setIsUpdatingEmail] = useState<boolean>(false);
   const [isUpdatingCcEmail, setIsUpdatingCcEmail] = useState<boolean>(false);
@@ -52,27 +52,27 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
   // 添加抄送邮箱
   const handleAddCcEmail = () => {
     if (!newCcEmail) return;
-    
+
     if (!validateEmail(newCcEmail)) {
       setEmailError('请输入有效的邮箱地址');
       return;
     }
-    
+
     if (ccEmails.includes(newCcEmail)) {
       setEmailError('该邮箱已在抄送列表中');
       return;
     }
-    
+
     if (ccEmails.length >= 5) {
       setEmailError('最多添加5个抄送邮箱');
       return;
     }
-    
+
     const newCcEmails = [...ccEmails, newCcEmail];
     setCcEmails(newCcEmails);
     setNewCcEmail('');
     setEmailError('');
-    
+
     // 更新到服务器
     setIsUpdatingCcEmail(true);
     onUpdate('cc_emails', newCcEmails)
@@ -88,7 +88,7 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
   const handleRemoveCcEmail = (email: string) => {
     const newCcEmails = ccEmails.filter(e => e !== email);
     setCcEmails(newCcEmails);
-    
+
     // 更新到服务器
     setIsUpdatingCcEmail(true);
     onUpdate('cc_emails', newCcEmails)
@@ -106,14 +106,14 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
       setEmailError('请输入主要对象邮箱');
       return;
     }
-    
+
     if (!validateEmail(targetEmail)) {
       setEmailError('请输入有效的邮箱地址');
       return;
     }
-    
+
     setEmailError('');
-    
+
     // 确保同时发送content字段，避免后端创建新记录时出错
     setIsUpdatingEmail(true);
     onUpdate('target_email', targetEmail)
@@ -133,10 +133,10 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
       toast.error('请先设置主要对象邮箱');
       return;
     }
-    
+
     const newState = !isEnabled;
     setIsEnabled(newState);
-    
+
     try {
       setIsTogglingEnabled(true);
       // 只发送is_enabled字段
@@ -193,9 +193,10 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
             placeholder="请输入邮箱地址"
             className="flex-1"
           />
-          <Button 
+          <Button
             onClick={handleUpdateTargetEmail}
             disabled={isUpdatingEmail || !targetEmail}
+            className="bg-[#eaf5fb] hover:bg-[#d6ebf7] text-[#65a8ec] border-none dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
           >
             {isUpdatingEmail ? '保存中...' : '保存'}
           </Button>
@@ -216,18 +217,19 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
             className="flex-1"
             disabled={!hasTargetEmail || isUpdatingCcEmail}
           />
-          <Button 
+          <Button
             onClick={handleAddCcEmail}
             disabled={isUpdatingCcEmail || !newCcEmail || !hasTargetEmail}
+            className="bg-[#eaf5fb] hover:bg-[#d6ebf7] text-[#65a8ec] border-none dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
           >
             {isUpdatingCcEmail ? '添加中...' : '添加'}
           </Button>
         </div>
-        
+
         {ccEmails.length > 0 ? (
           <div className="space-y-2 mt-2 max-w-md mx-auto">
             {ccEmails.map((email, index) => (
-              <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+              <div key={index} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-slate-800 rounded dark:text-slate-200">
                 <span className="text-sm truncate">{email}</span>
                 <Button
                   variant="ghost"
@@ -250,7 +252,7 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
       <div>
         <h3 className="text-sm font-medium text-gray-500 mb-2 text-center">启用亡语功能</h3>
         <div className="flex justify-center items-center space-x-2">
-          <AnimatedSubscribeButton 
+          <AnimatedSubscribeButton
             key={`will-enabled-${isEnabled}`}
             className="w-32 h-9"
             subscribeStatus={isEnabled}
@@ -288,10 +290,10 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleUpdateTimeoutHours([parseInt(e.target.value)])}
                 className="w-full"
               />
-              <Button 
+              <Button
                 onClick={handleSaveTimeoutHours}
                 disabled={isUpdatingTimeout}
-                className="w-full"
+                className="w-full bg-[#eaf5fb] hover:bg-[#d6ebf7] text-[#65a8ec] border-none dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
               >
                 {isUpdatingTimeout ? '保存中...' : '保存触发时间'}
               </Button>
@@ -308,12 +310,12 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
                 value={content}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)}
                 placeholder="请输入亡语内容..."
-                className="min-h-[150px] w-full p-2 border rounded-md"
+                className="min-h-[150px] w-full p-2 border rounded-md bg-white dark:bg-slate-900 dark:border-slate-700 dark:text-white"
               />
-              <Button 
+              <Button
                 onClick={handleUpdateContent}
                 disabled={isUpdatingContent}
-                className="w-full"
+                className="w-full bg-[#eaf5fb] hover:bg-[#d6ebf7] text-[#65a8ec] border-none dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
               >
                 {isUpdatingContent ? '保存中...' : '保存亡语内容'}
               </Button>

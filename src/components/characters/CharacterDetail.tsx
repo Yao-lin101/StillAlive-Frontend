@@ -403,7 +403,7 @@ export const CharacterDetail: React.FC = () => {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="display" className="space-y-6">
+                <TabsContent value="display" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* 背景主题配置 */}
                     <ThemeCard
@@ -435,7 +435,7 @@ export const CharacterDetail: React.FC = () => {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="sync" className="space-y-6">
+                <TabsContent value="sync" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {Object.entries(statusConfig?.vital_signs || {}).map(([key, config]) => (
@@ -511,7 +511,7 @@ export const CharacterDetail: React.FC = () => {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="will" className="space-y-6">
+                <TabsContent value="will" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   {isLoadingWill ? (
                     <div className="flex items-center justify-center min-h-[200px]">
                       <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />

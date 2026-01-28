@@ -249,7 +249,7 @@ export const WillConfigSection: React.FC<WillConfigSectionProps> = ({
                         size="sm"
                         onClick={() => handleRemoveCcEmail(email)}
                         disabled={isUpdatingCcEmail}
-                        className="h-6 w-6 p-0 hover:bg-red-50 hover:text-red-500"
+                        className="h-6 w-6 p-0 bg-transparent text-gray-400 hover:bg-red-50 hover:text-red-500 dark:text-gray-500 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors"
                       >
                         <MinusIcon className="h-3 w-3" />
                       </Button>

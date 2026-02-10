@@ -68,6 +68,12 @@ export const characterService = {
     return response.data.secret_key;
   },
 
+  // iCloud 快捷指令分享链接
+  SHORTCUT_ICLOUD_URLS: {
+    high_freq: 'https://www.icloud.com/shortcuts/7bbfa2d6a6ca420faffcfa6f122874b5',
+    low_freq: 'https://www.icloud.com/shortcuts/71c575860eaa40da89dc26167a3fe18c',
+  } as Record<'high_freq' | 'low_freq', string>,
+
   async regenerateDisplayCode(uid: string) {
     const response = await api.post(`/characters/${uid}/regenerate_display_code/`);
     return response.data;

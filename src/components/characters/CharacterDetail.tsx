@@ -384,6 +384,7 @@ export const CharacterDetail: React.FC = () => {
                         secretKey={secretKey}
                         isRegeneratingKey={isRegeneratingKey}
                         showRegenerateConfirm={showRegenerateConfirm}
+                        characterUid={uid!}
                         onRegenerateKey={handleRegenerateSecretKey}
                         onCancelRegenerate={() => setShowRegenerateConfirm(false)}
                         onShowRegenerateConfirm={() => setShowRegenerateConfirm(true)}

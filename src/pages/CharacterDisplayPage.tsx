@@ -16,6 +16,12 @@ import { AnimatedContent } from '@/components/characters/components/display/Anim
 import { Message } from '@/types/character';
 import { toast } from 'sonner';
 import { DanmakuManager } from '@/components/characters/DanmakuManager';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import '@/styles/animations.css';
 
 interface CharacterDisplay {
@@ -116,6 +122,7 @@ export const CharacterDisplayPage: React.FC = () => {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [showDanmakuManager, setShowDanmakuManager] = useState(false);
+  const [selectedDanmaku, setSelectedDanmaku] = useState<Message | null>(null);
 
   const fetchMessages = async () => {
     if (!code) return;
@@ -327,15 +334,7 @@ export const CharacterDisplayPage: React.FC = () => {
   };
 
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center overflow-hidden"
-      onClick={() => {
-        if (isCardHidden) {
-          setIsCardHidden(false);
-          setIsMusicPlaying(true);
-        }
-      }}
-    >
+    <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
       <Background
         theme={character.status_config?.theme}
         onBgImageError={() => { }}
@@ -343,12 +342,19 @@ export const CharacterDisplayPage: React.FC = () => {
 
       {/* 弹幕始终显示，不受隐藏卡片影响 */}
       <div className="absolute inset-0 z-10 overflow-hidden">
-        <DanmakuList messages={messages} className="h-full" />
+        <DanmakuList
+          messages={messages}
+          className="h-full"
+          onSelect={setSelectedDanmaku}
+        />
       </div>
 
       <AnimatedContent
         isHidden={isCardHidden}
-        onShow={() => { }}
+        onShow={() => {
+          setIsCardHidden(false);
+          setIsMusicPlaying(true);
+        }}
         className="relative z-20 w-full min-h-full flex flex-col items-center py-12"
       >
 
@@ -394,6 +400,7 @@ export const CharacterDisplayPage: React.FC = () => {
         />
       )}
 
+      {/* 状态详情弹窗 */}
       <Modal
         isOpen={showStatusDialog}
         onClose={() => setShowStatusDialog(false)}
@@ -418,12 +425,45 @@ export const CharacterDisplayPage: React.FC = () => {
         </div>
       </Modal>
 
+      {/* 弹幕管理弹窗 */}
       <DanmakuManager
         open={showDanmakuManager}
         onOpenChange={setShowDanmakuManager}
         messages={messages}
         onDelete={handleDeleteMessage}
       />
+
+      {/* 弹幕内容详情弹窗 */}
+      <Dialog open={!!selectedDanmaku} onOpenChange={(open) => !open && setSelectedDanmaku(null)}>
+        <DialogContent
+          className="sm:max-w-md bg-white/90 dark:bg-black/90 backdrop-blur-xl border-white/20"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDownOutside={(e) => e.stopPropagation()}
+        >
+          <DialogHeader>
+            <DialogTitle>弹幕详情</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <p className="text-lg font-medium dark:text-gray-100 break-words">{selectedDanmaku?.content}</p>
+            </div>
+            <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 border-t pt-4 dark:border-gray-800">
+              <div className="flex flex-col gap-1">
+                <span className="font-mono text-xs opacity-70">
+                  {selectedDanmaku?.created_at && new Date(selectedDanmaku.created_at).toLocaleString()}
+                </span>
+              </div>
+              <div className="flex flex-col gap-1 text-right">
+                <div className="flex flex-col items-end">
+                  <span className="font-medium text-xs text-gray-900 dark:text-gray-100">
+                    {selectedDanmaku?.location ? `${selectedDanmaku.location}网友` : '异世界网友'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div >
   );
 }; 

@@ -50,15 +50,18 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
           @keyframes breathing {
             0%, 100% {
               opacity: 1;
-              text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+              text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2);
             }
             50% {
-              opacity: 0.4;
-              text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+              opacity: 0.7;
+              text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 255, 255, 0.5);
             }
           }
           .breathing-animation {
             animation: breathing 2s ease-in-out infinite;
+          }
+          .text-outline {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2);
           }
         `}
       </style>
@@ -91,7 +94,7 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
             >
               {isMobile ? (
                 <div className={cn(
-                  "text-shadow-sm",
+                  "text-outline",
                   showBreathing && "breathing-animation"
                 )}>
                   <HyperText
@@ -107,7 +110,7 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
               ) : (
                 <SpinningText
                   duration={30}
-                  className="w-32 h-32"
+                  className="w-32 h-32 text-outline"
                 >
                   CLICK TO VIEW STATUS DATA
                 </SpinningText>

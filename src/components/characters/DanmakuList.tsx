@@ -1,16 +1,11 @@
 import { useMemo, useState, useEffect } from 'react';
 import { cn } from "@/lib/utils";
 import { Message } from "@/types/character";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
 
 interface DanmakuListProps {
     messages: Message[];
     className?: string;
+    onSelect?: (msg: Message) => void;
 }
 
 const TRACK_HEIGHT = 40; // Height per track in pixels
@@ -68,8 +63,7 @@ const DanmakuItem = ({
     );
 };
 
-export function DanmakuList({ messages, className }: DanmakuListProps) {
-    const [selectedMsg, setSelectedMsg] = useState<Message | null>(null);
+export function DanmakuList({ messages, className, onSelect }: DanmakuListProps) {
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
@@ -93,19 +87,18 @@ export function DanmakuList({ messages, className }: DanmakuListProps) {
     }
 
     return (
-        <>
-            <div
-                className={cn(
-                    "relative w-full overflow-hidden select-none pointer-events-none",
-                    className
-                )}
-                style={{
-                    maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
-                    WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)'
-                }}
-            >
-                <style>
-                    {`
+        <div
+            className={cn(
+                "relative w-full overflow-hidden select-none pointer-events-none",
+                className
+            )}
+            style={{
+                maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)'
+            }}
+        >
+            <style>
+                {`
             @keyframes danmaku-scroll {
               from { transform: translateX(0); }
               to { transform: translateX(calc(-100vw - 100%)); } 
@@ -115,47 +108,15 @@ export function DanmakuList({ messages, className }: DanmakuListProps) {
               z-index: 50;
             }
           `}
-                </style>
+            </style>
 
-                {displayMessages.map((msg) => (
-                    <DanmakuItem
-                        key={msg.id}
-                        msg={msg}
-                        onClick={setSelectedMsg}
-                    />
-                ))}
-            </div>
-
-            <Dialog open={!!selectedMsg} onOpenChange={(open) => !open && setSelectedMsg(null)}>
-                <DialogContent
-                    className="sm:max-w-md bg-white/90 dark:bg-black/90 backdrop-blur-xl border-white/20"
-                    onClick={(e) => e.stopPropagation()}
-                    onPointerDownOutside={(e) => e.stopPropagation()}
-                >
-                    <DialogHeader>
-                        <DialogTitle>弹幕详情</DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="space-y-2">
-                            <p className="text-lg font-medium dark:text-gray-100 break-words">{selectedMsg?.content}</p>
-                        </div>
-                        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 border-t pt-4 dark:border-gray-800">
-                            <div className="flex flex-col gap-1">
-                                <span className="font-mono text-xs opacity-70">
-                                    {selectedMsg?.created_at && new Date(selectedMsg.created_at).toLocaleString()}
-                                </span>
-                            </div>
-                            <div className="flex flex-col gap-1 text-right">
-                                <div className="flex flex-col items-end">
-                                    <span className="font-medium text-xs text-gray-900 dark:text-gray-100">
-                                        {selectedMsg?.location ? `${selectedMsg.location}网友` : '异世界网友'}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
-        </>
+            {displayMessages.map((msg) => (
+                <DanmakuItem
+                    key={msg.id}
+                    msg={msg}
+                    onClick={(msg) => onSelect?.(msg)}
+                />
+            ))}
+        </div>
     );
 }

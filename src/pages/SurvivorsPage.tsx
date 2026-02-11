@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
 import { SparklesText } from "@/components/magicui/sparkles-text";
@@ -17,6 +18,14 @@ interface Survivor {
     status_message: string;
     experience?: number;
 }
+
+/** 判断角色是否为"最近活跃"：在线 或 最后更新在24小时内 */
+const isRecentlyActive = (survivor: Survivor): boolean => {
+    if (survivor.is_online) return true;
+    if (!survivor.last_updated) return false;
+    const diffMs = Date.now() - new Date(survivor.last_updated).getTime();
+    return diffMs < 24 * 60 * 60 * 1000; // 24h
+};
 
 const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivor, index }) => {
     const navigate = useNavigate();
@@ -127,10 +136,48 @@ const SurvivorCard: React.FC<{ survivor: Survivor; index: number }> = ({ survivo
     );
 };
 
+/** 空状态提示 */
+const EmptyState: React.FC<{ emoji: string; title: string; description: string }> = ({ emoji, title, description }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center py-20"
+    >
+        <div className="text-6xl mb-4">{emoji}</div>
+        <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">{title}</h2>
+        <p className="text-gray-500 dark:text-gray-400">{description}</p>
+    </motion.div>
+);
+
+/** 卡片网格 */
+const SurvivorGrid: React.FC<{ survivors: Survivor[] }> = ({ survivors }) => (
+    <motion.div
+        key={survivors.map(s => s.display_code).join(',')}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
+        {survivors.map((survivor, index) => (
+            <SurvivorCard key={survivor.display_code} survivor={survivor} index={index} />
+        ))}
+    </motion.div>
+);
+
 export const SurvivorsPage: React.FC = () => {
     const [survivors, setSurvivors] = useState<Survivor[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // 分类：活跃 / 不活跃
+    const { active, inactive } = useMemo(() => {
+        const active: Survivor[] = [];
+        const inactive: Survivor[] = [];
+        for (const s of survivors) {
+            (isRecentlyActive(s) ? active : inactive).push(s);
+        }
+        return { active, inactive };
+    }, [survivors]);
 
     // 首次加载
     useEffect(() => {
@@ -227,25 +274,46 @@ export const SurvivorsPage: React.FC = () => {
                 {/* Content */}
                 <div className="max-w-6xl mx-auto px-4 py-8">
                     {survivors.length === 0 ? (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-center py-20"
-                        >
-                            <div className="text-6xl mb-4">👻</div>
-                            <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                暂无存活者
-                            </h2>
-                            <p className="text-gray-500 dark:text-gray-400">
-                                还没有任何角色被创建
-                            </p>
-                        </motion.div>
+                        <EmptyState emoji="👻" title="暂无存活者" description="还没有任何角色被创建" />
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {survivors.map((survivor, index) => (
-                                <SurvivorCard key={survivor.display_code} survivor={survivor} index={index} />
-                            ))}
-                        </div>
+                        <Tabs defaultValue="active" className="w-full">
+                            <TabsList className="mb-6 backdrop-blur-md bg-white/40 dark:bg-slate-800/40 border border-white/20 dark:border-white/10 p-1 rounded-xl shadow-sm">
+                                <TabsTrigger value="active" className="gap-2 rounded-lg px-4 py-2">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    冒泡
+                                    <span className="ml-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-400">
+                                        {active.length}
+                                    </span>
+                                </TabsTrigger>
+                                <TabsTrigger value="inactive" className="gap-2 rounded-lg px-4 py-2">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                    </svg>
+                                    潜水
+                                    <span className="ml-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700/60 dark:text-gray-400">
+                                        {inactive.length}
+                                    </span>
+                                </TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="active">
+                                {active.length === 0 ? (
+                                    <EmptyState emoji="😴" title="暂无活跃角色" description="最近24小时内没有角色活动" />
+                                ) : (
+                                    <SurvivorGrid survivors={active} />
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="inactive">
+                                {inactive.length === 0 ? (
+                                    <EmptyState emoji="🎉" title="全员活跃！" description="所有角色都在最近24小时内有过活动" />
+                                ) : (
+                                    <SurvivorGrid survivors={inactive} />
+                                )}
+                            </TabsContent>
+                        </Tabs>
                     )}
                 </div>
             </div>

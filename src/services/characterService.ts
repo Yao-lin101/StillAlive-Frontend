@@ -68,11 +68,35 @@ export const characterService = {
     return response.data.secret_key;
   },
 
-  // iCloud 快捷指令分享链接
+  // iCloud 快捷指令分享链接（iOS）
   SHORTCUT_ICLOUD_URLS: {
     high_freq: 'https://www.icloud.com/shortcuts/7bbfa2d6a6ca420faffcfa6f122874b5',
     low_freq: 'https://www.icloud.com/shortcuts/71c575860eaa40da89dc26167a3fe18c',
   } as Record<'high_freq' | 'low_freq', string>,
+
+  // MacroDroid 配置文件下载（Android）
+  async downloadMacro(secretKey: string, type: 'high_freq' | 'low_freq'): Promise<void> {
+    const TEMPLATE_PLACEHOLDER_KEY = 'YOUR_SECRET_KEY_HERE';
+    const templateUrl = `/templates/${type}.macro`;
+
+    const response = await fetch(templateUrl);
+    if (!response.ok) throw new Error('模板加载失败');
+
+    let text = await response.text();
+    // 替换占位密钥为真实密钥
+    text = text.split(TEMPLATE_PLACEHOLDER_KEY).join(secretKey);
+
+    const blob = new Blob([text], { type: 'application/octet-stream' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const names = { high_freq: '高频同步', low_freq: '位置同步' };
+    a.download = `StillAlive_${names[type]}.macro`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  },
 
   async regenerateDisplayCode(uid: string) {
     const response = await api.post(`/characters/${uid}/regenerate_display_code/`);

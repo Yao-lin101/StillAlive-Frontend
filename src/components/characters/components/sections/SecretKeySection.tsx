@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -28,6 +28,7 @@ export const SecretKeySection: React.FC<SecretKeySectionProps> = ({
   onCancelRegenerate,
   onShowRegenerateConfirm
 }) => {
+  const [downloadingMacro, setDownloadingMacro] = useState<string | null>(null);
 
   const handleCopyKey = async () => {
     if (!secretKey) return;
@@ -39,18 +40,15 @@ export const SecretKeySection: React.FC<SecretKeySectionProps> = ({
     }
   };
 
+  // iOS - 复制密钥后跳转 iCloud 链接
   const handleInstallShortcut = async (type: 'high_freq' | 'low_freq') => {
     if (!secretKey) {
       toast.error("请先生成密钥");
       return;
     }
-
-    // 先复制密钥到剪贴板
     try {
       await navigator.clipboard.writeText(secretKey);
-    } catch {
-      // 剪贴板写入失败不阻止流程
-    }
+    } catch { /* 失败不阻止流程 */ }
 
     const typeName = type === 'high_freq' ? '高频同步' : '低频同步';
     toast.success(`密钥已复制，正在跳转安装「${typeName}」快捷指令…`, {
@@ -58,10 +56,27 @@ export const SecretKeySection: React.FC<SecretKeySectionProps> = ({
       duration: 5000,
     });
 
-    // 短暂延迟后跳转，让 toast 显示出来
     setTimeout(() => {
       window.open(characterService.SHORTCUT_ICLOUD_URLS[type], '_blank');
     }, 600);
+  };
+
+  // Android - 下载注入密钥的 .macro 文件
+  const handleDownloadMacro = async (type: 'high_freq' | 'low_freq') => {
+    if (!secretKey) {
+      toast.error("请先生成密钥");
+      return;
+    }
+    setDownloadingMacro(type);
+    try {
+      await characterService.downloadMacro(secretKey, type);
+      const typeName = type === 'high_freq' ? '高频同步' : '位置同步';
+      toast.success(`${typeName}配置已下载，请在 MacroDroid 中导入`);
+    } catch (err) {
+      toast.error("下载失败，请稍后重试");
+    } finally {
+      setDownloadingMacro(null);
+    }
   };
 
   return (
@@ -77,10 +92,7 @@ export const SecretKeySection: React.FC<SecretKeySectionProps> = ({
         </div>
         <div className="space-x-2">
           {secretKey && (
-            <Button
-              variant="outline"
-              onClick={handleCopyKey}
-            >
+            <Button variant="outline" onClick={handleCopyKey}>
               复制密钥
             </Button>
           )}
@@ -93,45 +105,94 @@ export const SecretKeySection: React.FC<SecretKeySectionProps> = ({
           </Button>
         </div>
 
-        {/* 快捷指令安装 */}
+        {/* 自动化配置下载 */}
         {secretKey && (
-          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-              </svg>
-              <h4 className="text-sm font-medium text-blue-900 dark:text-blue-200">
-                快捷指令安装
-              </h4>
+          <div className="mt-4 space-y-3">
+            {/* iOS 快捷指令 */}
+            <div className="p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">🍎</span>
+                <h4 className="text-sm font-medium text-blue-900 dark:text-blue-200">
+                  iOS 快捷指令
+                </h4>
+              </div>
+              <p className="text-xs text-blue-700 dark:text-blue-300 mb-3">
+                点击按钮后密钥将自动复制，跳转安装页后请粘贴到「X-Character-Key」字段
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50"
+                  onClick={() => handleInstallShortcut('high_freq')}
+                >
+                  ⚡ 高频同步
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50"
+                  onClick={() => handleInstallShortcut('low_freq')}
+                >
+                  🌍 低频同步
+                </Button>
+              </div>
+              <p className="text-xs text-blue-600/50 dark:text-blue-400/50 mt-2">
+                高频：电池 + 当前App ｜ 低频：位置 + 天气
+              </p>
             </div>
-            <p className="text-xs text-blue-700 dark:text-blue-300 mb-3">
-              点击下方按钮，密钥将自动复制，然后跳转到快捷指令安装页面。安装时请粘贴密钥。
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50"
-                onClick={() => handleInstallShortcut('high_freq')}
-              >
-                <span className="flex items-center gap-1.5">
-                  ⚡ 安装高频同步
-                </span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50"
-                onClick={() => handleInstallShortcut('low_freq')}
-              >
-                <span className="flex items-center gap-1.5">
-                  🌍 安装低频同步
-                </span>
-              </Button>
+
+            {/* Android MacroDroid */}
+            <div className="p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">🤖</span>
+                <h4 className="text-sm font-medium text-green-900 dark:text-green-200">
+                  Android MacroDroid
+                </h4>
+              </div>
+              <p className="text-xs text-green-700 dark:text-green-300 mb-3">
+                下载配置文件后在 MacroDroid 中导入即可，密钥已自动填入
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50"
+                  onClick={() => handleDownloadMacro('high_freq')}
+                  disabled={downloadingMacro !== null}
+                >
+                  {downloadingMacro === 'high_freq' ? (
+                    <span className="flex items-center gap-1">
+                      <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      下载中…
+                    </span>
+                  ) : '⚡ 高频同步'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50"
+                  onClick={() => handleDownloadMacro('low_freq')}
+                  disabled={downloadingMacro !== null}
+                >
+                  {downloadingMacro === 'low_freq' ? (
+                    <span className="flex items-center gap-1">
+                      <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      下载中…
+                    </span>
+                  ) : '📍 位置同步'}
+                </Button>
+              </div>
+              <p className="text-xs text-green-600/50 dark:text-green-400/50 mt-2">
+                高频：电池 + 当前App ｜ 位置同步：GPS 坐标
+              </p>
             </div>
-            <p className="text-xs text-blue-600/60 dark:text-blue-400/60 mt-2">
-              高频：电池 + 当前App &nbsp;|&nbsp; 低频：位置 + 天气
-            </p>
           </div>
         )}
 
@@ -144,10 +205,7 @@ export const SecretKeySection: React.FC<SecretKeySectionProps> = ({
               </DialogDescription>
             </DialogHeader>
             <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                variant="outline"
-                onClick={onCancelRegenerate}
-              >
+              <Button variant="outline" onClick={onCancelRegenerate}>
                 取消
               </Button>
               <Button

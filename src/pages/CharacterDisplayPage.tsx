@@ -341,7 +341,7 @@ export const CharacterDisplayPage: React.FC = () => {
       />
 
       {/* 弹幕始终显示，不受隐藏卡片影响 */}
-      <div className="absolute inset-0 z-10 overflow-hidden">
+      <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
         <DanmakuList
           messages={messages}
           className="h-full"
@@ -349,47 +349,48 @@ export const CharacterDisplayPage: React.FC = () => {
         />
       </div>
 
-      <AnimatedContent
-        isHidden={isCardHidden}
-        onShow={() => {
-          setIsCardHidden(false);
-          setIsMusicPlaying(true);
-        }}
-        className="relative z-20 w-full min-h-full flex flex-col items-center py-12"
-      >
-
-        <div className="w-full max-w-md md:max-w-2xl flex flex-col gap-6 px-4 my-auto relative z-20">
-          <CharacterCard
-            name={character.name}
-            avatar={character.avatar}
-            bio={character.bio}
-            statusMessage={getStatusMessage()}
-            lastUpdate={getLastUpdate()}
-            statusItems={statusItems}
-            onStatusClick={() => setShowStatusDialog(true)}
-            onHideClick={(e) => {
-              e.stopPropagation();
-              setIsCardHidden(true);
-            }}
-            isMusicPlaying={isMusicPlaying}
-            onMusicToggle={currentMusicUrl ? () => setIsMusicPlaying(!isMusicPlaying) : undefined}
-            isOwner={character.is_owner}
-            onManageDanmaku={() => setShowDanmakuManager(true)}
-            experience={character.experience}
-          />
-          <CharacterMessages
-            displayCode={code!}
-            onMessageSent={(newMsg) => {
-              if (newMsg) {
-                setMessages(prev => [...prev, newMsg]);
-              } else {
-                fetchMessages();
-              }
-            }}
-            className="mt-4"
-          />
-        </div>
-      </AnimatedContent>
+      <div className={`absolute inset-0 ${isCardHidden ? 'z-0' : 'z-20'}`}>
+        <AnimatedContent
+          isHidden={isCardHidden}
+          onShow={() => {
+            setIsCardHidden(false);
+            setIsMusicPlaying(true);
+          }}
+          className="w-full min-h-full flex flex-col items-center py-12"
+        >
+          <div className="w-full max-w-md md:max-w-2xl flex flex-col gap-6 px-4 my-auto relative z-20">
+            <CharacterCard
+              name={character.name}
+              avatar={character.avatar}
+              bio={character.bio}
+              statusMessage={getStatusMessage()}
+              lastUpdate={getLastUpdate()}
+              statusItems={statusItems}
+              onStatusClick={() => setShowStatusDialog(true)}
+              onHideClick={(e) => {
+                e.stopPropagation();
+                setIsCardHidden(true);
+              }}
+              isMusicPlaying={isMusicPlaying}
+              onMusicToggle={currentMusicUrl ? () => setIsMusicPlaying(!isMusicPlaying) : undefined}
+              isOwner={character.is_owner}
+              onManageDanmaku={() => setShowDanmakuManager(true)}
+              experience={character.experience}
+            />
+            <CharacterMessages
+              displayCode={code!}
+              onMessageSent={(newMsg) => {
+                if (newMsg) {
+                  setMessages(prev => [...prev, newMsg]);
+                } else {
+                  fetchMessages();
+                }
+              }}
+              className="mt-4"
+            />
+          </div>
+        </AnimatedContent>
+      </div>
 
       {/* 音乐播放器 - 固定在底部 */}
       {currentMusicUrl && (

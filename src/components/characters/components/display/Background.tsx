@@ -43,7 +43,8 @@ export const Background: React.FC<BackgroundProps> = ({
 
       const urls = parseUrls(urlString);
       setBackgroundUrls(urls);
-      setCurrentIndex(0);
+      // 随机起始图片
+      setCurrentIndex(urls.length > 1 ? Math.floor(Math.random() * urls.length) : 0);
     };
 
     checkMobileAndSetBackground();
@@ -59,7 +60,14 @@ export const Background: React.FC<BackgroundProps> = ({
     const interval = (theme?.slideshow_interval ?? 5) * 1000;
 
     intervalRef.current = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % backgroundUrls.length);
+      // 随机选择下一张（排除当前图片，避免连续重复）
+      setCurrentIndex(prev => {
+        let next: number;
+        do {
+          next = Math.floor(Math.random() * backgroundUrls.length);
+        } while (next === prev && backgroundUrls.length > 1);
+        return next;
+      });
     }, interval);
 
     return () => {

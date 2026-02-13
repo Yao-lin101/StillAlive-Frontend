@@ -72,6 +72,7 @@ export interface StatusConfigType {
     overlay_opacity: number;
     meteors_enabled?: boolean;
     feathers_enabled?: boolean;
+    slideshow_interval?: number;
   };
 }
 

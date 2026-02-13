@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Meteors } from "@/components/magicui/meteors";
 import { FeatherFall } from "@/components/effects/FeatherFall";
 
@@ -8,6 +8,7 @@ interface BackgroundTheme {
   overlay_opacity: number;
   meteors_enabled?: boolean;
   feathers_enabled?: boolean;
+  slideshow_interval?: number;
 }
 
 interface BackgroundProps {
@@ -15,64 +16,107 @@ interface BackgroundProps {
   onBgImageError: () => void;
 }
 
+// 将换行分隔的URL字符串解析为数组
+const parseUrls = (urlString: string): string[] => {
+  return urlString.split('\n').map(u => u.trim()).filter(Boolean);
+};
+
 export const Background: React.FC<BackgroundProps> = ({
   theme,
   onBgImageError
 }) => {
-  const [backgroundUrl, setBackgroundUrl] = useState<string | undefined>(undefined);
+  const [backgroundUrls, setBackgroundUrls] = useState<string[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // 检测设备类型并设置对应的背景URL
+  // 检测设备类型并解析对应的背景URL列表
   useEffect(() => {
     const checkMobileAndSetBackground = () => {
       if (!theme) return;
-      
-      // 根据设备类型选择背景URL
+
+      let urlString: string;
       if (window.innerWidth <= 768 && theme.mobile_background_url) {
-        setBackgroundUrl(theme.mobile_background_url);
+        urlString = theme.mobile_background_url;
       } else {
-        setBackgroundUrl(theme.background_url);
+        urlString = theme.background_url;
       }
+
+      const urls = parseUrls(urlString);
+      setBackgroundUrls(urls);
+      setCurrentIndex(0);
     };
-    
+
     checkMobileAndSetBackground();
     window.addEventListener('resize', checkMobileAndSetBackground);
-    
+
     return () => window.removeEventListener('resize', checkMobileAndSetBackground);
   }, [theme]);
 
+  // 幻灯片定时器 — 简单地切换 currentIndex
+  useEffect(() => {
+    if (backgroundUrls.length <= 1) return;
+
+    const interval = (theme?.slideshow_interval ?? 5) * 1000;
+
+    intervalRef.current = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % backgroundUrls.length);
+    }, interval);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [backgroundUrls.length, theme?.slideshow_interval]);
+
+  const hasImages = backgroundUrls.length > 0;
+
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      {backgroundUrl && (
+    <div className="absolute inset-0 overflow-hidden" style={{ isolation: 'isolate' }}>
+      {hasImages && (
         <>
-          <img 
-            src={backgroundUrl} 
-            alt="背景" 
-            className="absolute inset-0 w-full h-full object-cover"
-            onError={onBgImageError}
-            crossOrigin="anonymous"
-            referrerPolicy="no-referrer"
-          />
+          {/* 渲染所有图片，通过 opacity 控制显示 */}
+          {backgroundUrls.map((url, index) => (
+            <img
+              key={url}
+              src={url}
+              alt="背景"
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{
+                opacity: index === currentIndex ? 1 : 0,
+                transition: 'opacity 1s ease-in-out',
+                zIndex: index === currentIndex ? 1 : 0,
+              }}
+              onError={index === currentIndex ? onBgImageError : undefined}
+              crossOrigin="anonymous"
+              referrerPolicy="no-referrer"
+            />
+          ))}
+
           {(theme?.meteors_enabled ?? true) && (
-            <div 
+            <div
               className="absolute inset-0"
               style={{
                 background: `linear-gradient(to bottom, 
                   rgba(0,0,0,${theme?.overlay_opacity}), 
-                  rgba(0,0,0,0))`
+                  rgba(0,0,0,0))`,
+                zIndex: 2,
               }}
             />
           )}
         </>
       )}
       {(theme?.meteors_enabled ?? true) && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Meteors 
+        <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 3 }}>
+          <Meteors
             number={30}
             className="text-white"
           />
         </div>
       )}
-      {(theme?.feathers_enabled ?? false) && <FeatherFall />}
+      {(theme?.feathers_enabled ?? false) && (
+        <div className="absolute inset-0" style={{ zIndex: 4, pointerEvents: 'none' }}>
+          <FeatherFall />
+        </div>
+      )}
     </div>
   );
-}; 
+};

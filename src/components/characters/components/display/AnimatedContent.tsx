@@ -66,7 +66,7 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
         `}
       </style>
       <AnimatePresence>
-        {isHidden ? (
+        {(isMobile ? isHidden : true) && (
           <motion.div
             key="text"
             initial={{ opacity: 0 }}
@@ -76,23 +76,30 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
               duration: 0.4,
               ease: "easeInOut"
             }}
+            style={{ pointerEvents: isHidden ? "auto" : "none" }}
             className={cn(
-              "absolute inset-0 flex cursor-pointer", // cursor-pointer added here and removed from inner div to make whole area clickable with feedback
+              "absolute inset-0 flex cursor-pointer",
               isMobile ? "items-center justify-center" : "items-end justify-end pb-12 pr-12"
             )}
-            onClick={onShow}
+            onClick={isHidden ? onShow : undefined}
           >
             <motion.div
               initial={{ y: 20 }}
-              animate={{ y: 0 }}
-              exit={{ y: -20 }}
+              animate={{
+                scale: (!isMobile && !isHidden) ? 5 : 1, // Scale up massively on desktop
+                x: (!isMobile && !isHidden) ? 100 : 0, // Move outwards
+                y: (!isMobile && !isHidden) ? 100 : 0,
+                opacity: (!isMobile && !isHidden) ? 0 : 1, // Fade out while scaling
+              }}
+              exit={{ y: -20, opacity: 0 }}
               transition={{
-                duration: 0.4,
-                ease: "easeInOut"
+                type: "spring",
+                stiffness: 260,
+                damping: 20,
               }}
               className={cn(
                 "text-white font-medium select-none",
-                isMobile ? "text-2xl mt-32" : "text-base"
+                isMobile ? "text-2xl mt-32" : "text-base origin-bottom-right" // Set origin for desktop scaling
               )}
             >
               {isMobile ? (
@@ -123,36 +130,30 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
               )}
             </motion.div>
           </motion.div>
-        ) : (
-          <motion.div
-            key="card"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{
-              duration: 0.4,
-              ease: "easeInOut"
-            }}
-            className={cn(
-              "absolute inset-0",
-              isHidden ? "flex items-center justify-center" : "overflow-y-auto"
-            )}
-          >
-            <motion.div
-              initial={{ y: 20, scale: 0.95 }}
-              animate={{ y: 0, scale: 1 }}
-              exit={{ y: -20, scale: 0.95 }}
-              transition={{
-                duration: 0.4,
-                ease: "easeInOut"
-              }}
-              className={className}
-            >
-              {children}
-            </motion.div>
-          </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Card - always mounted, visibility controlled by animation */}
+      <motion.div
+        initial={false}
+        animate={{
+          opacity: isHidden ? 0 : 1,
+          scale: isHidden ? 0.95 : 1,
+          y: isHidden ? 30 : 0,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 260,
+          damping: 24,
+          opacity: { duration: 0.3 }, // opacity uses tween for smoother fade
+        }}
+        style={{ pointerEvents: isHidden ? "none" : "auto" }}
+        className="absolute inset-0 overflow-y-auto"
+      >
+        <div className={className}>
+          {children}
+        </div>
+      </motion.div>
     </div>
   );
 }; 

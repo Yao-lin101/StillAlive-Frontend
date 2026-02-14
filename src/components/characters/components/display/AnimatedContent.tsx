@@ -76,7 +76,10 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
               duration: 0.4,
               ease: "easeInOut"
             }}
-            className="absolute inset-0 flex items-center justify-center"
+            className={cn(
+              "absolute inset-0 flex cursor-pointer", // cursor-pointer added here and removed from inner div to make whole area clickable with feedback
+              isMobile ? "items-center justify-center" : "items-end justify-end pb-12 pr-12"
+            )}
             onClick={onShow}
           >
             <motion.div
@@ -88,8 +91,8 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
                 ease: "easeInOut"
               }}
               className={cn(
-                "text-white text-2xl font-medium cursor-pointer select-none",
-                isMobile && "mt-32" // 移动端文字向下偏移
+                "text-white font-medium select-none",
+                isMobile ? "text-2xl mt-32" : "text-base"
               )}
             >
               {isMobile ? (
@@ -108,12 +111,15 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
                   </HyperText>
                 </div>
               ) : (
-                <SpinningText
-                  duration={30}
-                  className="w-32 h-32 text-outline"
-                >
-                  CLICK TO VIEW STATUS DATA
-                </SpinningText>
+                <div className="flex items-center gap-4 opacity-80 hover:opacity-100 transition-opacity">
+                  <SpinningText
+                    duration={30}
+                    className="w-24 h-24 text-outline"
+                    radius={5}
+                  >
+                    CLICK • TO • VIEW • STATUS • DATA •
+                  </SpinningText>
+                </div>
               )}
             </motion.div>
           </motion.div>

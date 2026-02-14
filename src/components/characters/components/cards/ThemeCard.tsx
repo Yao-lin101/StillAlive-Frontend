@@ -173,7 +173,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
               设置展示页面的背景图片和主题
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
             {/* 桌面端背景URL列表 */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -182,7 +182,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-7 px-2 text-xs"
+                  className="h-7 px-2 text-xs dark:text-gray-300 dark:hover:text-white bg-transparent"
                   onClick={() => syncDesktopUrls([...desktopUrls, ''])}
                 >
                   <Plus className="h-3 w-3 mr-1" />
@@ -210,6 +210,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                           syncDesktopUrls(newUrls);
                         }}
                         placeholder="https://example.com/background.jpg"
+                        className="dark:bg-muted/30"
                       />
                     </div>
                     {desktopUrls.length > 1 && (
@@ -217,7 +218,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive flex-shrink-0"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive dark:text-gray-400 dark:hover:text-red-400 bg-transparent flex-shrink-0"
                         onClick={() => {
                           const newUrls = desktopUrls.filter((_, i) => i !== index);
                           syncDesktopUrls(newUrls.length > 0 ? newUrls : ['']);
@@ -245,7 +246,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-7 px-2 text-xs"
+                  className="h-7 px-2 text-xs dark:text-gray-300 dark:hover:text-white bg-transparent"
                   onClick={() => syncMobileUrls([...mobileUrls, ''])}
                 >
                   <Plus className="h-3 w-3 mr-1" />
@@ -273,6 +274,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                           syncMobileUrls(newUrls);
                         }}
                         placeholder="https://example.com/mobile-bg.jpg"
+                        className="dark:bg-muted/30"
                       />
                     </div>
                     {mobileUrls.length > 1 && (
@@ -280,7 +282,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive flex-shrink-0"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive dark:text-gray-400 dark:hover:text-red-400 bg-transparent flex-shrink-0"
                         onClick={() => {
                           const newUrls = mobileUrls.filter((_, i) => i !== index);
                           syncMobileUrls(newUrls.length > 0 ? newUrls : ['']);

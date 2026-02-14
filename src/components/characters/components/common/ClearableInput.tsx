@@ -32,7 +32,7 @@ export const ClearableInput: React.FC<ClearableInputProps> = ({
         <button
           type="button"
           onClick={onClear}
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 p-1 rounded-full bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         >
           <X className="h-4 w-4" />
         </button>

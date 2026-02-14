@@ -79,7 +79,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
   }, [handleInteraction]);
 
   return (
-    <Card className={`relative w-[calc(100vw-2rem)] sm:w-full max-w-2xl bg-white/80 backdrop-blur-sm overflow-hidden ${className || ''}`}>
+    <Card className={`relative w-full max-w-2xl bg-white/80 backdrop-blur-sm overflow-hidden ${className || ''}`}>
       <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
       <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
         {isOwner && onManageDanmaku && (

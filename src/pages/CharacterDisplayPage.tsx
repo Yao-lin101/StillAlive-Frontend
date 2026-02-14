@@ -334,7 +334,7 @@ export const CharacterDisplayPage: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 flex items-center justify-center overflow-hidden light-mode-forced">
       <Background
         theme={character.status_config?.theme}
         onBgImageError={() => { }}
@@ -437,7 +437,7 @@ export const CharacterDisplayPage: React.FC = () => {
       {/* 弹幕内容详情弹窗 */}
       <Dialog open={!!selectedDanmaku} onOpenChange={(open) => !open && setSelectedDanmaku(null)}>
         <DialogContent
-          className="sm:max-w-md bg-white/90 dark:bg-black/90 backdrop-blur-xl border-white/20"
+          className="sm:max-w-md bg-white/90 backdrop-blur-xl border-white/20"
           onClick={(e) => e.stopPropagation()}
           onPointerDownOutside={(e) => e.stopPropagation()}
         >
@@ -446,9 +446,9 @@ export const CharacterDisplayPage: React.FC = () => {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <p className="text-lg font-medium dark:text-gray-100 break-words">{selectedDanmaku?.content}</p>
+              <p className="text-lg font-medium break-words">{selectedDanmaku?.content}</p>
             </div>
-            <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 border-t pt-4 dark:border-gray-800">
+            <div className="flex items-center justify-between text-sm text-gray-500 border-t pt-4">
               <div className="flex flex-col gap-1">
                 <span className="font-mono text-xs opacity-70">
                   {selectedDanmaku?.created_at && new Date(selectedDanmaku.created_at).toLocaleString()}
@@ -456,7 +456,7 @@ export const CharacterDisplayPage: React.FC = () => {
               </div>
               <div className="flex flex-col gap-1 text-right">
                 <div className="flex flex-col items-end">
-                  <span className="font-medium text-xs text-gray-900 dark:text-gray-100">
+                  <span className="font-medium text-xs text-gray-900">
                     {selectedDanmaku?.location ? `${selectedDanmaku.location}网友` : '异世界网友'}
                   </span>
                 </div>

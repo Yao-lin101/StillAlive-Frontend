@@ -33,7 +33,7 @@ export const CharacterMessages: React.FC<CharacterMessagesProps> = ({ displayCod
 
     return (
         <div className={`w-full max-w-2xl mx-auto ${className || ''}`}>
-            <div className="flex items-center gap-2 bg-white/60 dark:bg-black/40 p-2 rounded-full backdrop-blur-md shadow-lg border border-white/20 dark:border-white/10 opacity-70 hover:opacity-100 focus-within:opacity-100 transition-all duration-300">
+            <div className="flex items-center gap-2 bg-white/60 p-2 rounded-full backdrop-blur-md shadow-lg border border-white/20 opacity-70 hover:opacity-100 focus-within:opacity-100 transition-all duration-300">
                 <input
                     value={newMessage}
                     type="text"
@@ -41,7 +41,7 @@ export const CharacterMessages: React.FC<CharacterMessagesProps> = ({ displayCod
                     placeholder="发送弹幕..."
                     onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSend()}
                     maxLength={200}
-                    className="flex-1 bg-transparent border-none outline-none px-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-500/70 h-9 min-w-0"
+                    className="flex-1 bg-transparent border-none outline-none px-4 text-sm text-gray-900 placeholder:text-gray-500/70 h-9 min-w-0"
                 />
                 <Button
                     onClick={handleSend}

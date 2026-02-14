@@ -17,7 +17,7 @@ interface DanmakuManagerProps {
 export function DanmakuManager({ open, onOpenChange, messages, onDelete }: DanmakuManagerProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-lg h-[80vh] flex flex-col bg-white/90 dark:bg-black/90 backdrop-blur-xl border-white/20">
+            <DialogContent className="sm:max-w-lg h-[80vh] flex flex-col bg-white/90 backdrop-blur-xl border-white/20">
                 <DialogHeader>
                     <DialogTitle>弹幕管理</DialogTitle>
                 </DialogHeader>
@@ -26,9 +26,9 @@ export function DanmakuManager({ open, onOpenChange, messages, onDelete }: Danma
                         <div className="text-center text-gray-500 py-10">暂无弹幕</div>
                     ) : (
                         messages.map((msg) => (
-                            <div key={msg.id} className="flex justify-between items-start gap-4 p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-black/20 hover:bg-white/80 dark:hover:bg-black/40 transition-colors">
+                            <div key={msg.id} className="flex justify-between items-start gap-4 p-3 rounded-lg border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors">
                                 <div className="flex-1 min-w-0 text-left">
-                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 break-words">{msg.content}</p>
+                                    <p className="text-sm font-medium text-gray-900 break-words">{msg.content}</p>
                                     <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-gray-500">
                                         <span>{new Date(msg.created_at).toLocaleString()}</span>
                                         <span>{msg.location || '未知'} ({msg.ip_address})</span>
@@ -37,7 +37,7 @@ export function DanmakuManager({ open, onOpenChange, messages, onDelete }: Danma
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0 h-8 px-2"
+                                    className="text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0 h-8 px-2"
                                     onClick={() => onDelete(msg.id)}
                                 >
                                     删除

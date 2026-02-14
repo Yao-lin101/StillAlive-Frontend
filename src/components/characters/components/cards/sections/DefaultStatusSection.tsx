@@ -17,8 +17,8 @@ export const DefaultStatusSection: React.FC<DefaultStatusSectionProps> = ({
       <div className="flex justify-between items-center">
         <Label className="font-medium">默认状态文本</Label>
       </div>
-      <div 
-        className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
+      <div
+        className="p-3 border rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
         onClick={onEdit}
       >
         <div className="w-full">
@@ -30,7 +30,7 @@ export const DefaultStatusSection: React.FC<DefaultStatusSectionProps> = ({
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-600 w-full text-left">
+          <p className="text-sm text-gray-600 dark:text-gray-400 w-full text-left">
             {config.default_message}
           </p>
         </div>

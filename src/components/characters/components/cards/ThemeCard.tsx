@@ -79,6 +79,8 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
     slideshow_interval: theme?.slideshow_interval ?? 5,
   });
 
+  const [editingImage, setEditingImage] = useState<{ type: 'desktop' | 'mobile'; index: number } | null>(null);
+
   useEffect(() => {
     if (theme) {
       const updatedTheme = {
@@ -177,54 +179,61 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
             {/* 桌面端背景URL列表 */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>桌面端背景图片URL</Label>
+                <Label>桌面端背景图片 ({desktopUrlCount})</Label>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   className="h-7 px-2 text-xs dark:text-gray-300 dark:hover:text-white bg-transparent"
-                  onClick={() => syncDesktopUrls([...desktopUrls, ''])}
+                  onClick={() => {
+                    const newUrls = [...desktopUrls, ''];
+                    syncDesktopUrls(newUrls);
+                    setEditingImage({ type: 'desktop', index: newUrls.length - 1 });
+                  }}
                 >
                   <Plus className="h-3 w-3 mr-1" />
                   添加图片
                 </Button>
               </div>
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {desktopUrls.map((url, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-muted text-muted-foreground text-xs flex-shrink-0">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <ClearableInput
-                        value={url}
-                        maxLength={300}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const newUrls = [...desktopUrls];
-                          newUrls[index] = e.target.value;
-                          syncDesktopUrls(newUrls);
-                        }}
-                        onClear={() => {
-                          const newUrls = [...desktopUrls];
-                          newUrls[index] = '';
-                          syncDesktopUrls(newUrls);
-                        }}
-                        placeholder="https://example.com/background.jpg"
-                        className="dark:bg-muted/30"
+                  <div key={index} className="relative group aspect-video bg-muted rounded-md border overflow-hidden">
+                    {url ? (
+                      <img
+                        src={url}
+                        alt={`Background ${index + 1}`}
+                        className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => setEditingImage({ type: 'desktop', index })}
+                        referrerPolicy="no-referrer"
                       />
+                    ) : (
+                      <div
+                        className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors"
+                        onClick={() => setEditingImage({ type: 'desktop', index })}
+                      >
+                        <Plus className="h-8 w-8 text-muted-foreground/50 mb-2" />
+                        <span className="text-xs text-muted-foreground">设置图片</span>
+                      </div>
+                    )}
+                    <div className="absolute left-1 top-1 flex items-center justify-center w-5 h-5 rounded-full bg-black/50 text-white text-[10px] pointer-events-none">
+                      {index + 1}
                     </div>
                     {desktopUrls.length > 1 && (
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive dark:text-gray-400 dark:hover:text-red-400 bg-transparent flex-shrink-0"
-                        onClick={() => {
+                        variant="destructive"
+                        size="icon"
+                        className="absolute right-1 top-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
                           const newUrls = desktopUrls.filter((_, i) => i !== index);
                           syncDesktopUrls(newUrls.length > 0 ? newUrls : ['']);
+                          if (editingImage?.type === 'desktop' && editingImage?.index === index) {
+                            setEditingImage(null);
+                          }
                         }}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     )}
                   </div>
@@ -233,7 +242,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
               <p className="text-sm text-gray-500">
                 {desktopUrlCount > 1
                   ? `已添加 ${desktopUrlCount} 张图片，将以幻灯片方式播放`
-                  : '输入桌面端背景图片的URL地址，可添加多张进行幻灯片播放'
+                  : '添加背景图片URL，可添加多张进行幻灯片播放'
                 }
               </p>
             </div>
@@ -241,54 +250,61 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
             {/* 移动端背景URL列表 */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>移动端背景图片URL（可选）</Label>
+                <Label>移动端背景图片 ({mobileUrlCount})</Label>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   className="h-7 px-2 text-xs dark:text-gray-300 dark:hover:text-white bg-transparent"
-                  onClick={() => syncMobileUrls([...mobileUrls, ''])}
+                  onClick={() => {
+                    const newUrls = [...mobileUrls, ''];
+                    syncMobileUrls(newUrls);
+                    setEditingImage({ type: 'mobile', index: newUrls.length - 1 });
+                  }}
                 >
                   <Plus className="h-3 w-3 mr-1" />
                   添加图片
                 </Button>
               </div>
-              <div className="space-y-2">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                 {mobileUrls.map((url, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-muted text-muted-foreground text-xs flex-shrink-0">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <ClearableInput
-                        value={url}
-                        maxLength={300}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const newUrls = [...mobileUrls];
-                          newUrls[index] = e.target.value;
-                          syncMobileUrls(newUrls);
-                        }}
-                        onClear={() => {
-                          const newUrls = [...mobileUrls];
-                          newUrls[index] = '';
-                          syncMobileUrls(newUrls);
-                        }}
-                        placeholder="https://example.com/mobile-bg.jpg"
-                        className="dark:bg-muted/30"
+                  <div key={index} className="relative group aspect-[9/16] bg-muted rounded-md border overflow-hidden">
+                    {url ? (
+                      <img
+                        src={url}
+                        alt={`Mobile Background ${index + 1}`}
+                        className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => setEditingImage({ type: 'mobile', index })}
+                        referrerPolicy="no-referrer"
                       />
+                    ) : (
+                      <div
+                        className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors"
+                        onClick={() => setEditingImage({ type: 'mobile', index })}
+                      >
+                        <Plus className="h-6 w-6 text-muted-foreground/50 mb-1" />
+                        <span className="text-[10px] text-muted-foreground">设置</span>
+                      </div>
+                    )}
+                    <div className="absolute left-1 top-1 flex items-center justify-center w-5 h-5 rounded-full bg-black/50 text-white text-[10px] pointer-events-none">
+                      {index + 1}
                     </div>
                     {mobileUrls.length > 1 && (
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive dark:text-gray-400 dark:hover:text-red-400 bg-transparent flex-shrink-0"
-                        onClick={() => {
+                        variant="destructive"
+                        size="icon"
+                        className="absolute right-1 top-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
                           const newUrls = mobileUrls.filter((_, i) => i !== index);
                           syncMobileUrls(newUrls.length > 0 ? newUrls : ['']);
+                          if (editingImage?.type === 'mobile' && editingImage?.index === index) {
+                            setEditingImage(null);
+                          }
                         }}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     )}
                   </div>
@@ -414,6 +430,73 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                 disabled={isSaving}
               >
                 {isSaving ? '保存中...' : '保存'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editingImage} onOpenChange={(open) => !open && setEditingImage(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingImage?.type === 'desktop' ? '编辑桌面端背景' : '编辑移动端背景'}</DialogTitle>
+            <DialogDescription>
+              输入图片URL地址，支持网络图片
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {editingImage && (
+              <>
+                <div className={`relative rounded-md overflow-hidden bg-muted border mx-auto ${editingImage.type === 'desktop' ? 'aspect-video w-full' : 'max-h-[300px] aspect-[9/16] w-1/2'}`}>
+                  {(editingImage.type === 'desktop' ? desktopUrls : mobileUrls)[editingImage.index] ? (
+                    <img
+                      src={(editingImage.type === 'desktop' ? desktopUrls : mobileUrls)[editingImage.index]}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center w-full h-full text-muted-foreground">
+                      <ImageIcon className="h-8 w-8 opacity-50" />
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>图片URL</Label>
+                  <ClearableInput
+                    value={(editingImage.type === 'desktop' ? desktopUrls : mobileUrls)[editingImage.index] || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const val = e.target.value;
+                      if (editingImage.type === 'desktop') {
+                        const newUrls = [...desktopUrls];
+                        newUrls[editingImage.index] = val;
+                        syncDesktopUrls(newUrls);
+                      } else {
+                        const newUrls = [...mobileUrls];
+                        newUrls[editingImage.index] = val;
+                        syncMobileUrls(newUrls);
+                      }
+                    }}
+                    onClear={() => {
+                      if (editingImage.type === 'desktop') {
+                        const newUrls = [...desktopUrls];
+                        newUrls[editingImage.index] = '';
+                        syncDesktopUrls(newUrls);
+                      } else {
+                        const newUrls = [...mobileUrls];
+                        newUrls[editingImage.index] = '';
+                        syncMobileUrls(newUrls);
+                      }
+                    }}
+                    placeholder={editingImage.type === 'desktop' ? "https://example.com/background.jpg" : "https://example.com/mobile-bg.jpg"}
+                    className="dark:bg-muted/30"
+                  />
+                </div>
+              </>
+            )}
+            <div className="flex justify-end">
+              <Button onClick={() => setEditingImage(null)}>
+                完成
               </Button>
             </div>
           </div>

@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 
 interface Theme {
@@ -415,24 +416,24 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  resetToOriginal();
-                  setIsEditing(false);
-                }}
-              >
-                取消
-              </Button>
-              <Button
-                onClick={handleSave}
-                disabled={isSaving}
-              >
-                {isSaving ? '保存中...' : '保存'}
-              </Button>
-            </div>
           </div>
+          <DialogFooter className="mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                resetToOriginal();
+                setIsEditing(false);
+              }}
+            >
+              取消
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={isSaving}
+            >
+              {isSaving ? '保存中...' : '保存'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

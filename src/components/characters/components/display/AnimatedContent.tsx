@@ -87,8 +87,6 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
               initial={{ y: 20 }}
               animate={{
                 scale: (!isMobile && !isHidden) ? 5 : 1, // Scale up massively on desktop
-                x: (!isMobile && !isHidden) ? 100 : 0, // Move outwards
-                y: (!isMobile && !isHidden) ? 100 : 0,
                 opacity: (!isMobile && !isHidden) ? 0 : 1, // Fade out while scaling
               }}
               exit={{ y: -20, opacity: 0 }}
@@ -99,7 +97,7 @@ export const AnimatedContent: React.FC<AnimatedContentProps> = ({
               }}
               className={cn(
                 "text-white font-medium select-none",
-                isMobile ? "text-2xl mt-32" : "text-base origin-bottom-right" // Set origin for desktop scaling
+                isMobile ? "text-2xl mt-32" : "text-base origin-center" // Set origin for desktop scaling
               )}
             >
               {isMobile ? (

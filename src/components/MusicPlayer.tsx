@@ -34,17 +34,17 @@ const Waveform: React.FC<WaveformProps> = ({
 
       // 增加随机噪声的强度
       const noise = (Math.random() - 0.5) * 0.5;
-      
+
       // 使用指数函数增强极值
       const enhanceExtremes = (x: number) => Math.sign(x) * Math.pow(Math.abs(x), 0.7);
       value = enhanceExtremes(value + noise);
-      
+
       // 规范化到更大的范围
       const normalized = (value + 1.2) / 2.4;  // 将 [-1.2, 1.2] 映射到 [0, 1]
-      
+
       // 增加随机峰值
       const spike = Math.random() < 0.1 ? Math.random() * 0.3 : 0;  // 10%概率出现峰值
-      
+
       // 确保值在0.05到0.95之间，增加对比度
       const final = Math.max(0.05, Math.min(0.95, normalized + spike));
       data.push(final);
@@ -57,7 +57,7 @@ const Waveform: React.FC<WaveformProps> = ({
       const prev = i > 0 ? data[i - 1] : data[i];
       const next = i < data.length - 1 ? data[i + 1] : data[i];
       smoothedData.push(
-        data[i] * (1 - smoothFactor) + 
+        data[i] * (1 - smoothFactor) +
         ((prev + next) / 2) * smoothFactor
       );
     }
@@ -92,7 +92,7 @@ const Waveform: React.FC<WaveformProps> = ({
           }
         `}
       </style>
-      <div 
+      <div
         className={`flex items-center justify-center gap-[2px] ${className}`}
         style={{ height: `${height}px` }}
       >
@@ -121,7 +121,7 @@ interface MusicPlayerProps {
   className?: string;
 }
 
-const MusicPlayer: React.FC<MusicPlayerProps> = ({ 
+const MusicPlayer: React.FC<MusicPlayerProps> = ({
   musicUrl,
   isPlaying: externalIsPlaying,
   onPlayingChange
@@ -135,7 +135,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       // 尝试从URL中提取歌曲ID
       const url = new URL(musicUrl.startsWith('//') ? `https:${musicUrl}` : musicUrl);
       const id = url.searchParams.get('id');
-      
+
       if (id) {
         // 创建音频元素
         const audio = new Audio(`https://music.163.com/song/media/outer/url?id=${id}.mp3`);
@@ -186,8 +186,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   }, [externalIsPlaying, isPlaying, onPlayingChange]);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 p-4">
-      <Waveform 
+    <div className="fixed bottom-0 left-0 right-0 p-4 pointer-events-none">
+      <Waveform
         lineCount={60}
         height={40}
         lineWidth={2}

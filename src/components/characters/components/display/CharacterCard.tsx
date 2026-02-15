@@ -1,4 +1,3 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { ShineBorder } from "@/components/magicui/shine-border";
 import { Marquee } from "@/components/magicui/marquee";
@@ -49,34 +48,6 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
   onManageDanmaku,
   experience
 }) => {
-  const [enableHover, setEnableHover] = useState(false);
-  const hasInteracted = useRef(false);
-
-  // 处理用户交互
-  const handleInteraction = useCallback(() => {
-    if (!hasInteracted.current) {
-      hasInteracted.current = true;
-      setEnableHover(true);
-    }
-  }, []);
-
-  // 组件挂载时添加交互监听
-  useEffect(() => {
-    const element = document.body;
-
-    // 重置交互状态
-    hasInteracted.current = false;
-    setEnableHover(false);
-
-    // 监听触摸移动和新的触摸开始
-    element.addEventListener('touchmove', handleInteraction);
-    element.addEventListener('touchstart', handleInteraction);
-
-    return () => {
-      element.removeEventListener('touchmove', handleInteraction);
-      element.removeEventListener('touchstart', handleInteraction);
-    };
-  }, [handleInteraction]);
 
   return (
     <Card className={`relative w-full max-w-2xl bg-white/80 backdrop-blur-sm overflow-hidden ${className || ''}`}>
@@ -180,7 +151,6 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
           >
             <div className="relative">
               <Marquee
-                pauseOnHover={enableHover}
                 className="[--duration:30s] [--gap:1rem]"
               >
                 {statusItems.map(({ key, config, value }) => (

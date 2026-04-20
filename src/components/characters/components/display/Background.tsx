@@ -96,20 +96,22 @@ export const Background: React.FC<BackgroundProps> = ({
               src={url}
               alt="背景"
               className="absolute inset-0 w-full h-full object-cover"
-              style={{
-                opacity: index === currentIndex ? 1 : 0,
-                transition: 'opacity 1s ease-in-out',
-                zIndex: index === currentIndex ? 1 : 0,
-              }}
+              onError={index === currentIndex ? onBgImageError : undefined}
+              crossOrigin="anonymous"
+              referrerPolicy="no-referrer"
+              decoding="async"
               onLoad={() => {
                 if (!hasTriggeredLoadRef.current && onInitialLoad) {
                   hasTriggeredLoadRef.current = true;
                   onInitialLoad();
                 }
               }}
-              onError={index === currentIndex ? onBgImageError : undefined}
-              crossOrigin="anonymous"
-              referrerPolicy="no-referrer"
+              style={{
+                opacity: index === currentIndex ? 1 : 0,
+                transition: 'opacity 1s ease-in-out',
+                zIndex: index === currentIndex ? 1 : 0,
+                willChange: 'opacity'
+              }}
             />
           ))}
 

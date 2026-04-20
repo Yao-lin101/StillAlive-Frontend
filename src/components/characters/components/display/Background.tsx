@@ -14,6 +14,7 @@ interface BackgroundTheme {
 interface BackgroundProps {
   theme?: BackgroundTheme;
   onBgImageError: () => void;
+  onInitialLoad?: () => void;
 }
 
 // 将换行分隔的URL字符串解析为数组
@@ -23,11 +24,13 @@ const parseUrls = (urlString: string): string[] => {
 
 export const Background: React.FC<BackgroundProps> = ({
   theme,
-  onBgImageError
+  onBgImageError,
+  onInitialLoad
 }) => {
   const [backgroundUrls, setBackgroundUrls] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hasTriggeredLoadRef = useRef(false);
 
   // 检测设备类型并解析对应的背景URL列表
   useEffect(() => {
@@ -45,6 +48,11 @@ export const Background: React.FC<BackgroundProps> = ({
       setBackgroundUrls(urls);
       // 随机起始图片
       setCurrentIndex(urls.length > 1 ? Math.floor(Math.random() * urls.length) : 0);
+
+      if (urls.length === 0 && onInitialLoad && !hasTriggeredLoadRef.current) {
+        hasTriggeredLoadRef.current = true;
+        onInitialLoad();
+      }
     };
 
     checkMobileAndSetBackground();
@@ -92,6 +100,12 @@ export const Background: React.FC<BackgroundProps> = ({
                 opacity: index === currentIndex ? 1 : 0,
                 transition: 'opacity 1s ease-in-out',
                 zIndex: index === currentIndex ? 1 : 0,
+              }}
+              onLoad={() => {
+                if (!hasTriggeredLoadRef.current && onInitialLoad) {
+                  hasTriggeredLoadRef.current = true;
+                  onInitialLoad();
+                }
               }}
               onError={index === currentIndex ? onBgImageError : undefined}
               crossOrigin="anonymous"

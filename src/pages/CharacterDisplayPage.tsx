@@ -22,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { MorphingText } from "@/components/magicui/morphing-text";
 import '@/styles/animations.css';
 
 interface CharacterDisplay {
@@ -123,6 +124,7 @@ export const CharacterDisplayPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showDanmakuManager, setShowDanmakuManager] = useState(false);
   const [selectedDanmaku, setSelectedDanmaku] = useState<Message | null>(null);
+  const [isBgLoaded, setIsBgLoaded] = useState(false);
 
   const fetchMessages = async () => {
     if (!code) return;
@@ -194,9 +196,8 @@ export const CharacterDisplayPage: React.FC = () => {
         const statusData = await characterService.getCharacterStatus(code);
         setStatus(statusData);
 
-        // 更新音乐播放器
         if (character?.status_config?.display) {
-          updateMusicPlayer(character.status_config, statusData);
+          updateMusicPlayer(character!.status_config, statusData);
         }
       } catch (err) {
         console.error('Failed to fetch status:', err);
@@ -271,24 +272,18 @@ export const CharacterDisplayPage: React.FC = () => {
       return b.updatedAt - a.updatedAt;
     });
 
-  if (isLoading) {
+  if (error) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-400 border-t-transparent" />
-      </div>
-    );
-  }
-
-  if (error || !character) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
+      <div className="fixed inset-0 flex items-center justify-center overflow-hidden bg-black">
         <div className="text-center p-8 max-w-md">
           <h1 className="text-3xl font-bold mb-4">⚠️</h1>
-          <p className="text-gray-600">{error || '角色不存在'}</p>
+          <p className="text-gray-400">{error || '角色不存在'}</p>
         </div>
       </div>
     );
   }
+
+  const showLoadingOverlay = isLoading || !character || !isBgLoaded;
 
   const formatTimeElapsed = (timestamp: string) => {
     const lastUpdate = new Date(timestamp);
@@ -306,7 +301,7 @@ export const CharacterDisplayPage: React.FC = () => {
   };
 
   const getStatusMessage = () => {
-    if (!status || !character.status_config?.display) return '';
+    if (!status || !character?.status_config?.display) return '';
 
     const latestUpdate = Object.values(status.status_data)
       .map(s => new Date(s.updated_at).getTime())
@@ -316,11 +311,11 @@ export const CharacterDisplayPage: React.FC = () => {
 
     const diffInHours = (new Date().getTime() - latestUpdate) / (1000 * 60 * 60);
 
-    const timeoutMessage = character.status_config?.display?.timeout_messages
+    const timeoutMessage = character?.status_config?.display?.timeout_messages
       ?.sort((a, b) => b.hours - a.hours)
       .find(msg => diffInHours >= msg.hours);
 
-    return timeoutMessage?.message || character.status_config?.display?.default_message || '';
+    return timeoutMessage?.message || character?.status_config?.display?.default_message || '';
   };
 
   const getLastUpdate = () => {
@@ -334,137 +329,161 @@ export const CharacterDisplayPage: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center overflow-hidden light-mode-forced">
-      <Background
-        theme={character.status_config?.theme}
-        onBgImageError={() => { }}
-      />
+    <div className="fixed inset-0 flex items-center justify-center overflow-hidden light-mode-forced bg-black">
+      {/* Cinematic Minimal Loading Overlay */}
+      <AnimatePresence>
+        {showLoadingOverlay && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-[#050505]"
+          >
+            <MorphingText texts={[
+              "Initializing System",
+              "Fetching Memory",
+              "Establishing Connection",
+              "Almost There"
+            ]} className="text-white" />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* 弹幕始终显示，不受隐藏卡片影响 */}
-      <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
-        <DanmakuList
-          messages={messages}
-          className="h-full"
-          onSelect={setSelectedDanmaku}
-        />
-      </div>
+      {character && (
+        <React.Fragment>
+          <Background
+            theme={character.status_config?.theme}
+            onBgImageError={() => { }}
+            onInitialLoad={() => setIsBgLoaded(true)}
+          />
 
-      <div className={`absolute inset-0 ${isCardHidden ? 'z-0' : 'z-20'}`}>
-        <AnimatedContent
-          isHidden={isCardHidden}
-          onShow={() => {
-            setIsCardHidden(false);
-            setIsMusicPlaying(true);
-          }}
-          className="w-full min-h-full flex flex-col items-center py-12"
-        >
-          <div className="w-full max-w-md md:max-w-2xl flex flex-col gap-6 px-4 my-auto relative z-20">
-            <CharacterCard
-              name={character.name}
-              avatar={character.avatar}
-              bio={character.bio}
-              statusMessage={getStatusMessage()}
-              lastUpdate={getLastUpdate()}
-              statusItems={statusItems}
-              onStatusClick={() => setShowStatusDialog(true)}
-              onHideClick={(e) => {
-                e.stopPropagation();
-                setIsCardHidden(true);
-              }}
-              isMusicPlaying={isMusicPlaying}
-              onMusicToggle={currentMusicUrl ? () => setIsMusicPlaying(!isMusicPlaying) : undefined}
-              isOwner={character.is_owner}
-              onManageDanmaku={() => setShowDanmakuManager(true)}
-              experience={character.experience}
-            />
-            <CharacterMessages
-              displayCode={code!}
-              onMessageSent={(newMsg) => {
-                if (newMsg) {
-                  setMessages(prev => [...prev, newMsg]);
-                } else {
-                  fetchMessages();
-                }
-              }}
-              className="mt-4"
+          {/* 弹幕始终显示，不受隐藏卡片影响 */}
+          <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
+            <DanmakuList
+              messages={messages}
+              className="h-full"
+              onSelect={setSelectedDanmaku}
             />
           </div>
-        </AnimatedContent>
-      </div>
 
-      {/* 音乐播放器 - 固定在底部 */}
-      {currentMusicUrl && (
-        <MusicPlayer
-          musicUrl={currentMusicUrl}
-          isPlaying={isMusicPlaying}
-          onPlayingChange={setIsMusicPlaying}
-        />
-      )}
-
-      {/* 状态详情弹窗 */}
-      <Modal
-        isOpen={showStatusDialog}
-        onClose={() => setShowStatusDialog(false)}
-      >
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold leading-none tracking-tight">状态信息</h2>
-        </div>
-        <div className="h-[55vh] overflow-y-auto pr-2 -mr-2">
-          <div className="grid grid-cols-2 gap-4">
-            {statusItems?.map(({ key, config, value, updatedAt }) => (
-              <StatusCard
-                key={key}
-                variant="compact"
-                label={config.label}
-                description={config.description}
-                value={value}
-                suffix={config.valueType === 'number' ? config.suffix : undefined}
-                timestamp={updatedAt ? formatTimeElapsed(new Date(updatedAt).toISOString()) : undefined}
-              />
-            ))}
-          </div>
-        </div>
-      </Modal>
-
-      {/* 弹幕管理弹窗 */}
-      <DanmakuManager
-        open={showDanmakuManager}
-        onOpenChange={setShowDanmakuManager}
-        messages={messages}
-        onDelete={handleDeleteMessage}
-      />
-
-      {/* 弹幕内容详情弹窗 */}
-      <Dialog open={!!selectedDanmaku} onOpenChange={(open) => !open && setSelectedDanmaku(null)}>
-        <DialogContent
-          className="sm:max-w-md bg-white/90 backdrop-blur-xl border-white/20"
-          onClick={(e) => e.stopPropagation()}
-          onPointerDownOutside={(e) => e.stopPropagation()}
-        >
-          <DialogHeader>
-            <DialogTitle>弹幕详情</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <p className="text-lg font-medium break-words">{selectedDanmaku?.content}</p>
-            </div>
-            <div className="flex items-center justify-between text-sm text-gray-500 border-t pt-4">
-              <div className="flex flex-col gap-1">
-                <span className="font-mono text-xs opacity-70">
-                  {selectedDanmaku?.created_at && new Date(selectedDanmaku.created_at).toLocaleString()}
-                </span>
+          <div className={`absolute inset-0 ${isCardHidden ? 'z-0' : 'z-20'}`}>
+            <AnimatedContent
+              isHidden={isCardHidden}
+              onShow={() => {
+                setIsCardHidden(false);
+                setIsMusicPlaying(true);
+              }}
+              className="w-full min-h-full flex flex-col items-center py-12"
+            >
+              <div className="w-full max-w-md md:max-w-2xl flex flex-col gap-6 px-4 my-auto relative z-20">
+                <CharacterCard
+                  name={character.name}
+                  avatar={character.avatar}
+                  bio={character.bio}
+                  statusMessage={getStatusMessage()}
+                  lastUpdate={getLastUpdate()}
+                  statusItems={statusItems}
+                  onStatusClick={() => setShowStatusDialog(true)}
+                  onHideClick={(e) => {
+                    e.stopPropagation();
+                    setIsCardHidden(true);
+                  }}
+                  isMusicPlaying={isMusicPlaying}
+                  onMusicToggle={currentMusicUrl ? () => setIsMusicPlaying(!isMusicPlaying) : undefined}
+                  isOwner={character.is_owner}
+                  onManageDanmaku={() => setShowDanmakuManager(true)}
+                  experience={character.experience}
+                />
+                <CharacterMessages
+                  displayCode={code!}
+                  onMessageSent={(newMsg) => {
+                    if (newMsg) {
+                      setMessages(prev => [...prev, newMsg]);
+                    } else {
+                      fetchMessages();
+                    }
+                  }}
+                  className="mt-4"
+                />
               </div>
-              <div className="flex flex-col gap-1 text-right">
-                <div className="flex flex-col items-end">
-                  <span className="font-medium text-xs text-gray-900">
-                    {selectedDanmaku?.location ? `${selectedDanmaku.location}网友` : '异世界网友'}
-                  </span>
+            </AnimatedContent>
+          </div>
+
+          {/* 音乐播放器 - 固定在底部 */}
+          {currentMusicUrl && (
+            <MusicPlayer
+              musicUrl={currentMusicUrl}
+              isPlaying={isMusicPlaying}
+              onPlayingChange={setIsMusicPlaying}
+            />
+          )}
+
+          {/* 状态详情弹窗 */}
+          <Modal
+            isOpen={showStatusDialog}
+            onClose={() => setShowStatusDialog(false)}
+          >
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold leading-none tracking-tight">状态信息</h2>
+            </div>
+            <div className="h-[55vh] overflow-y-auto pr-2 -mr-2">
+              <div className="grid grid-cols-2 gap-4">
+                {statusItems?.map(({ key, config, value, updatedAt }) => (
+                  <StatusCard
+                    key={key}
+                    variant="compact"
+                    label={config.label}
+                    description={config.description}
+                    value={value}
+                    suffix={config.valueType === 'number' ? config.suffix : undefined}
+                    timestamp={updatedAt ? formatTimeElapsed(new Date(updatedAt).toISOString()) : undefined}
+                  />
+                ))}
+              </div>
+            </div>
+          </Modal>
+
+          {/* 弹幕管理弹窗 */}
+          <DanmakuManager
+            open={showDanmakuManager}
+            onOpenChange={setShowDanmakuManager}
+            messages={messages}
+            onDelete={handleDeleteMessage}
+          />
+
+          {/* 弹幕内容详情弹窗 */}
+          <Dialog open={!!selectedDanmaku} onOpenChange={(open) => !open && setSelectedDanmaku(null)}>
+            <DialogContent
+              className="sm:max-w-md bg-white/90 backdrop-blur-xl border-white/20"
+              onClick={(e) => e.stopPropagation()}
+              onPointerDownOutside={(e) => e.stopPropagation()}
+            >
+              <DialogHeader>
+                <DialogTitle>弹幕详情</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="space-y-2">
+                  <p className="text-lg font-medium break-words">{selectedDanmaku?.content}</p>
+                </div>
+                <div className="flex items-center justify-between text-sm text-gray-500 border-t pt-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="font-mono text-xs opacity-70">
+                      {selectedDanmaku?.created_at && new Date(selectedDanmaku.created_at).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1 text-right">
+                    <div className="flex flex-col items-end">
+                      <span className="font-medium text-xs text-gray-900">
+                        {selectedDanmaku?.location ? `${selectedDanmaku.location}网友` : '异世界网友'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div >
+            </DialogContent>
+          </Dialog>
+        </React.Fragment>
+      )}
+    </div>
   );
 }; 

@@ -162,7 +162,7 @@ export const Background: React.FC<BackgroundProps> = ({
           )}
         </>
       )}
-      {(theme?.meteors_enabled ?? true) && (
+      {initialImageLoaded && (theme?.meteors_enabled ?? true) && (
         <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 3 }}>
           <Meteors
             number={30}
@@ -170,7 +170,7 @@ export const Background: React.FC<BackgroundProps> = ({
           />
         </div>
       )}
-      {(theme?.feathers_enabled ?? false) && (
+      {initialImageLoaded && (theme?.feathers_enabled ?? false) && (
         <div className="absolute inset-0" style={{ zIndex: 4, pointerEvents: 'none' }}>
           <FeatherFall />
         </div>

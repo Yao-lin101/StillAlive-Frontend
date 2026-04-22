@@ -283,7 +283,9 @@ export const CharacterDisplayPage: React.FC = () => {
     );
   }
 
-  const showLoadingOverlay = isLoading || !character || !isBgLoaded;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  const isPageLoading = isLoading || !character || !isBgLoaded;
+  const showLoadingOverlay = !isMobile && isPageLoading;
 
   const formatTimeElapsed = (timestamp: string) => {
     const lastUpdate = new Date(timestamp);
@@ -330,6 +332,16 @@ export const CharacterDisplayPage: React.FC = () => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center overflow-hidden light-mode-forced bg-black">
+      {/* Mobile Simple Loading Overlay */}
+      {isMobile && isPageLoading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 border-4 border-white/20 border-t-white/80 rounded-full animate-spin" />
+            <p className="text-white/60 font-mono text-sm animate-pulse">Loading System...</p>
+          </div>
+        </div>
+      )}
+
       {/* Cinematic Minimal Loading Overlay */}
       <AnimatePresence>
         {showLoadingOverlay && (

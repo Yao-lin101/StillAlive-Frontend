@@ -36,6 +36,8 @@ export const Background: React.FC<BackgroundProps> = ({
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hasTriggeredLoadRef = useRef(false);
 
+  const lastUrlStringRef = useRef<string | null>(null);
+
   // 检测设备类型并解析对应的背景URL列表
   useEffect(() => {
     const checkMobileAndSetBackground = () => {
@@ -45,19 +47,23 @@ export const Background: React.FC<BackgroundProps> = ({
       if (window.innerWidth <= 768 && theme.mobile_background_url) {
         urlString = theme.mobile_background_url;
       } else {
-        urlString = theme.background_url;
+        urlString = theme.background_url || '';
       }
 
-      const urls = parseUrls(urlString);
-      setBackgroundUrls(urls);
-      
-      const first = urls.length > 1 ? Math.floor(Math.random() * urls.length) : 0;
-      setActiveIndices({ current: first, next: null });
-      setMountedIndices(new Set([first]));
+      // 如果背景URL没有实质变化（例如仅仅是手机浏览器滚动导致的resize），则不进行任何重置操作
+      if (urlString !== lastUrlStringRef.current) {
+        lastUrlStringRef.current = urlString;
+        const urls = parseUrls(urlString);
+        setBackgroundUrls(urls);
+        
+        const first = urls.length > 1 ? Math.floor(Math.random() * urls.length) : 0;
+        setActiveIndices({ current: first, next: null });
+        setMountedIndices(new Set([first]));
 
-      if (urls.length === 0 && onInitialLoad && !hasTriggeredLoadRef.current) {
-        hasTriggeredLoadRef.current = true;
-        onInitialLoad();
+        if (urls.length === 0 && onInitialLoad && !hasTriggeredLoadRef.current) {
+          hasTriggeredLoadRef.current = true;
+          onInitialLoad();
+        }
       }
     };
 

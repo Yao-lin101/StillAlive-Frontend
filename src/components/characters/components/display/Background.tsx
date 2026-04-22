@@ -28,7 +28,11 @@ export const Background: React.FC<BackgroundProps> = ({
   onInitialLoad
 }) => {
   const [backgroundUrls, setBackgroundUrls] = useState<string[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // 使用单一状态管理当前展示和下一个预加载的索引
+  const [activeIndices, setActiveIndices] = useState<{ current: number, next: number | null }>({ current: 0, next: null });
+  const [mountedIndices, setMountedIndices] = useState<Set<number>>(new Set());
+  const [initialImageLoaded, setInitialImageLoaded] = useState(false);
+  
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hasTriggeredLoadRef = useRef(false);
 
@@ -46,8 +50,10 @@ export const Background: React.FC<BackgroundProps> = ({
 
       const urls = parseUrls(urlString);
       setBackgroundUrls(urls);
-      // 随机起始图片
-      setCurrentIndex(urls.length > 1 ? Math.floor(Math.random() * urls.length) : 0);
+      
+      const first = urls.length > 1 ? Math.floor(Math.random() * urls.length) : 0;
+      setActiveIndices({ current: first, next: null });
+      setMountedIndices(new Set([first]));
 
       if (urls.length === 0 && onInitialLoad && !hasTriggeredLoadRef.current) {
         hasTriggeredLoadRef.current = true;
@@ -61,27 +67,40 @@ export const Background: React.FC<BackgroundProps> = ({
     return () => window.removeEventListener('resize', checkMobileAndSetBackground);
   }, [theme]);
 
-  // 幻灯片定时器 — 简单地切换 currentIndex
+  // 记录所有已挂载的索引，避免卸载导致淡出动画失效
   useEffect(() => {
-    if (backgroundUrls.length <= 1) return;
+    setMountedIndices(prev => {
+      const nextSet = new Set(prev);
+      nextSet.add(activeIndices.current);
+      if (activeIndices.next !== null) {
+        nextSet.add(activeIndices.next);
+      }
+      return nextSet;
+    });
+  }, [activeIndices]);
+
+  // 幻灯片定时器 — 只有在第一张图片加载完毕后才开启
+  useEffect(() => {
+    if (backgroundUrls.length <= 1 || !initialImageLoaded) return;
 
     const interval = (theme?.slideshow_interval ?? 5) * 1000;
 
     intervalRef.current = setInterval(() => {
-      // 随机选择下一张（排除当前图片，避免连续重复）
-      setCurrentIndex(prev => {
-        let next: number;
+      setActiveIndices(prev => {
+        const newCurrent = prev.next !== null ? prev.next : prev.current;
+        let newNext: number;
         do {
-          next = Math.floor(Math.random() * backgroundUrls.length);
-        } while (next === prev && backgroundUrls.length > 1);
-        return next;
+          newNext = Math.floor(Math.random() * backgroundUrls.length);
+        } while (newNext === newCurrent && backgroundUrls.length > 1);
+        
+        return { current: newCurrent, next: newNext };
       });
     }, interval);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [backgroundUrls.length, theme?.slideshow_interval]);
+  }, [backgroundUrls.length, theme?.slideshow_interval, initialImageLoaded]);
 
   const hasImages = backgroundUrls.length > 0;
 
@@ -90,30 +109,45 @@ export const Background: React.FC<BackgroundProps> = ({
       {hasImages && (
         <>
           {/* 渲染所有图片，通过 opacity 控制显示 */}
-          {backgroundUrls.map((url, index) => (
-            <img
-              key={url}
-              src={url}
-              alt="背景"
-              className="absolute inset-0 w-full h-full object-cover"
-              onError={index === currentIndex ? onBgImageError : undefined}
-              crossOrigin="anonymous"
-              referrerPolicy="no-referrer"
-              decoding="async"
-              onLoad={() => {
-                if (!hasTriggeredLoadRef.current && onInitialLoad) {
-                  hasTriggeredLoadRef.current = true;
-                  onInitialLoad();
-                }
-              }}
-              style={{
-                opacity: index === currentIndex ? 1 : 0,
-                transition: 'opacity 1s ease-in-out',
-                zIndex: index === currentIndex ? 1 : 0,
-                willChange: 'opacity'
-              }}
-            />
-          ))}
+          {backgroundUrls.map((url, index) => {
+            if (!mountedIndices.has(index)) return null;
+
+            return (
+              <img
+                key={url}
+                src={url}
+                alt="背景"
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={index === activeIndices.current ? onBgImageError : undefined}
+                crossOrigin="anonymous"
+                referrerPolicy="no-referrer"
+                decoding="async"
+                onLoad={() => {
+                  if (!hasTriggeredLoadRef.current && onInitialLoad && index === activeIndices.current) {
+                    hasTriggeredLoadRef.current = true;
+                    setInitialImageLoaded(true);
+                    
+                    // 首图加载完毕后，立刻算出下一张并挂载，开始静默下载
+                    if (backgroundUrls.length > 1) {
+                      let nextTarget: number;
+                      do {
+                        nextTarget = Math.floor(Math.random() * backgroundUrls.length);
+                      } while (nextTarget === activeIndices.current);
+                      setActiveIndices(prev => ({ ...prev, next: nextTarget }));
+                    }
+
+                    onInitialLoad();
+                  }
+                }}
+                style={{
+                  opacity: index === activeIndices.current ? 1 : 0,
+                  transition: 'opacity 1s ease-in-out',
+                  zIndex: index === activeIndices.current ? 1 : 0,
+                  willChange: 'opacity'
+                }}
+              />
+            );
+          })}
 
           {(theme?.meteors_enabled ?? true) && (
             <div

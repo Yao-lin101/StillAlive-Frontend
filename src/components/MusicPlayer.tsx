@@ -240,6 +240,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [useCORS, setUseCORS] = useState(true);
+  const [resolvedId, setResolvedId] = useState<string | null>(null);
 
   const cleanupAudioContext = useCallback(() => {
     if (sourceRef.current) {
@@ -254,16 +255,53 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
     setAnalyser(null);
   }, []);
 
-  // 初始化或重新加载音频
+  // 解析音乐 URL（如果是电台节目 type=3，则需要异步获取真实歌曲 ID）
   useEffect(() => {
+    let isMounted = true;
     try {
       const url = new URL(musicUrl.startsWith('//') ? `https:${musicUrl}` : musicUrl);
       const id = url.searchParams.get('id');
+      const type = url.searchParams.get('type');
 
-      if (id) {
-        // 使用带有 CORS 响应头的第三方解析 API 替代官方接口
-        // 官方的 302 跳转缺少 CORS 头会导致浏览器直接拦截跨域请求
-        const audio = new Audio();
+      if (!id) {
+        if (isMounted) setResolvedId(null);
+        return;
+      }
+
+      if (type === '3') {
+        fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent('https://music.163.com/api/dj/program/detail?id=' + id)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (isMounted && data?.program?.mainSong?.id) {
+              setResolvedId(data.program.mainSong.id.toString());
+            } else if (isMounted) {
+              setResolvedId(id);
+            }
+          })
+          .catch(err => {
+            console.error('Failed to resolve DJ program to song ID:', err);
+            if (isMounted) setResolvedId(id);
+          });
+      } else {
+        setResolvedId(id);
+      }
+    } catch (error) {
+      console.error('Failed to parse music URL:', error);
+      if (isMounted) setResolvedId(null);
+    }
+    return () => { isMounted = false; };
+  }, [musicUrl]);
+
+  // 初始化或重新加载音频
+  useEffect(() => {
+    if (!resolvedId) {
+      audioRef.current = null;
+      return;
+    }
+
+    // 使用带有 CORS 响应头的第三方解析 API 替代官方接口
+    // 官方的 302 跳转缺少 CORS 头会导致浏览器直接拦截跨域请求
+    const audio = new Audio();
 
         // 尝试跨域以支持 Web Audio API 获取数据
         if (useCORS) {
@@ -271,7 +309,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         }
 
         // 必须在设置 src 之前设置 crossOrigin，否则浏览器可能会在赋予 CORS 属性前就发出非 CORS 请求，导致错误！
-        audio.src = `https://api.injahow.cn/meting/?server=netease&type=url&id=${id}`;
+        audio.src = `https://api.injahow.cn/meting/?server=netease&type=url&id=${resolvedId}`;
 
         audio.loop = true;
         const handleEnded = () => {
@@ -313,19 +351,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
           setIsPlaying(false);
           cleanupAudioContext();
         };
-      } else {
-        audioRef.current = null;
-      }
-    } catch (error) {
-      console.error('Failed to parse music URL:', error);
-      audioRef.current = null;
-    }
-
-    return () => {
-      setIsPlaying(false);
-      cleanupAudioContext();
-    };
-  }, [musicUrl, useCORS, cleanupAudioContext]);
+  }, [resolvedId, useCORS, cleanupAudioContext]);
 
   const initAudioContext = () => {
     if (!audioRef.current || !useCORS) return;

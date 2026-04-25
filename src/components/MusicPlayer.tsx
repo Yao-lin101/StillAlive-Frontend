@@ -67,7 +67,7 @@ const Waveform: React.FC<WaveformProps> = ({
 
   // 实时渲染来自分析器的数据
   useEffect(() => {
-    if (!analyser || !isPlaying || !containerRef.current) {
+    if (!analyser || !containerRef.current) {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -84,7 +84,13 @@ const Waveform: React.FC<WaveformProps> = ({
 
     const draw = () => {
       animationRef.current = requestAnimationFrame(draw);
-      analyser.getByteFrequencyData(dataArray);
+      
+      // 如果正在播放，获取真实数据；否则全为 0，让系统自然重力回落
+      if (isPlaying) {
+        analyser.getByteFrequencyData(dataArray);
+      } else {
+        dataArray.fill(0);
+      }
 
       let totalEnergy = 0;
       const spectrumData = [];
@@ -113,6 +119,8 @@ const Waveform: React.FC<WaveformProps> = ({
         spectrumData.push(value);
       }
 
+      let allAtBottom = true;
+
       // 2. 应用平滑缓动算法 (Lerp) 并更新 DOM
       for (let i = 0; i < lineCount; i++) {
         const target = spectrumData[i] || 0;
@@ -125,6 +133,10 @@ const Waveform: React.FC<WaveformProps> = ({
           currentHeights[i] *= 0.92;  // 8% 的空气阻力，形成优美的抛物线下落
         }
         currentHeights[i] = Math.max(0.02, currentHeights[i]); // 最低保持 2%
+
+        if (currentHeights[i] > 0.025) {
+          allAtBottom = false;
+        }
 
         const h = currentHeights[i] * height;
         totalEnergy += currentHeights[i];
@@ -141,6 +153,11 @@ const Waveform: React.FC<WaveformProps> = ({
       if (containerRef.current) {
         const glowRadius = avgEnergy * 20; // 能量越高，辉光越扩散
         containerRef.current.style.filter = `drop-shadow(0 0 ${glowRadius}px rgba(255, 255, 255, 0.7))`;
+      }
+
+      // 为了节省性能，如果处于暂停状态且所有音柱都已经跌落到最低点，则停止渲染循环
+      if (!isPlaying && allAtBottom) {
+        cancelAnimationFrame(animationRef.current);
       }
     };
 

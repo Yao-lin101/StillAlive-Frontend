@@ -21,42 +21,19 @@ const Waveform: React.FC<WaveformProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>(0);
+  const currentHeightsRef = useRef<number[]>(new Array(lineCount).fill(0));
 
-  // 生成静态波形数据
+  // 生成静态波形数据 (闲置状态)
   const generateStaticWaveform = useCallback(() => {
     const data = [];
-    const frequencies = [0.05, 0.15, 0.3, 0.8];
-    const amplitudes = [0.5, 0.3, 0.2, 0.1];
-    const phases = frequencies.map(() => Math.random() * Math.PI * 2);
-
     for (let i = 0; i < lineCount; i++) {
-      let value = 0;
-      frequencies.forEach((freq, index) => {
-        value += Math.sin(i * freq + phases[index]) * amplitudes[index];
-      });
-
-      const noise = (Math.random() - 0.5) * 0.5;
-      const enhanceExtremes = (x: number) => Math.sign(x) * Math.pow(Math.abs(x), 0.7);
-      value = enhanceExtremes(value + noise);
-
-      const normalized = (value + 1.2) / 2.4;
-      const spike = Math.random() < 0.1 ? Math.random() * 0.3 : 0;
-      const final = Math.max(0.05, Math.min(0.95, normalized + spike));
-      data.push(final);
+      // 简单生成一个中间高两边低的平滑静态曲线
+      const x = (i - lineCount / 2) / (lineCount / 2);
+      const bellCurve = Math.exp(-Math.pow(x, 2) * 4); 
+      const noise = Math.random() * 0.1;
+      data.push(Math.max(0.05, bellCurve * 0.4 + noise));
     }
-
-    const smoothedData = [];
-    const smoothFactor = 0.15;
-    for (let i = 0; i < data.length; i++) {
-      const prev = i > 0 ? data[i - 1] : data[i];
-      const next = i < data.length - 1 ? data[i + 1] : data[i];
-      smoothedData.push(
-        data[i] * (1 - smoothFactor) +
-        ((prev + next) / 2) * smoothFactor
-      );
-    }
-
-    return smoothedData;
+    return data;
   }, [lineCount]);
 
   const [staticData, setStaticData] = useState<number[]>([]);
@@ -76,20 +53,27 @@ const Waveform: React.FC<WaveformProps> = ({
 
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
     const lines = containerRef.current.children;
+    const currentHeights = currentHeightsRef.current;
+    
+    // 取前 60% 的频段（截掉人类听觉不敏感的极高频空白区）
+    const usefulBins = Math.floor(analyser.frequencyBinCount * 0.6); 
+    const halfCount = Math.floor(lineCount / 2);
+    const step = Math.max(1, Math.floor(usefulBins / halfCount));
 
     const draw = () => {
       animationRef.current = requestAnimationFrame(draw);
       analyser.getByteFrequencyData(dataArray);
 
-      // 将频谱数据映射到可视化的线条上
-      const step = Math.max(1, Math.floor(dataArray.length / lineCount));
-      
-      for (let i = 0; i < lineCount; i++) {
+      let totalEnergy = 0;
+      const sideData = [];
+
+      // 1. 提取单侧音频频段数据（从低频到高频）
+      for (let i = 0; i < halfCount; i++) {
         let sum = 0;
         let count = 0;
         for (let j = 0; j < step; j++) {
           const index = i * step + j;
-          if (index < dataArray.length) {
+          if (index < usefulBins) {
             sum += dataArray[index];
             count++;
           }
@@ -98,16 +82,45 @@ const Waveform: React.FC<WaveformProps> = ({
         const avg = count > 0 ? sum / count : 0;
         const normalized = avg / 255;
         
-        // 增益调整：让频段更具视觉冲击力，稍微增强高频的可视化
-        const boost = 1 + (i / lineCount) * 0.5;
-        const value = Math.max(0.05, Math.min(0.95, normalized * 1.2 * boost));
+        // 压低平均值，拉开极值差距，避免音柱一直“顶头”
+        // 使用指数曲线让低音量更沉，高音爆点更锐利
+        const curved = Math.pow(normalized, 1.8);
+        
+        // 增益调整：高频能量弱，予以指数放大补偿视觉
+        const boost = 1 + (i / halfCount) * 1.5;
+        const value = Math.max(0.02, Math.min(0.95, curved * 0.85 * boost));
+        sideData.push(value);
+      }
+
+      // 2. 拼接为中心对称数组: [高频 -> 低频] + [低频 -> 高频]
+      const mirroredData = [...sideData].reverse().concat(sideData);
+
+      // 3. 应用平滑缓动算法 (Lerp) 并更新 DOM
+      for (let i = 0; i < lineCount; i++) {
+        const target = mirroredData[i] || 0;
+        
+        // 物理感平滑插值：上升快（0.6），回落较快（0.18）以防一直停留在高处
+        if (target > currentHeights[i]) {
+          currentHeights[i] += (target - currentHeights[i]) * 0.6;
+        } else {
+          currentHeights[i] += (target - currentHeights[i]) * 0.18;
+        }
+        
+        const h = currentHeights[i] * height;
+        totalEnergy += currentHeights[i];
         
         const line = lines[i] as HTMLDivElement;
         if (line) {
-          line.style.height = `${value * height}px`;
-          // 如果使用真实数据驱动，不再需要 CSS 的 bounce 动画，直接缩放为1
+          line.style.height = `${Math.max(2, h)}px`;
           line.style.transform = 'scaleY(1)';
         }
+      }
+
+      // 4. 计算全局总能量，施加动态呼吸发光效果
+      const avgEnergy = totalEnergy / lineCount;
+      if (containerRef.current) {
+        const glowRadius = avgEnergy * 20; // 能量越高，辉光越扩散
+        containerRef.current.style.filter = `drop-shadow(0 0 ${glowRadius}px rgba(255, 255, 255, 0.7))`;
       }
     };
 
@@ -116,6 +129,9 @@ const Waveform: React.FC<WaveformProps> = ({
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
+      }
+      if (containerRef.current) {
+        containerRef.current.style.filter = 'none';
       }
     };
   }, [analyser, isPlaying, lineCount, height]);
@@ -128,8 +144,10 @@ const Waveform: React.FC<WaveformProps> = ({
         const line = lines[i] as HTMLDivElement;
         if (line) {
           line.style.height = '2px';
+          line.style.transform = 'scaleY(1)';
         }
       }
+      containerRef.current.style.filter = 'none';
     }
   }, [analyser, isPlaying]);
 
@@ -142,12 +160,14 @@ const Waveform: React.FC<WaveformProps> = ({
               transform: scaleY(0.7);
             }
             50% {
-              transform: scaleY(1);
+              transform: scaleY(1.3);
             }
           }
           .waveform-line {
-            transition: height 0.1s ease, transform 0.4s ease, background-color 0.4s ease;
-            transform-origin: center;
+            /* 移除了 height 的 CSS transition，交由 JS requestAnimationFrame 进行精准平滑渲染 */
+            transition: transform 0.4s ease, background-color 0.4s ease;
+            transform-origin: bottom; /* 从底部向上生长，配合中心对称的高低起伏更有山峰感 */
+            border-radius: 2px;
           }
           .waveform-line.playing-simulated {
             animation: waveform-bounce 1s ease-in-out infinite;
@@ -157,8 +177,11 @@ const Waveform: React.FC<WaveformProps> = ({
       </style>
       <div
         ref={containerRef}
-        className={`flex items-center justify-center gap-[2px] ${className}`}
-        style={{ height: `${height}px` }}
+        className={`flex items-end justify-center gap-[3px] ${className}`}
+        style={{ 
+          height: `${height}px`,
+          transition: 'filter 0.1s ease-out'
+        }}
       >
         {staticData.map((amplitude, index) => (
           <div
@@ -166,11 +189,10 @@ const Waveform: React.FC<WaveformProps> = ({
             className={`waveform-line ${isPlaying && !analyser ? 'playing-simulated' : ''}`}
             style={{
               width: `${lineWidth}px`,
-              // 初始状态：如果使用Analyser则由内部接管，否则使用静态生成的振幅
+              // 初始静态状态使用钟形曲线
               height: analyser ? '2px' : (isPlaying ? `${amplitude * height}px` : '2px'),
               backgroundColor: lineColor,
-              transform: isPlaying && !analyser ? 'scaleY(0.7)' : 'scaleY(1)',
-              '--index': index,
+              '--index': Math.abs(index - lineCount / 2),
             } as React.CSSProperties}
           />
         ))}
@@ -297,7 +319,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         
         const analyserNode = ctx.createAnalyser();
         analyserNode.fftSize = 256; // 128 个频率数据点
-        analyserNode.smoothingTimeConstant = 0.8; // 平滑过渡时间
+        // 降低原生 API 的平滑，交由我们自己的 JS Lerp 来做物理平滑，否则会导致数据居高不下
+        analyserNode.smoothingTimeConstant = 0.2; 
         
         const sourceNode = ctx.createMediaElementSource(audioRef.current);
         sourceNode.connect(analyserNode);

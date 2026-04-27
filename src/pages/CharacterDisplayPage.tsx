@@ -4,7 +4,6 @@ import { Card } from '@/components/ui/card';
 import { characterService } from '@/services/characterService';
 import { formatError } from '@/lib/utils';
 import { StatusConfigType } from '@/types/character';
-import { ShineBorder } from "@/components/magicui/shine-border";
 import { motion, AnimatePresence } from "framer-motion";
 import MusicPlayer from '../components/MusicPlayer';
 import { Background } from '@/components/characters/components/display/Background';
@@ -30,7 +29,7 @@ import {
 } from "@/components/ui/tabs";
 import { DailyReportCalendar } from '@/components/characters/components/display/DailyReportCalendar';
 import { DailyReportDetail } from '@/components/characters/components/display/DailyReportDetail';
-import { DailyReport } from '@/types/character';
+import { DailyReportDetail as DailyReportDetailType } from '@/types/character';
 import { MorphingText } from "@/components/magicui/morphing-text";
 import '@/styles/animations.css';
 
@@ -99,8 +98,7 @@ const Modal = ({
             className="relative max-w-2xl w-full"
             onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
           >
-            <Card className="w-full overflow-hidden bg-white/90 backdrop-blur-sm">
-              <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
+            <Card className="w-full overflow-hidden bg-white">
               <div className="p-6 pt-12">
                 <button
                   onClick={onClose}
@@ -140,10 +138,17 @@ export const CharacterDisplayPage: React.FC = () => {
   const [currentReportYear, setCurrentReportYear] = useState(new Date().getFullYear());
   const [currentReportMonth, setCurrentReportMonth] = useState(new Date().getMonth());
   const [selectedReportDate, setSelectedReportDate] = useState<Date | null>(null);
-  const [selectedReport, setSelectedReport] = useState<DailyReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<DailyReportDetailType | null>(null);
   const [isLoadingReportDates, setIsLoadingReportDates] = useState(false);
   const [isLoadingReportDetail, setIsLoadingReportDetail] = useState(false);
   const [showReportDetail, setShowReportDetail] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('status');
+  const [dailyReportConfig, setDailyReportConfig] = useState<{
+    is_enabled: boolean;
+    is_visible: boolean;
+    visibility?: string;
+    is_owner?: boolean;
+  } | null>(null);
 
   const fetchMessages = async () => {
     if (!code) return;
@@ -167,21 +172,76 @@ export const CharacterDisplayPage: React.FC = () => {
     }
   };
 
-  const fetchReportDates = async () => {
-    if (!code) return;
+  const fetchReportDates = async (year?: number, month?: number): Promise<number[]> => {
+    if (!code) return [];
     try {
       setIsLoadingReportDates(true);
+      const targetYear = year ?? currentReportYear;
+      const targetMonth = month ?? currentReportMonth;
       const dates = await characterService.getDailyReportDates(
         code,
-        currentReportYear,
-        currentReportMonth + 1
+        targetYear,
+        targetMonth + 1
       );
       setReportDates(dates);
+      return dates;
     } catch (error) {
       console.error('Failed to fetch report dates:', error);
       setReportDates([]);
+      return [];
     } finally {
       setIsLoadingReportDates(false);
+    }
+  };
+
+  const handleTabChange = async (value: string) => {
+    setActiveTab(value);
+    
+    if (value === 'report') {
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      setShowReportDetail(false);
+      setSelectedReport(null);
+      setSelectedReportDate(null);
+      
+      if (currentReportYear !== today.getFullYear() || currentReportMonth !== today.getMonth()) {
+        setCurrentReportYear(today.getFullYear());
+        setCurrentReportMonth(today.getMonth());
+      }
+      
+      const currentYear = today.getFullYear();
+      const currentMonth = today.getMonth();
+      const dates = await fetchReportDates(currentYear, currentMonth);
+      
+      const todayDate = today.getDate();
+      const yesterdayDate = yesterday.getDate();
+      const yesterdayYear = yesterday.getFullYear();
+      const yesterdayMonth = yesterday.getMonth();
+      
+      if (dates.includes(todayDate)) {
+        handleReportDateSelect(today);
+        return;
+      }
+      
+      if (yesterdayYear === currentYear && yesterdayMonth === currentMonth) {
+        if (dates.includes(yesterdayDate)) {
+          handleReportDateSelect(yesterday);
+          return;
+        }
+      } else {
+        const prevMonthDates = await fetchReportDates(yesterdayYear, yesterdayMonth);
+        if (prevMonthDates.includes(yesterdayDate)) {
+          setCurrentReportYear(yesterdayYear);
+          setCurrentReportMonth(yesterdayMonth);
+          handleReportDateSelect(yesterday);
+          return;
+        }
+      }
+      
+      setCurrentReportYear(currentYear);
+      setCurrentReportMonth(currentMonth);
     }
   };
 
@@ -268,14 +328,16 @@ export const CharacterDisplayPage: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const [characterData, statusData, messagesData] = await Promise.all([
+        const [characterData, statusData, messagesData, reportConfigData] = await Promise.all([
           characterService.getPublicDisplay(code!),
           characterService.getCharacterStatus(code!),
-          characterService.getMessages(code!)
+          characterService.getMessages(code!),
+          characterService.getDailyReportConfigPublic(code!)
         ]);
         setCharacter(characterData);
         setStatus(statusData);
         setMessages(messagesData);
+        setDailyReportConfig(reportConfigData);
 
         // 初始化音乐
         if (characterData.status_config?.display) {
@@ -315,9 +377,18 @@ export const CharacterDisplayPage: React.FC = () => {
 
   useEffect(() => {
     if (showStatusDialog) {
+      setActiveTab('status');
+      setShowReportDetail(false);
+      setSelectedReport(null);
+      setSelectedReportDate(null);
+    }
+  }, [showStatusDialog]);
+
+  useEffect(() => {
+    if (activeTab === 'report' && !showReportDetail) {
       fetchReportDates();
     }
-  }, [showStatusDialog, currentReportYear, currentReportMonth]);
+  }, [activeTab, currentReportYear, currentReportMonth]);
 
   // 根据状态更新音乐播放器
   const updateMusicPlayer = (config: StatusConfigType, statusData: CharacterStatus | null) => {
@@ -549,10 +620,32 @@ export const CharacterDisplayPage: React.FC = () => {
               setShowReportDetail(false);
             }}
           >
-            <Tabs defaultValue="status" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="status">状态信息</TabsTrigger>
-                <TabsTrigger value="report">日报分析</TabsTrigger>
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+              <TabsList className={`grid w-full ${dailyReportConfig?.is_visible ? 'grid-cols-2' : 'grid-cols-1'} mb-4 !bg-gray-100`}>
+                <TabsTrigger 
+                  value="status"
+                  className="!text-gray-600 
+                    data-[state=active]:!bg-white 
+                    data-[state=active]:!text-slate-800
+                    data-[state=active]:!shadow-none
+                    data-[state=active]:!from-transparent
+                    data-[state=active]:!to-transparent"
+                >
+                  状态信息
+                </TabsTrigger>
+                {dailyReportConfig?.is_visible && (
+                  <TabsTrigger 
+                    value="report"
+                    className="!text-gray-600 
+                      data-[state=active]:!bg-white 
+                      data-[state=active]:!text-slate-800
+                      data-[state=active]:!shadow-none
+                      data-[state=active]:!from-transparent
+                      data-[state=active]:!to-transparent"
+                  >
+                    日报分析
+                  </TabsTrigger>
+                )}
               </TabsList>
 
               <TabsContent value="status" className="mt-2">
@@ -573,43 +666,45 @@ export const CharacterDisplayPage: React.FC = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="report" className="mt-2">
-                <div className={`${showReportDetail ? 'h-[55vh] flex flex-col' : 'h-[55vh] overflow-y-auto pr-2 -mr-2'}`}>
-                  {showReportDetail ? (
-                    <div className="flex-1 min-h-0">
-                      <DailyReportDetail
-                        report={selectedReport}
-                        isLoading={isLoadingReportDetail}
-                        isOwner={character?.is_owner || false}
-                        onHide={handleToggleReportHidden}
-                        onDelete={handleDeleteReport}
-                        onBack={() => {
-                          setShowReportDetail(false);
-                          setSelectedReport(null);
-                          setSelectedReportDate(null);
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="pt-1">
-                      {isLoadingReportDates ? (
-                        <div className="flex items-center justify-center py-16">
-                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
-                        </div>
-                      ) : (
-                        <DailyReportCalendar
-                          reportDates={reportDates}
-                          selectedDate={selectedReportDate}
-                          onDateSelect={handleReportDateSelect}
-                          currentYear={currentReportYear}
-                          currentMonth={currentReportMonth}
-                          onMonthChange={handleMonthChange}
+              {dailyReportConfig?.is_visible && (
+                <TabsContent value="report" className="mt-2">
+                  <div className={`${showReportDetail ? 'h-[55vh] flex flex-col' : 'h-[55vh] overflow-y-auto pr-2 -mr-2'}`}>
+                    {showReportDetail ? (
+                      <div className="flex-1 min-h-0">
+                        <DailyReportDetail
+                          report={selectedReport}
+                          isLoading={isLoadingReportDetail}
+                          isOwner={character?.is_owner || false}
+                          onHide={handleToggleReportHidden}
+                          onDelete={handleDeleteReport}
+                          onBack={() => {
+                            setShowReportDetail(false);
+                            setSelectedReport(null);
+                            setSelectedReportDate(null);
+                          }}
                         />
-                      )}
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
+                      </div>
+                    ) : (
+                      <div className="pt-1">
+                        {isLoadingReportDates ? (
+                          <div className="flex items-center justify-center py-16">
+                            <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+                          </div>
+                        ) : (
+                          <DailyReportCalendar
+                            reportDates={reportDates}
+                            selectedDate={selectedReportDate}
+                            onDateSelect={handleReportDateSelect}
+                            currentYear={currentReportYear}
+                            currentMonth={currentReportMonth}
+                            onMonthChange={handleMonthChange}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              )}
             </Tabs>
           </Modal>
 

@@ -125,6 +125,13 @@ export interface DailyReportConfig {
   updated_at?: string;
 }
 
+export interface DailyReportDetail {
+  date: string;
+  is_hidden: boolean;
+  markdown: string;
+  error?: string;
+}
+
 export interface DailyReportAnalysis {
   markdown: string;
   error?: string;

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Character, CharacterDetail, CreateCharacterData, UpdateCharacterData, WillConfig, Message, DailyReportConfig, DailyReport } from '@/types/character';
+import { Character, CharacterDetail, CreateCharacterData, UpdateCharacterData, WillConfig, Message, DailyReportConfig, DailyReportDetail } from '@/types/character';
 
 import { API_URL } from '@/config';
 import api from '@/lib/api';
@@ -211,9 +211,27 @@ export const characterService = {
   },
 
   // 日报数据相关（公开 API，用于展示页）
+  async getDailyReportConfigPublic(code: string): Promise<{
+    is_enabled: boolean;
+    is_visible: boolean;
+    visibility?: string;
+    is_owner?: boolean;
+  }> {
+    try {
+      const response = await api.get(`/d/${code}/reports/config/`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get daily report config:', error);
+      return {
+        is_enabled: false,
+        is_visible: false
+      };
+    }
+  },
+
   async getDailyReportDates(code: string, year: number, month: number): Promise<number[]> {
     try {
-      const response = await axios.get(`${API_URL}/d/${code}/reports/dates/`, {
+      const response = await api.get(`/d/${code}/reports/dates/`, {
         params: { year, month }
       });
       return response.data.dates || [];
@@ -223,9 +241,9 @@ export const characterService = {
     }
   },
 
-  async getDailyReportDetail(code: string, date: string): Promise<DailyReport | null> {
+  async getDailyReportDetail(code: string, date: string): Promise<DailyReportDetail | null> {
     try {
-      const response = await axios.get(`${API_URL}/d/${code}/reports/detail/`, {
+      const response = await api.get(`/d/${code}/reports/detail/`, {
         params: { date }
       });
       return response.data;

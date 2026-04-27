@@ -23,7 +23,8 @@ import {
   DisplayLinkSection,
   SecretKeySection,
   DangerZoneSection,
-  WillConfigSection
+  WillConfigSection,
+  DailyReportConfigSection
 } from './components/sections';
 import { CharacterForm } from './components/CharacterForm';
 
@@ -310,11 +311,12 @@ export const CharacterDetail: React.FC = () => {
               )}
 
               <Tabs defaultValue="basic" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-5">
                   <TabsTrigger value="basic">基础</TabsTrigger>
                   <TabsTrigger value="display">展示</TabsTrigger>
                   <TabsTrigger value="sync">同步</TabsTrigger>
                   <TabsTrigger value="will">亡语</TabsTrigger>
+                  <TabsTrigger value="daily-report">日报</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="basic" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -525,6 +527,13 @@ export const CharacterDetail: React.FC = () => {
                       isLoading={isSaving}
                     />
                   )}
+                </TabsContent>
+
+                <TabsContent value="daily-report" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <DailyReportConfigSection
+                    characterUid={uid!}
+                    statusConfig={statusConfig}
+                  />
                 </TabsContent>
               </Tabs>
             </div>

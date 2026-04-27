@@ -111,4 +111,38 @@ export interface Message {
   created_at: string;
   ip_address?: string;
   location?: string;
+}
+
+export interface DailyReportConfig {
+  is_enabled: boolean;
+  visibility: 'private' | 'public';
+  field_mappings: {
+    phone_app?: string;
+    computer_app?: string;
+    steps?: string;
+  };
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface DailyReportAnalysis {
+  markdown: string;
+  error?: string;
+}
+
+export interface DailyReport {
+  id: number;
+  date: string;
+  is_hidden: boolean;
+  raw_data: any;
+  analysis_result: DailyReportAnalysis;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VitalSignOption {
+  key: string;
+  label: string;
+  description?: string;
+  valueType?: string;
 } 

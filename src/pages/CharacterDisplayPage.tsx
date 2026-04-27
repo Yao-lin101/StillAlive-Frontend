@@ -142,6 +142,7 @@ export const CharacterDisplayPage: React.FC = () => {
   const [isLoadingReportDates, setIsLoadingReportDates] = useState(false);
   const [isLoadingReportDetail, setIsLoadingReportDetail] = useState(false);
   const [showReportDetail, setShowReportDetail] = useState(false);
+  const [isCheckingReport, setIsCheckingReport] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('status');
   const [dailyReportConfig, setDailyReportConfig] = useState<{
     is_enabled: boolean;
@@ -205,43 +206,44 @@ export const CharacterDisplayPage: React.FC = () => {
       setShowReportDetail(false);
       setSelectedReport(null);
       setSelectedReportDate(null);
-      
-      if (currentReportYear !== today.getFullYear() || currentReportMonth !== today.getMonth()) {
-        setCurrentReportYear(today.getFullYear());
-        setCurrentReportMonth(today.getMonth());
-      }
+      setIsCheckingReport(true);
       
       const currentYear = today.getFullYear();
       const currentMonth = today.getMonth();
-      const dates = await fetchReportDates(currentYear, currentMonth);
       
-      const todayDate = today.getDate();
-      const yesterdayDate = yesterday.getDate();
-      const yesterdayYear = yesterday.getFullYear();
-      const yesterdayMonth = yesterday.getMonth();
-      
-      if (dates.includes(todayDate)) {
-        handleReportDateSelect(today);
-        return;
-      }
-      
-      if (yesterdayYear === currentYear && yesterdayMonth === currentMonth) {
-        if (dates.includes(yesterdayDate)) {
-          handleReportDateSelect(yesterday);
+      try {
+        const dates = await fetchReportDates(currentYear, currentMonth);
+        
+        const todayDate = today.getDate();
+        const yesterdayDate = yesterday.getDate();
+        const yesterdayYear = yesterday.getFullYear();
+        const yesterdayMonth = yesterday.getMonth();
+        
+        if (dates.includes(todayDate)) {
+          await handleReportDateSelect(today);
           return;
         }
-      } else {
-        const prevMonthDates = await fetchReportDates(yesterdayYear, yesterdayMonth);
-        if (prevMonthDates.includes(yesterdayDate)) {
-          setCurrentReportYear(yesterdayYear);
-          setCurrentReportMonth(yesterdayMonth);
-          handleReportDateSelect(yesterday);
-          return;
+        
+        if (yesterdayYear === currentYear && yesterdayMonth === currentMonth) {
+          if (dates.includes(yesterdayDate)) {
+            await handleReportDateSelect(yesterday);
+            return;
+          }
+        } else {
+          const prevMonthDates = await fetchReportDates(yesterdayYear, yesterdayMonth);
+          if (prevMonthDates.includes(yesterdayDate)) {
+            setCurrentReportYear(yesterdayYear);
+            setCurrentReportMonth(yesterdayMonth);
+            await handleReportDateSelect(yesterday);
+            return;
+          }
         }
+        
+        setCurrentReportYear(currentYear);
+        setCurrentReportMonth(currentMonth);
+      } finally {
+        setIsCheckingReport(false);
       }
-      
-      setCurrentReportYear(currentYear);
-      setCurrentReportMonth(currentMonth);
     }
   };
 
@@ -686,7 +688,7 @@ export const CharacterDisplayPage: React.FC = () => {
                       </div>
                     ) : (
                       <div className="pt-1">
-                        {isLoadingReportDates ? (
+                        {isCheckingReport || isLoadingReportDates ? (
                           <div className="flex items-center justify-center py-16">
                             <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
                           </div>

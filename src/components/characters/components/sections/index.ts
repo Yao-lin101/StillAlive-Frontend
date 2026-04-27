@@ -3,4 +3,5 @@ export * from './PublicStatusSection';
 export * from './DisplayLinkSection';
 export * from './SecretKeySection';
 export * from './DangerZoneSection';
-export * from './WillConfigSection'; 
+export * from './WillConfigSection';
+export * from './DailyReportConfigSection'; 

@@ -22,10 +22,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/tabs";
+import { DailyReportCalendar } from '@/components/characters/components/display/DailyReportCalendar';
+import { DailyReportDetail } from '@/components/characters/components/display/DailyReportDetail';
+import { DailyReport } from '@/types/character';
 import { MorphingText } from "@/components/magicui/morphing-text";
 import '@/styles/animations.css';
 
 interface CharacterDisplay {
+  uid?: string;
   name: string;
   avatar: string | null;
   bio: string | null;
@@ -91,10 +101,10 @@ const Modal = ({
           >
             <Card className="w-full overflow-hidden bg-white/90 backdrop-blur-sm">
               <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
-              <div className="p-6">
+              <div className="p-6 pt-12">
                 <button
                   onClick={onClose}
-                  className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 z-10"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -126,6 +136,15 @@ export const CharacterDisplayPage: React.FC = () => {
   const [selectedDanmaku, setSelectedDanmaku] = useState<Message | null>(null);
   const [isBgLoaded, setIsBgLoaded] = useState(false);
 
+  const [reportDates, setReportDates] = useState<number[]>([]);
+  const [currentReportYear, setCurrentReportYear] = useState(new Date().getFullYear());
+  const [currentReportMonth, setCurrentReportMonth] = useState(new Date().getMonth());
+  const [selectedReportDate, setSelectedReportDate] = useState<Date | null>(null);
+  const [selectedReport, setSelectedReport] = useState<DailyReport | null>(null);
+  const [isLoadingReportDates, setIsLoadingReportDates] = useState(false);
+  const [isLoadingReportDetail, setIsLoadingReportDetail] = useState(false);
+  const [showReportDetail, setShowReportDetail] = useState(false);
+
   const fetchMessages = async () => {
     if (!code) return;
     try {
@@ -146,6 +165,92 @@ export const CharacterDisplayPage: React.FC = () => {
       toast.error('删除失败');
       console.error(error);
     }
+  };
+
+  const fetchReportDates = async () => {
+    if (!code) return;
+    try {
+      setIsLoadingReportDates(true);
+      const dates = await characterService.getDailyReportDates(
+        code,
+        currentReportYear,
+        currentReportMonth + 1
+      );
+      setReportDates(dates);
+    } catch (error) {
+      console.error('Failed to fetch report dates:', error);
+      setReportDates([]);
+    } finally {
+      setIsLoadingReportDates(false);
+    }
+  };
+
+  const handleReportDateSelect = async (date: Date) => {
+    setSelectedReportDate(date);
+    
+    if (!code) return;
+    
+    try {
+      setIsLoadingReportDetail(true);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+      const report = await characterService.getDailyReportDetail(code, dateStr);
+      setSelectedReport(report);
+      setShowReportDetail(true);
+    } catch (error) {
+      console.error('Failed to fetch report detail:', error);
+      toast.error('获取日报详情失败');
+    } finally {
+      setIsLoadingReportDetail(false);
+    }
+  };
+
+  const handleToggleReportHidden = async () => {
+    if (!code || !selectedReport || !character?.is_owner) return;
+    
+    try {
+      const dateStr = selectedReport.date;
+      const result = await characterService.toggleDailyReportHidden(
+        character.uid || code,
+        dateStr,
+        !selectedReport.is_hidden
+      );
+      setSelectedReport({
+        ...selectedReport,
+        is_hidden: result.is_hidden
+      });
+      toast.success(result.is_hidden ? '日报已隐藏' : '日报已显示');
+    } catch (error) {
+      console.error('Failed to toggle report hidden:', error);
+      toast.error('操作失败');
+    }
+  };
+
+  const handleDeleteReport = async () => {
+    if (!code || !selectedReport || !character?.is_owner) return;
+    
+    try {
+      const dateStr = selectedReport.date;
+      await characterService.deleteDailyReport(
+        character.uid || code,
+        dateStr
+      );
+      setShowReportDetail(false);
+      setSelectedReport(null);
+      setSelectedReportDate(null);
+      await fetchReportDates();
+      toast.success('日报已删除');
+    } catch (error) {
+      console.error('Failed to delete report:', error);
+      toast.error('删除失败');
+    }
+  };
+
+  const handleMonthChange = (year: number, month: number) => {
+    setCurrentReportYear(year);
+    setCurrentReportMonth(month);
   };
 
   // 更新页面标题
@@ -207,6 +312,12 @@ export const CharacterDisplayPage: React.FC = () => {
     const intervalId = setInterval(fetchStatus, 15000);
     return () => clearInterval(intervalId);
   }, [code, character]);
+
+  useEffect(() => {
+    if (showStatusDialog) {
+      fetchReportDates();
+    }
+  }, [showStatusDialog, currentReportYear, currentReportMonth]);
 
   // 根据状态更新音乐播放器
   const updateMusicPlayer = (config: StatusConfigType, statusData: CharacterStatus | null) => {
@@ -433,26 +544,73 @@ export const CharacterDisplayPage: React.FC = () => {
           {/* 状态详情弹窗 */}
           <Modal
             isOpen={showStatusDialog}
-            onClose={() => setShowStatusDialog(false)}
+            onClose={() => {
+              setShowStatusDialog(false);
+              setShowReportDetail(false);
+            }}
           >
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold leading-none tracking-tight">状态信息</h2>
-            </div>
-            <div className="h-[55vh] overflow-y-auto pr-2 -mr-2">
-              <div className="grid grid-cols-2 gap-4">
-                {statusItems?.map(({ key, config, value, updatedAt }) => (
-                  <StatusCard
-                    key={key}
-                    variant="compact"
-                    label={config.label}
-                    description={config.description}
-                    value={value}
-                    suffix={config.valueType === 'number' ? config.suffix : undefined}
-                    timestamp={updatedAt ? formatTimeElapsed(new Date(updatedAt).toISOString()) : undefined}
-                  />
-                ))}
-              </div>
-            </div>
+            <Tabs defaultValue="status" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="status">状态信息</TabsTrigger>
+                <TabsTrigger value="report">日报分析</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="status" className="mt-2">
+                <div className="h-[55vh] overflow-y-auto pr-2 -mr-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    {statusItems?.map(({ key, config, value, updatedAt }) => (
+                      <StatusCard
+                        key={key}
+                        variant="compact"
+                        label={config.label}
+                        description={config.description}
+                        value={value}
+                        suffix={config.valueType === 'number' ? config.suffix : undefined}
+                        timestamp={updatedAt ? formatTimeElapsed(new Date(updatedAt).toISOString()) : undefined}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="report" className="mt-2">
+                <div className={`${showReportDetail ? 'h-[55vh] flex flex-col' : 'h-[55vh] overflow-y-auto pr-2 -mr-2'}`}>
+                  {showReportDetail ? (
+                    <div className="flex-1 min-h-0">
+                      <DailyReportDetail
+                        report={selectedReport}
+                        isLoading={isLoadingReportDetail}
+                        isOwner={character?.is_owner || false}
+                        onHide={handleToggleReportHidden}
+                        onDelete={handleDeleteReport}
+                        onBack={() => {
+                          setShowReportDetail(false);
+                          setSelectedReport(null);
+                          setSelectedReportDate(null);
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="pt-1">
+                      {isLoadingReportDates ? (
+                        <div className="flex items-center justify-center py-16">
+                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+                        </div>
+                      ) : (
+                        <DailyReportCalendar
+                          reportDates={reportDates}
+                          selectedDate={selectedReportDate}
+                          onDateSelect={handleReportDateSelect}
+                          currentYear={currentReportYear}
+                          currentMonth={currentReportMonth}
+                          onMonthChange={handleMonthChange}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
           </Modal>
 
           {/* 弹幕管理弹窗 */}

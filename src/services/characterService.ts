@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Character, CharacterDetail, CreateCharacterData, UpdateCharacterData, WillConfig, Message } from '@/types/character';
+import { Character, CharacterDetail, CreateCharacterData, UpdateCharacterData, WillConfig, Message, DailyReportConfig, DailyReport } from '@/types/character';
 
 import { API_URL } from '@/config';
 import api from '@/lib/api';
@@ -186,5 +186,70 @@ export const characterService = {
 
   async deleteMessage(code: string, msgId: number): Promise<void> {
     await api.delete(`/characters/${code}/messages/${msgId}/`);
+  },
+
+  // 日报配置相关
+  async getDailyReportConfig(uid: string): Promise<DailyReportConfig> {
+    try {
+      const response = await api.get(`/characters/${uid}/daily-report/`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        return {
+          is_enabled: false,
+          visibility: 'private',
+          field_mappings: {}
+        };
+      }
+      throw error;
+    }
+  },
+
+  async updateDailyReportConfig(uid: string, data: Partial<DailyReportConfig>): Promise<DailyReportConfig> {
+    const response = await api.post(`/characters/${uid}/daily-report/`, data);
+    return response.data;
+  },
+
+  // 日报数据相关（公开 API，用于展示页）
+  async getDailyReportDates(code: string, year: number, month: number): Promise<number[]> {
+    try {
+      const response = await axios.get(`${API_URL}/d/${code}/reports/dates/`, {
+        params: { year, month }
+      });
+      return response.data.dates || [];
+    } catch (error) {
+      console.error('Failed to get daily report dates:', error);
+      return [];
+    }
+  },
+
+  async getDailyReportDetail(code: string, date: string): Promise<DailyReport | null> {
+    try {
+      const response = await axios.get(`${API_URL}/d/${code}/reports/detail/`, {
+        params: { date }
+      });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        return null;
+      }
+      console.error('Failed to get daily report detail:', error);
+      throw error;
+    }
+  },
+
+  // 日报操作相关（需要认证）
+  async toggleDailyReportHidden(uid: string, date: string, isHidden: boolean): Promise<{ date: string; is_hidden: boolean }> {
+    const response = await api.post(`/characters/${uid}/reports/toggle-hidden/`, {
+      date,
+      is_hidden: isHidden
+    });
+    return response.data;
+  },
+
+  async deleteDailyReport(uid: string, date: string): Promise<void> {
+    await api.delete(`/characters/${uid}/reports/delete/`, {
+      params: { date }
+    });
   },
 };

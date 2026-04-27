@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckIcon, XIcon, BarChart3, Eye, MapPin, Smartphone, Monitor, Activity, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckIcon, XIcon, BarChart3, Eye, MapPin, Smartphone, Monitor, Activity, ChevronDown, ChevronUp, User } from 'lucide-react';
 import { AnimatedSubscribeButton } from '@/components/magicui/animated-subscribe-button';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,9 +23,11 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
     computer_app?: string;
     steps?: string;
   }>({});
+  const [persona, setPersona] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isToggling, setIsToggling] = useState<boolean>(false);
+  const [isSavingPersona, setIsSavingPersona] = useState<boolean>(false);
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
   const vitalSignOptions: VitalSignOption[] = React.useMemo(() => {
@@ -47,6 +49,7 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
         setIsEnabled(config.is_enabled);
         setVisibility(config.visibility);
         setFieldMappings(config.field_mappings || {});
+        setPersona(config.persona || '');
       } catch (error) {
         console.error('Failed to fetch daily report config:', error);
         toast.error('获取日报配置失败');
@@ -114,6 +117,21 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
       });
     } catch (error) {
       console.error('Failed to save field mapping:', error);
+    }
+  };
+
+  const handleSavePersona = async () => {
+    try {
+      setIsSavingPersona(true);
+      await characterService.updateDailyReportConfig(characterUid, {
+        persona: persona || ''
+      });
+      toast.success('人设已保存');
+    } catch (error) {
+      console.error('Failed to save persona:', error);
+      toast.error('保存失败');
+    } finally {
+      setIsSavingPersona(false);
     }
   };
 
@@ -300,6 +318,40 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
           </div>
         </Card>
       </div>
+
+      <Card className="p-6 space-y-6 bg-white/50 dark:bg-slate-900/50 border-white/20 dark:border-white/10 backdrop-blur-sm">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-lg">
+            <User className="w-5 h-5 text-rose-500 dark:text-rose-400" />
+          </div>
+          <h3 className="font-semibold text-lg text-slate-800 dark:text-white">角色人设</h3>
+        </div>
+
+        <p className="text-sm text-gray-500">
+          填写角色的人设信息，AI 在分析日报时会结合这些背景信息，使分析更加贴合角色的实际情况。
+        </p>
+
+        <div className="space-y-4">
+          <textarea
+            value={persona}
+            onChange={(e) => setPersona(e.target.value)}
+            placeholder="例如：&#10;- 年龄：18岁&#10;- 职业：高中生&#10;- 日常习惯：喜欢听歌、玩游戏、刷社交软件&#10;- 常用 APP 说明：&#10;  - 网易云音乐：主要用来听流行音乐&#10;  - 微信：和同学聊天、刷朋友圈&#10;  - Chrome：用来查资料、看视频"
+            className="w-full h-48 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-slate-950 dark:text-white focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 focus:border-blue-400 transition-all resize-none"
+          />
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-400">
+              提示：越详细的人设信息，AI 分析的结果会越精准有趣
+            </p>
+            <Button
+              onClick={handleSavePersona}
+              disabled={isSavingPersona}
+              className="bg-[#eaf5fb] hover:bg-[#d6ebf7] text-[#65a8ec] border-none dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700 h-9"
+            >
+              {isSavingPersona ? '保存中...' : '保存人设'}
+            </Button>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 };

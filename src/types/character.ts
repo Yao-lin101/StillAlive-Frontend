@@ -121,6 +121,7 @@ export interface DailyReportConfig {
     computer_app?: string;
     steps?: string;
   };
+  persona?: string;
   created_at?: string;
   updated_at?: string;
 }

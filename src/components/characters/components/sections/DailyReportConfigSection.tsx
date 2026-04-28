@@ -32,7 +32,7 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
 
   const vitalSignOptions: VitalSignOption[] = React.useMemo(() => {
     if (!statusConfig?.vital_signs) return [];
-    
+
     return Object.entries(statusConfig.vital_signs).map(([key, config]) => ({
       key: (config as any).key || key,
       label: (config as any).label || key,
@@ -63,21 +63,21 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
 
   const handleToggleEnabled = async () => {
     const newState = !isEnabled;
-    
+
     try {
       setIsToggling(true);
-      
+
       const hasValidMappings = Object.values(fieldMappings).some(v => v !== undefined && v !== '');
-      
+
       if (newState && !hasValidMappings) {
         toast.warning('请至少配置一个要分析的字段');
         return;
       }
-      
+
       await characterService.updateDailyReportConfig(characterUid, {
         is_enabled: newState
       });
-      
+
       setIsEnabled(newState);
       toast.success(newState ? '日报分析已启用' : '日报分析已禁用');
     } catch (error) {
@@ -108,9 +108,9 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
       ...fieldMappings,
       [field]: value || undefined
     };
-    
+
     setFieldMappings(newMappings);
-    
+
     try {
       await characterService.updateDailyReportConfig(characterUid, {
         field_mappings: newMappings
@@ -174,7 +174,7 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
             </AnimatedSubscribeButton>
             <p className="text-xs text-gray-500 mt-3 max-w-xs mx-auto leading-relaxed">
               {isEnabled
-                ? '系统将每天凌晨自动分析您的状态数据，生成活动日报'
+                ? '系统将每小时自动分析您的状态数据，生成活动日报'
                 : '启用后，系统将自动分析您的状态数据并生成活动日报'}
             </p>
           </div>
@@ -196,8 +196,8 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
                   <option value="public">所有人可见</option>
                 </select>
                 <p className="text-xs text-gray-500 mt-2">
-                  {visibility === 'private' 
-                    ? '只有您可以查看您的日报分析' 
+                  {visibility === 'private'
+                    ? '只有您可以查看您的日报分析'
                     : '所有人都可以在展示页面查看您的日报分析'}
                 </p>
                 <Button
@@ -300,7 +300,7 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
               {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               <span>查看配置说明</span>
             </button>
-            
+
             {showAdvanced && (
               <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-xs text-gray-600 dark:text-gray-300 space-y-2">
                 <p>
@@ -311,7 +311,7 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
                   <li>电脑 APP 字段用于分析您的工作/学习习惯</li>
                   <li>步数字段用于分析您的活动量和运动规律</li>
                   <li>至少配置一个字段才能启用日报分析</li>
-                  <li>系统将在每天凌晨 2:00 自动分析前一天的数据</li>
+                  <li>系统会在每小时生成一次当日日报</li>
                 </ul>
               </div>
             )}

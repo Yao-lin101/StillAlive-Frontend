@@ -16,17 +16,33 @@ import {
 function normalizeMarkdownFormatting(text: string): string {
   if (!text) return text;
   
-  let result = text;
+  let result = '';
+  let inCodeBlock = false;
   
-  result = result.replace(/\*\*([「『【（][^\*]*?[」』】）])\*\*/g, '<strong>$1</strong>');
+  // 按行处理，跳过代码块内的内容
+  const lines = text.split('\n');
+  for (const line of lines) {
+    // 检查是否是代码块的开始或结束
+    if (line.trim() === '```') {
+      inCodeBlock = !inCodeBlock;
+      result += line + '\n';
+    } else if (inCodeBlock) {
+      // 在代码块内，直接添加，不做处理
+      result += line + '\n';
+    } else {
+      // 不在代码块内，处理粗体
+      let processedLine = line;
+      processedLine = processedLine.replace(/\*\*([「『【（][^\*]*?[」』】）])\*\*/g, '<strong>$1</strong>');
+      processedLine = processedLine.replace(/\*\*([^\*？！，。、]+?[？！，。、]*?)\*\*/g, (match, content) => {
+        const trimmedContent = content.trim();
+        if (trimmedContent.length === 0) return match;
+        return `<strong>${trimmedContent}</strong>`;
+      });
+      result += processedLine + '\n';
+    }
+  }
   
-  result = result.replace(/\*\*([^\*？！，。、]+?[？！，。、]*?)\*\*/g, (match, content) => {
-    const trimmedContent = content.trim();
-    if (trimmedContent.length === 0) return match;
-    return `<strong>${trimmedContent}</strong>`;
-  });
-  
-  return result;
+  return result.trim();
 }
 
 interface DailyReportDetailProps {

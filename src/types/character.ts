@@ -113,6 +113,12 @@ export interface Message {
   location?: string;
 }
 
+export interface AIPersona {
+  core_identity?: string;
+  personality_traits?: string;
+  language_style?: string;
+}
+
 export interface DailyReportConfig {
   is_enabled: boolean;
   visibility: 'private' | 'public';
@@ -122,6 +128,7 @@ export interface DailyReportConfig {
     steps?: string;
   };
   persona?: string;
+  ai_persona?: AIPersona;
   created_at?: string;
   updated_at?: string;
 }

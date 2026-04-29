@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import type { DailyReportDetail as DailyReportDetailType } from '@/types/character';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -80,7 +82,55 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
             prose-ol:list-decimal prose-ol:pl-6
             prose-blockquote:border-l-4 prose-blockquote:border-blue-400 prose-blockquote:pl-4 prose-blockquote:italic
             prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm">
-            <ReactMarkdown>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              components={{
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-4">
+                    <table className="min-w-full border-collapse border border-gray-200 rounded-lg overflow-hidden">
+                      {children}
+                    </table>
+                  </div>
+                ),
+                thead: ({ children }) => (
+                  <thead className="bg-blue-50">{children}</thead>
+                ),
+                th: ({ children }) => (
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-blue-700 border-b-2 border-blue-200">
+                    {children}
+                  </th>
+                ),
+                td: ({ children }) => (
+                  <td className="px-4 py-3 text-sm text-slate-700 border-b border-gray-100 hover:bg-gray-50">
+                    {children}
+                  </td>
+                ),
+                tr: ({ children }) => (
+                  <tr className="hover:bg-gray-50 transition-colors">{children}</tr>
+                ),
+                pre: ({ children }) => (
+                  <pre className="bg-slate-50 border border-slate-200 rounded-lg p-4 my-4 overflow-x-auto">
+                    {children}
+                  </pre>
+                ),
+                code: ({ className, children }) => {
+                  const isInline = !className;
+                  if (isInline) {
+                    return (
+                      <code className="bg-gray-100 text-pink-600 px-2 py-0.5 rounded text-sm font-mono">
+                        {children}
+                      </code>
+                    );
+                  }
+                  return (
+                    <code className="text-sm font-mono text-slate-800 whitespace-pre-wrap">
+                      {children}
+                    </code>
+                  );
+                }
+              }}
+            >
               {report.markdown || report.error || '暂无分析内容'}
             </ReactMarkdown>
           </div>

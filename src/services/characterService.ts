@@ -198,7 +198,8 @@ export const characterService = {
         return {
           is_enabled: false,
           visibility: 'private',
-          field_mappings: {}
+          field_mappings: {},
+          ai_persona: {}
         };
       }
       throw error;

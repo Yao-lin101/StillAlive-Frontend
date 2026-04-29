@@ -360,13 +360,17 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
         <div className="space-y-4">
           <textarea
             value={persona}
-            onChange={(e) => setPersona(e.target.value)}
+            onChange={(e) => setPersona(e.target.value.slice(0, 1000))}
             placeholder="例如：&#10;- 年龄：18岁&#10;- 职业：高中生&#10;- 日常习惯：喜欢听歌、玩游戏、刷社交软件&#10;- 常用 APP 说明：&#10;  - 网易云音乐：主要用来听流行音乐&#10;  - 微信：和同学聊天、刷朋友圈&#10;  - Chrome：用来查资料、看视频"
             className="w-full h-48 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-slate-950 dark:text-white focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 focus:border-blue-400 transition-all resize-none"
+            maxLength={1000}
           />
           <div className="flex items-center justify-between">
             <p className="text-xs text-gray-400">
               提示：越详细的人设信息，AI 分析的结果会越精准有趣
+              <span className={`ml-2 ${persona.length > 900 ? 'text-amber-500' : 'text-gray-400'}`}>
+                ({persona.length}/1000)
+              </span>
             </p>
             <Button
               onClick={handleSavePersona}
@@ -410,12 +414,16 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
               <input
                 type="text"
                 value={aiPersona.core_identity || ''}
-                onChange={(e) => handleAIPersonaChange('core_identity', e.target.value)}
+                onChange={(e) => handleAIPersonaChange('core_identity', e.target.value.slice(0, 300))}
                 placeholder="例如：毒舌但精准的生活数据分析专家、温和的生活顾问、幽默的观察家"
                 className="w-full p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-slate-950 dark:text-white focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 focus:border-blue-400 transition-all"
+                maxLength={300}
               />
-              <p className="text-xs text-gray-400 mt-1">
-                定义 AI 在分析日报时扮演的角色身份
+              <p className="text-xs text-gray-400 mt-1 flex justify-between">
+                <span>定义 AI 在分析日报时扮演的角色身份</span>
+                <span className={`${(aiPersona.core_identity?.length || 0) > 270 ? 'text-amber-500' : 'text-gray-400'}`}>
+                  ({aiPersona.core_identity?.length || 0}/300)
+                </span>
               </p>
             </div>
 
@@ -426,12 +434,16 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
               </div>
               <textarea
                 value={aiPersona.personality_traits || ''}
-                onChange={(e) => handleAIPersonaChange('personality_traits', e.target.value)}
+                onChange={(e) => handleAIPersonaChange('personality_traits', e.target.value.slice(0, 500))}
                 placeholder="例如：&#10;- 毒舌、尖锐、喜欢吐槽&#10;- 温和、鼓励、善于发现闪光点&#10;- 幽默风趣、喜欢用梗"
                 className="w-full h-24 p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-slate-950 dark:text-white focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 focus:border-blue-400 transition-all resize-none"
+                maxLength={500}
               />
-              <p className="text-xs text-gray-400 mt-1">
-                描述 AI 的性格特点（可选）
+              <p className="text-xs text-gray-400 mt-1 flex justify-between">
+                <span>描述 AI 的性格特点（可选）</span>
+                <span className={`${(aiPersona.personality_traits?.length || 0) > 450 ? 'text-amber-500' : 'text-gray-400'}`}>
+                  ({aiPersona.personality_traits?.length || 0}/500)
+                </span>
               </p>
             </div>
 
@@ -442,12 +454,16 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
               </div>
               <textarea
                 value={aiPersona.language_style || ''}
-                onChange={(e) => handleAIPersonaChange('language_style', e.target.value)}
+                onChange={(e) => handleAIPersonaChange('language_style', e.target.value.slice(0, 500))}
                 placeholder="例如：&#10;- 毒舌、尖锐、抽象、有梗。口语化，可适当使用网络流行语。多用 emoji 增加表现力。&#10;- 亲切自然、富有同理心、适当使用鼓励性的表达。&#10;- 专业严谨、客观理性、用词精准。"
                 className="w-full h-24 p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-slate-950 dark:text-white focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 focus:border-blue-400 transition-all resize-none"
+                maxLength={500}
               />
-              <p className="text-xs text-gray-400 mt-1">
-                定义 AI 的语言表达风格（如果不填，将根据核心身份自动适配）
+              <p className="text-xs text-gray-400 mt-1 flex justify-between">
+                <span>定义 AI 的语言表达风格（如果不填，将根据核心身份自动适配）</span>
+                <span className={`${(aiPersona.language_style?.length || 0) > 450 ? 'text-amber-500' : 'text-gray-400'}`}>
+                  ({aiPersona.language_style?.length || 0}/500)
+                </span>
               </p>
             </div>
 

@@ -13,6 +13,22 @@ import {
   ChevronLeft
 } from 'lucide-react';
 
+function normalizeMarkdownFormatting(text: string): string {
+  if (!text) return text;
+  
+  let result = text;
+  
+  result = result.replace(/\*\*([「『【（][^\*]*?[」』】）])\*\*/g, '<strong>$1</strong>');
+  
+  result = result.replace(/\*\*([^\*？！，。、]+?[？！，。、]*?)\*\*/g, (match, content) => {
+    const trimmedContent = content.trim();
+    if (trimmedContent.length === 0) return match;
+    return `<strong>${trimmedContent}</strong>`;
+  });
+  
+  return result;
+}
+
 interface DailyReportDetailProps {
   report: DailyReportDetailType | null;
   isLoading: boolean;
@@ -131,7 +147,7 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
                 }
               }}
             >
-              {report.markdown || report.error || '暂无分析内容'}
+              {normalizeMarkdownFormatting(report.markdown || report.error || '暂无分析内容')}
             </ReactMarkdown>
           </div>
         </Card>

@@ -259,6 +259,24 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [useCORS, setUseCORS] = useState(true);
   const [resolvedId, setResolvedId] = useState<string | null>(null);
 
+  const onPlayingChangeRef = useRef(onPlayingChange);
+  useEffect(() => {
+    onPlayingChangeRef.current = onPlayingChange;
+  }, [onPlayingChange]);
+
+  // 监听页面可见性，解决移动端切换后台导致的 AudioContext 挂起问题
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+          audioContextRef.current.resume().catch(e => console.log('Resume error:', e));
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   const cleanupAudioContext = useCallback(() => {
     if (sourceRef.current) {
       sourceRef.current.disconnect();
@@ -333,7 +351,20 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
           audio.currentTime = 0;
           audio.play().catch(err => console.error('Failed to restart audio:', err));
         };
+        
+        const handlePause = () => {
+          setIsPlaying(false);
+          onPlayingChangeRef.current?.(false);
+        };
+        
+        const handlePlay = () => {
+          setIsPlaying(true);
+          onPlayingChangeRef.current?.(true);
+        };
+
         audio.addEventListener('ended', handleEnded);
+        audio.addEventListener('pause', handlePause);
+        audio.addEventListener('play', handlePlay);
 
         // 监听跨域错误，如果启用CORS导致无法加载，则降级为不使用CORS纯模拟模式
         const handleError = () => {
@@ -361,6 +392,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         // 保存用于清理的引用
         return () => {
           audio.removeEventListener('ended', handleEnded);
+          audio.removeEventListener('pause', handlePause);
+          audio.removeEventListener('play', handlePlay);
           audio.removeEventListener('error', handleError);
           audio.pause();
           audio.src = '';

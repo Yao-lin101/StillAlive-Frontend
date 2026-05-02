@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
 import type { DailyReportDetail as DailyReportDetailType } from '@/types/character';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,38 +11,6 @@ import {
   EyeOff,
   ChevronLeft
 } from 'lucide-react';
-
-function normalizeMarkdownFormatting(text: string): string {
-  if (!text) return text;
-  
-  let result = '';
-  let inCodeBlock = false;
-  
-  // 按行处理，跳过代码块内的内容
-  const lines = text.split('\n');
-  for (const line of lines) {
-    // 检查是否是代码块的开始或结束
-    if (line.trim() === '```') {
-      inCodeBlock = !inCodeBlock;
-      result += line + '\n';
-    } else if (inCodeBlock) {
-      // 在代码块内，直接添加，不做处理
-      result += line + '\n';
-    } else {
-      // 不在代码块内，处理粗体
-      let processedLine = line;
-      processedLine = processedLine.replace(/\*\*([「『【（][^\*]*?[」』】）])\*\*/g, '<strong>$1</strong>');
-      processedLine = processedLine.replace(/\*\*([^\*？！，。、]+?[？！，。、]*?)\*\*/g, (match, content) => {
-        const trimmedContent = content.trim();
-        if (trimmedContent.length === 0) return match;
-        return `<strong>${trimmedContent}</strong>`;
-      });
-      result += processedLine + '\n';
-    }
-  }
-  
-  return result.trim();
-}
 
 interface DailyReportDetailProps {
   report: DailyReportDetailType | null;
@@ -98,8 +65,8 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
       </div>
 
       <div className="flex-1 overflow-y-auto mb-4 pr-2 -mr-2">
-        <Card className="p-6 bg-white">
-          <div className="prose prose-slate max-w-none 
+        <Card className="p-4 sm:p-6 bg-white">
+          <div className="prose prose-slate max-w-none text-wrap break-words
             prose-h1:text-2xl prose-h1:font-bold prose-h1:mb-4 prose-h1:mt-0
             prose-h1:text-slate-800
             prose-h2:text-xl prose-h2:font-semibold prose-h2:mb-3 prose-h2:mt-6
@@ -113,10 +80,10 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
             prose-ul:list-disc prose-ul:pl-6
             prose-ol:list-decimal prose-ol:pl-6
             prose-blockquote:border-l-4 prose-blockquote:border-blue-400 prose-blockquote:pl-4 prose-blockquote:italic
-            prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm">
+            prose-code:bg-gray-100 prose-code:px-2 prose-code:py-0.5 prose-code:rounded prose-code:text-sm font-mono break-all
+            sm:prose-lg">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw]}
               components={{
                 table: ({ children }) => (
                   <div className="overflow-x-auto my-4">
@@ -150,20 +117,30 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
                   const isInline = !className;
                   if (isInline) {
                     return (
-                      <code className="bg-gray-100 text-pink-600 px-2 py-0.5 rounded text-sm font-mono">
+                      <code className="bg-gray-100 text-pink-600 px-2 py-0.5 rounded text-sm font-mono break-all">
                         {children}
                       </code>
                     );
                   }
                   return (
-                    <code className="text-sm font-mono text-slate-800 whitespace-pre-wrap">
+                    <code className="text-sm font-mono text-slate-800 whitespace-pre-wrap break-all">
                       {children}
                     </code>
                   );
-                }
+                },
+                p: ({ children }) => (
+                  <p className="whitespace-pre-wrap break-words">
+                    {children}
+                  </p>
+                ),
+                strong: ({ children }) => (
+                  <strong className="font-bold text-slate-800">
+                    {children}
+                  </strong>
+                )
               }}
             >
-              {normalizeMarkdownFormatting(report.markdown || report.error || '暂无分析内容')}
+              {report.markdown || report.error || '暂无分析内容'}
             </ReactMarkdown>
           </div>
         </Card>

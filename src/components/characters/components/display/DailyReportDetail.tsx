@@ -5,8 +5,8 @@ import rehypeRaw from 'rehype-raw';
 import type { DailyReportDetail as DailyReportDetailType } from '@/types/character';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Calendar, 
+import {
+  Calendar,
   Trash2,
   Eye,
   EyeOff,
@@ -15,10 +15,10 @@ import {
 
 function normalizeMarkdownFormatting(text: string): string {
   if (!text) return text;
-  
+
   let result = '';
   let inCodeBlock = false;
-  
+
   // 按行处理，跳过代码块内的内容
   const lines = text.split('\n');
   for (const line of lines) {
@@ -41,7 +41,7 @@ function normalizeMarkdownFormatting(text: string): string {
       result += processedLine + '\n';
     }
   }
-  
+
   return result.trim();
 }
 
@@ -87,7 +87,7 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
         <div className="flex items-center gap-2">
           <Calendar className="w-5 h-5 text-blue-500" />
           <h3 className="text-lg font-semibold text-slate-800">
-            {report.date} 日报分析
+            {report.date}
           </h3>
           {report.is_hidden && (
             <span className="px-2 py-0.5 text-xs bg-amber-100 text-amber-700 rounded-full">
@@ -182,7 +182,7 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
             </Button>
           )}
         </div>
-        
+
         {isOwner && (
           <div className="flex gap-2">
             <Button

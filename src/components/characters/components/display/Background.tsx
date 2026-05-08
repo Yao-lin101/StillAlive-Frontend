@@ -32,7 +32,7 @@ export const Background: React.FC<BackgroundProps> = ({
   const [activeIndices, setActiveIndices] = useState<{ current: number, next: number | null }>({ current: 0, next: null });
   const [mountedIndices, setMountedIndices] = useState<Set<number>>(new Set());
   const [initialImageLoaded, setInitialImageLoaded] = useState(false);
-  
+
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hasTriggeredLoadRef = useRef(false);
 
@@ -55,7 +55,7 @@ export const Background: React.FC<BackgroundProps> = ({
         lastUrlStringRef.current = urlString;
         const urls = parseUrls(urlString);
         setBackgroundUrls(urls);
-        
+
         const first = urls.length > 1 ? Math.floor(Math.random() * urls.length) : 0;
         setActiveIndices({ current: first, next: null });
         setMountedIndices(new Set([first]));
@@ -98,7 +98,7 @@ export const Background: React.FC<BackgroundProps> = ({
         do {
           newNext = Math.floor(Math.random() * backgroundUrls.length);
         } while (newNext === newCurrent && backgroundUrls.length > 1);
-        
+
         return { current: newCurrent, next: newNext };
       });
     }, interval);
@@ -111,47 +111,83 @@ export const Background: React.FC<BackgroundProps> = ({
   const hasImages = backgroundUrls.length > 0;
 
   return (
-    <div className="absolute inset-0 overflow-hidden" style={{ isolation: 'isolate' }}>
+    <div
+      className="absolute inset-0 overflow-hidden"
+      style={{
+        isolation: 'isolate',
+        // 清透水色系复合渐变底色
+        background: `
+          radial-gradient(at 0% 0%, #E0F7FA 0, transparent 50%),
+          radial-gradient(at 100% 0%, #B2EBF2 0, transparent 50%),
+          radial-gradient(at 100% 100%, #81D4FA 0, transparent 50%),
+          radial-gradient(at 0% 100%, #E1F5FE 0, transparent 50%),
+          #CCF3FF
+        `
+      }}
+    >
+      {/* 极细微颗粒感叠加，增加质感 */}
+      <div className="absolute inset-0 opacity-[0.15] mix-blend-soft-light pointer-events-none" 
+           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} 
+      />
+
       {hasImages && (
         <>
-          {/* 渲染所有图片，通过 opacity 控制显示 */}
           {backgroundUrls.map((url, index) => {
             if (!mountedIndices.has(index)) return null;
+            const isActive = index === activeIndices.current;
 
             return (
-              <img
-                key={url}
-                src={url}
-                alt="背景"
-                className="absolute inset-0 w-full h-full object-cover"
-                onError={index === activeIndices.current ? onBgImageError : undefined}
-                crossOrigin="anonymous"
-                referrerPolicy="no-referrer"
-                decoding="async"
-                onLoad={() => {
-                  if (!hasTriggeredLoadRef.current && onInitialLoad && index === activeIndices.current) {
-                    hasTriggeredLoadRef.current = true;
-                    setInitialImageLoaded(true);
-                    
-                    // 首图加载完毕后，立刻算出下一张并挂载，开始静默下载
-                    if (backgroundUrls.length > 1) {
-                      let nextTarget: number;
-                      do {
-                        nextTarget = Math.floor(Math.random() * backgroundUrls.length);
-                      } while (nextTarget === activeIndices.current);
-                      setActiveIndices(prev => ({ ...prev, next: nextTarget }));
-                    }
+              <React.Fragment key={url}>
+                {/* 氛围底层：模糊原图产生环境色漫反射，解决立绘透明像素后的空洞感 */}
+                <img
+                  src={url}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                  style={{
+                    filter: 'blur(80px) saturate(1.4) brightness(0.9)',
+                    transform: 'scale(1.15)',
+                    opacity: isActive ? 0.6 : 0,
+                    transition: 'opacity 1.5s ease-in-out',
+                    zIndex: 0
+                  }}
+                />
+                {/* 清晰原图层 */}
+                <img
+                  key={url}
+                  src={url}
+                  alt="背景"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={isActive ? onBgImageError : undefined}
+                  crossOrigin="anonymous"
+                  referrerPolicy="no-referrer"
+                  decoding="async"
+                  onLoad={() => {
+                    if (!hasTriggeredLoadRef.current && onInitialLoad && isActive) {
+                      hasTriggeredLoadRef.current = true;
+                      setInitialImageLoaded(true);
+                      
+                      // 首图加载完毕后，立刻算出下一张并挂载，开始静默下载
+                      if (backgroundUrls.length > 1) {
+                        let nextTarget: number;
+                        do {
+                          nextTarget = Math.floor(Math.random() * backgroundUrls.length);
+                        } while (nextTarget === activeIndices.current);
+                        setActiveIndices(prev => ({ ...prev, next: nextTarget }));
+                      }
 
-                    onInitialLoad();
-                  }
-                }}
-                style={{
-                  opacity: index === activeIndices.current ? 1 : 0,
-                  transition: 'opacity 1s ease-in-out',
-                  zIndex: index === activeIndices.current ? 1 : 0,
-                  willChange: 'opacity'
-                }}
-              />
+                      onInitialLoad();
+                    }
+                  }}
+                  style={{
+                    opacity: isActive ? 1 : 0,
+                    transition: 'opacity 1s ease-in-out',
+                    zIndex: 1,
+                    willChange: 'opacity',
+                    // 为立绘增加微妙的投影，增强空间深度
+                    filter: 'drop-shadow(0 0 30px rgba(0,0,0,0.15))'
+                  }}
+                />
+              </React.Fragment>
             );
           })}
 

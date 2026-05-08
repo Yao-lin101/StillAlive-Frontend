@@ -2,9 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Meteors } from "@/components/magicui/meteors";
 import { FeatherFall } from "@/components/effects/FeatherFall";
 
+interface BackgroundItem {
+  url: string;
+  active?: boolean;
+}
+
 interface BackgroundTheme {
   background_url: string;
   mobile_background_url?: string;
+  backgrounds?: BackgroundItem[];
+  mobile_backgrounds?: BackgroundItem[];
   overlay_opacity: number;
   meteors_enabled?: boolean;
   feathers_enabled?: boolean;
@@ -43,17 +50,37 @@ export const Background: React.FC<BackgroundProps> = ({
     const checkMobileAndSetBackground = () => {
       if (!theme) return;
 
-      let urlString: string;
-      if (window.innerWidth <= 768 && theme.mobile_background_url) {
-        urlString = theme.mobile_background_url;
-      } else {
-        urlString = theme.background_url || '';
+      let urls: string[] = [];
+      const isMobile = window.innerWidth <= 768;
+
+      if (isMobile) {
+        if (theme.mobile_backgrounds && theme.mobile_backgrounds.length > 0) {
+          urls = theme.mobile_backgrounds
+            .filter(item => item.active !== false)
+            .map(item => item.url)
+            .filter(Boolean);
+        } else if (theme.mobile_background_url) {
+          urls = parseUrls(theme.mobile_background_url);
+        }
       }
+
+      // If mobile URLs are empty or it's not mobile, try desktop backgrounds
+      if (urls.length === 0) {
+        if (theme.backgrounds && theme.backgrounds.length > 0) {
+          urls = theme.backgrounds
+            .filter(item => item.active !== false)
+            .map(item => item.url)
+            .filter(Boolean);
+        } else if (theme.background_url) {
+          urls = parseUrls(theme.background_url);
+        }
+      }
+
+      const urlString = urls.join('\n');
 
       // 如果背景URL没有实质变化（例如仅仅是手机浏览器滚动导致的resize），则不进行任何重置操作
       if (urlString !== lastUrlStringRef.current) {
         lastUrlStringRef.current = urlString;
-        const urls = parseUrls(urlString);
         setBackgroundUrls(urls);
 
         const first = urls.length > 1 ? Math.floor(Math.random() * urls.length) : 0;

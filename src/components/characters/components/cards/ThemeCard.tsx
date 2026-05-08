@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Settings2, Plus, Trash2, ImageIcon } from 'lucide-react';
+import { Settings2, Plus, Trash2, ImageIcon, Eye, EyeOff, CheckSquare, Square, Check } from 'lucide-react';
 import { ClearableInput } from '../common/ClearableInput';
 import {
   Dialog,
@@ -14,9 +14,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
+interface BackgroundItem {
+  url: string;
+  active: boolean;
+}
+
 interface Theme {
   background_url: string;
   mobile_background_url: string;
+  backgrounds?: BackgroundItem[];
+  mobile_backgrounds?: BackgroundItem[];
   overlay_opacity: number;
   meteors_enabled: boolean;
   feathers_enabled: boolean;
@@ -26,11 +33,6 @@ interface Theme {
 // 辅助函数：将换行分隔的字符串解析为URL数组
 const parseUrls = (urlString: string): string[] => {
   return urlString.split('\n').map(u => u.trim()).filter(Boolean);
-};
-
-// 辅助函数：将URL数组合并为换行分隔的字符串
-const joinUrls = (urls: string[]): string => {
-  return urls.filter(Boolean).join('\n');
 };
 
 interface ThemeCardProps {
@@ -59,16 +61,26 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
   });
 
   // 桌面端URL列表管理
-  const [desktopUrls, setDesktopUrls] = useState<string[]>(() => {
+  const [desktopItems, setDesktopItems] = useState<BackgroundItem[]>(() => {
+    if (theme?.backgrounds && theme.backgrounds.length > 0) {
+      return theme.backgrounds;
+    }
     const urls = parseUrls(theme?.background_url || '');
-    return urls.length > 0 ? urls : [''];
+    return urls.length > 0 ? urls.map(url => ({ url, active: true })) : [{ url: '', active: true }];
   });
 
   // 移动端URL列表管理
-  const [mobileUrls, setMobileUrls] = useState<string[]>(() => {
+  const [mobileItems, setMobileItems] = useState<BackgroundItem[]>(() => {
+    if (theme?.mobile_backgrounds && theme.mobile_backgrounds.length > 0) {
+      return theme.mobile_backgrounds;
+    }
     const urls = parseUrls(theme?.mobile_background_url || '');
-    return urls.length > 0 ? urls : [''];
+    return urls.length > 0 ? urls.map(url => ({ url, active: true })) : [{ url: '', active: true }];
   });
+
+  // 批量选择状态
+  const [selectedDesktop, setSelectedDesktop] = useState<Set<number>>(new Set());
+  const [selectedMobile, setSelectedMobile] = useState<Set<number>>(new Set());
 
   // 保存原始主题值，用于取消或关闭弹窗时重置
   const [originalTheme, setOriginalTheme] = useState<Theme>({
@@ -87,6 +99,8 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
       const updatedTheme = {
         background_url: theme.background_url || '',
         mobile_background_url: theme.mobile_background_url || '',
+        backgrounds: theme.backgrounds || [],
+        mobile_backgrounds: theme.mobile_backgrounds || [],
         overlay_opacity: typeof theme.overlay_opacity === 'number' ? theme.overlay_opacity : 0,
         meteors_enabled: theme.meteors_enabled ?? true,
         feathers_enabled: theme.feathers_enabled ?? false,
@@ -95,50 +109,133 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
       setLocalTheme(updatedTheme);
       setOriginalTheme(updatedTheme);
 
-      const dUrls = parseUrls(theme.background_url || '');
-      setDesktopUrls(dUrls.length > 0 ? dUrls : ['']);
-      const mUrls = parseUrls(theme.mobile_background_url || '');
-      setMobileUrls(mUrls.length > 0 ? mUrls : ['']);
+      if (theme.backgrounds && theme.backgrounds.length > 0) {
+        setDesktopItems(theme.backgrounds);
+      } else {
+        const dUrls = parseUrls(theme.background_url || '');
+        setDesktopItems(dUrls.length > 0 ? dUrls.map(url => ({ url, active: true })) : [{ url: '', active: true }]);
+      }
+
+      if (theme.mobile_backgrounds && theme.mobile_backgrounds.length > 0) {
+        setMobileItems(theme.mobile_backgrounds);
+      } else {
+        const mUrls = parseUrls(theme.mobile_background_url || '');
+        setMobileItems(mUrls.length > 0 ? mUrls.map(url => ({ url, active: true })) : [{ url: '', active: true }]);
+      }
     }
   }, [theme]);
 
   // 重置为原始值的函数
   const resetToOriginal = () => {
     setLocalTheme({ ...originalTheme });
-    const dUrls = parseUrls(originalTheme.background_url);
-    setDesktopUrls(dUrls.length > 0 ? dUrls : ['']);
-    const mUrls = parseUrls(originalTheme.mobile_background_url);
-    setMobileUrls(mUrls.length > 0 ? mUrls : ['']);
+
+    if (originalTheme.backgrounds && originalTheme.backgrounds.length > 0) {
+      setDesktopItems(originalTheme.backgrounds);
+    } else {
+      const dUrls = parseUrls(originalTheme.background_url);
+      setDesktopItems(dUrls.length > 0 ? dUrls.map(url => ({ url, active: true })) : [{ url: '', active: true }]);
+    }
+
+    if (originalTheme.mobile_backgrounds && originalTheme.mobile_backgrounds.length > 0) {
+      setMobileItems(originalTheme.mobile_backgrounds);
+    } else {
+      const mUrls = parseUrls(originalTheme.mobile_background_url);
+      setMobileItems(mUrls.length > 0 ? mUrls.map(url => ({ url, active: true })) : [{ url: '', active: true }]);
+    }
+    setSelectedDesktop(new Set());
+    setSelectedMobile(new Set());
   };
 
   // 同步URL列表到localTheme
-  const syncDesktopUrls = (urls: string[]) => {
-    setDesktopUrls(urls);
-    setLocalTheme(prev => ({ ...prev, background_url: joinUrls(urls) }));
+  const syncDesktopItems = (items: BackgroundItem[]) => {
+    setDesktopItems(items);
+    setLocalTheme(prev => ({
+      ...prev,
+      backgrounds: items,
+      background_url: items.map(i => i.url).filter(Boolean).join('\n')
+    }));
   };
 
-  const syncMobileUrls = (urls: string[]) => {
-    setMobileUrls(urls);
-    setLocalTheme(prev => ({ ...prev, mobile_background_url: joinUrls(urls) }));
+  const syncMobileItems = (items: BackgroundItem[]) => {
+    setMobileItems(items);
+    setLocalTheme(prev => ({
+      ...prev,
+      mobile_backgrounds: items,
+      mobile_background_url: items.map(i => i.url).filter(Boolean).join('\n')
+    }));
   };
 
   // 计算当前有效URL数量
-  const desktopUrlCount = desktopUrls.filter(Boolean).length;
-  const mobileUrlCount = mobileUrls.filter(Boolean).length;
-  const hasMultipleImages = desktopUrlCount > 1 || mobileUrlCount > 1;
+  const desktopUrlCount = desktopItems.filter(i => i.url).length;
+  const mobileUrlCount = mobileItems.filter(i => i.url).length;
+  const activeDesktopCount = desktopItems.filter(i => i.url && i.active).length;
+  const activeMobileCount = mobileItems.filter(i => i.url && i.active).length;
+  const hasMultipleImages = activeDesktopCount > 1 || activeMobileCount > 1;
 
   const handleSave = async () => {
     console.log('ThemeCard - Saving theme:', localTheme);
+    const themeToSave = {
+      ...localTheme,
+      backgrounds: desktopItems,
+      mobile_backgrounds: mobileItems
+    };
     const newConfig = {
       ...config,
-      theme: localTheme
+      theme: themeToSave
     };
-    onUpdate(localTheme);
+    onUpdate(themeToSave);
     await onSave(newConfig);
 
     // 保存成功后，更新原始值
-    setOriginalTheme({ ...localTheme });
+    setOriginalTheme({ ...themeToSave });
     setIsEditing(false);
+  };
+
+  const toggleSelect = (type: 'desktop' | 'mobile', index: number) => {
+    const set = type === 'desktop' ? new Set(selectedDesktop) : new Set(selectedMobile);
+    if (set.has(index)) {
+      set.delete(index);
+    } else {
+      set.add(index);
+    }
+    type === 'desktop' ? setSelectedDesktop(set) : setSelectedMobile(set);
+  };
+
+  const toggleSelectAll = (type: 'desktop' | 'mobile') => {
+    const items = type === 'desktop' ? desktopItems : mobileItems;
+    const selected = type === 'desktop' ? selectedDesktop : selectedMobile;
+    if (selected.size === items.length && items.length > 0) {
+      type === 'desktop' ? setSelectedDesktop(new Set()) : setSelectedMobile(new Set());
+    } else {
+      const newSet = new Set(items.map((_, i) => i));
+      type === 'desktop' ? setSelectedDesktop(newSet) : setSelectedMobile(newSet);
+    }
+  };
+
+  const handleBatchToggleActive = (type: 'desktop' | 'mobile', active: boolean) => {
+    if (type === 'desktop') {
+      const newItems = desktopItems.map((item, i) =>
+        selectedDesktop.has(i) ? { ...item, active } : item
+      );
+      syncDesktopItems(newItems);
+    } else {
+      const newItems = mobileItems.map((item, i) =>
+        selectedMobile.has(i) ? { ...item, active } : item
+      );
+      syncMobileItems(newItems);
+    }
+  };
+
+  const handleBatchDelete = (type: 'desktop' | 'mobile') => {
+    if (type === 'desktop') {
+      const newItems = desktopItems.filter((_, i) => !selectedDesktop.has(i));
+      syncDesktopItems(newItems.length > 0 ? newItems : [{ url: '', active: true }]);
+      setSelectedDesktop(new Set());
+    } else {
+      const newItems = mobileItems.filter((_, i) => !selectedMobile.has(i));
+      syncMobileItems(newItems.length > 0 ? newItems : [{ url: '', active: true }]);
+      setSelectedMobile(new Set());
+    }
   };
 
   return (
@@ -151,7 +248,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
           <h5 className="text-sm font-medium">背景主题设置</h5>
           <p className="text-sm text-gray-500 truncate w-full">
             {desktopUrlCount > 0
-              ? `背景图片: ${desktopUrlCount}张${desktopUrlCount > 1 ? ' (幻灯片)' : ''}`
+              ? `背景图片: ${desktopUrlCount}张 (${activeDesktopCount}张激活)`
               : '背景图片: 未设置'
             }
           </p>
@@ -178,32 +275,87 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
           </DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
             {/* 桌面端背景URL列表 */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>桌面端背景图片 ({desktopUrlCount})</Label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-xs dark:text-gray-300 dark:hover:text-white bg-transparent"
-                  onClick={() => {
-                    const newUrls = [...desktopUrls, ''];
-                    syncDesktopUrls(newUrls);
-                    setEditingImage({ type: 'desktop', index: newUrls.length - 1 });
-                  }}
-                >
-                  <Plus className="h-3 w-3 mr-1" />
-                  添加图片
-                </Button>
+            <div className="space-y-2 border rounded-lg p-3 bg-muted/30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Label className="font-bold">桌面端背景 ({activeDesktopCount}/{desktopUrlCount})</Label>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs bg-transparent"
+                    onClick={() => toggleSelectAll('desktop')}
+                  >
+                    {selectedDesktop.size === desktopItems.length && desktopItems.length > 0 ? <CheckSquare className="h-3 w-3 mr-1" /> : <Square className="h-3 w-3 mr-1" />}
+                    全选
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs text-primary bg-transparent"
+                    onClick={() => {
+                      const newItems = [...desktopItems, { url: '', active: true }];
+                      syncDesktopItems(newItems);
+                      setEditingImage({ type: 'desktop', index: newItems.length - 1 });
+                    }}
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    添加
+                  </Button>
+                </div>
               </div>
+
+              {/* 批量操作栏 */}
+              {selectedDesktop.size > 0 && (
+                <div className="flex items-center gap-2 py-1.5 px-2 bg-primary/10 dark:bg-primary/20 rounded-md mb-2 animate-in fade-in slide-in-from-top-1 border border-primary/20 dark:border-primary/40">
+                  <span className="text-[10px] font-medium text-primary dark:text-primary-foreground/90 mr-auto pl-1">已选 {selectedDesktop.size} 项</span>
+                  <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px] hover:bg-primary/20 dark:text-primary-foreground/80 dark:hover:text-white" onClick={() => handleBatchToggleActive('desktop', true)}>
+                    <Eye className="h-3 w-3 mr-1" /> 激活
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px] hover:bg-primary/20 dark:text-primary-foreground/80 dark:hover:text-white" onClick={() => handleBatchToggleActive('desktop', false)}>
+                    <EyeOff className="h-3 w-3 mr-1" /> 隐藏
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px] text-destructive hover:text-destructive hover:bg-destructive/10 dark:text-red-400 dark:hover:text-red-300" onClick={() => handleBatchDelete('desktop')}>
+                    <Trash2 className="h-3 w-3 mr-1" /> 删除
+                  </Button>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {desktopUrls.map((url, index) => (
-                  <div key={index} className="relative group aspect-video bg-muted rounded-md border overflow-hidden">
-                    {url ? (
+                {desktopItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className={`relative group aspect-video bg-muted rounded-md border overflow-hidden transition-all ${!item.active ? 'opacity-60 grayscale-[0.5]' : ''} ${selectedDesktop.has(index) ? 'ring-2 ring-primary border-primary' : 'hover:border-primary/50'}`}
+                  >
+                    {/* 选择框 */}
+                    <div
+                      className={`absolute top-2 left-2 z-20 w-5 h-5 rounded border shadow-sm flex items-center justify-center cursor-pointer transition-all duration-200 ${selectedDesktop.has(index) ? 'bg-primary border-primary scale-110' : 'bg-white/90 dark:bg-zinc-800/90 border-gray-400 dark:border-zinc-600 hover:border-primary group-hover:scale-105'}`}
+                      onClick={(e) => { e.stopPropagation(); toggleSelect('desktop', index); }}
+                    >
+                      {selectedDesktop.has(index) ? (
+                        <Check className="h-3.5 w-3.5 text-primary-foreground stroke-[3px]" />
+                      ) : (
+                        <div className="w-1.5 h-1.5 bg-gray-400/50 rounded-full group-hover:bg-primary/50" />
+                      )}
+                    </div>
+
+                    {/* 状态标识 */}
+                    <div className="absolute top-1.5 right-1.5 z-10 flex gap-1">
+                      {!item.active && (
+                        <div className="bg-black/60 text-white rounded-full px-1.5 py-0.5 text-[8px] flex items-center backdrop-blur-sm">
+                          <EyeOff className="h-2 w-2 mr-0.5" /> 已隐藏
+                        </div>
+                      )}
+                    </div>
+
+                    {item.url ? (
                       <img
-                        src={url}
+                        src={item.url}
                         alt={`Background ${index + 1}`}
-                        className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
                         onClick={() => setEditingImage({ type: 'desktop', index })}
                         referrerPolicy="no-referrer"
                       />
@@ -212,69 +364,125 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                         className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors"
                         onClick={() => setEditingImage({ type: 'desktop', index })}
                       >
-                        <Plus className="h-8 w-8 text-muted-foreground/50 mb-2" />
-                        <span className="text-xs text-muted-foreground">设置图片</span>
+                        <Plus className="h-6 w-6 text-muted-foreground/50 mb-1" />
+                        <span className="text-[10px] text-muted-foreground">设置图片</span>
                       </div>
                     )}
-                    <div className="absolute left-1 top-1 flex items-center justify-center w-5 h-5 rounded-full bg-black/50 text-white text-[10px] pointer-events-none">
-                      {index + 1}
+
+                    {/* 操作浮层 */}
+                    <div className="absolute inset-x-0 bottom-0 bg-black/80 translate-y-full group-hover:translate-y-0 transition-transform duration-200 flex items-center justify-center gap-5 py-2 backdrop-blur-md border-t border-white/10">
+                      <button title={item.active ? "隐藏" : "激活"} onClick={(e) => {
+                        e.stopPropagation();
+                        const newItems = [...desktopItems];
+                        newItems[index].active = !newItems[index].active;
+                        syncDesktopItems(newItems);
+                      }} className="text-white hover:text-white transition-colors p-1.5 hover:bg-white/20 rounded-full bg-white/5">
+                        {item.active ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </button>
+                      <button title="删除" onClick={(e) => {
+                        e.stopPropagation();
+                        const newItems = desktopItems.filter((_, i) => i !== index);
+                        syncDesktopItems(newItems.length > 0 ? newItems : [{ url: '', active: true }]);
+                        const newSelected = new Set(selectedDesktop);
+                        newSelected.delete(index);
+                        setSelectedDesktop(newSelected);
+                      }} className="text-red-400 hover:text-red-300 transition-colors p-1.5 hover:bg-red-400/20 rounded-full bg-red-400/10">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </div>
-                    {desktopUrls.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute right-1 top-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity p-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const newUrls = desktopUrls.filter((_, i) => i !== index);
-                          syncDesktopUrls(newUrls.length > 0 ? newUrls : ['']);
-                          if (editingImage?.type === 'desktop' && editingImage?.index === index) {
-                            setEditingImage(null);
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    )}
                   </div>
                 ))}
               </div>
-              <p className="text-sm text-gray-500">
-                {desktopUrlCount > 1
-                  ? `已添加 ${desktopUrlCount} 张图片，将以幻灯片方式播放`
-                  : '添加背景图片URL，可添加多张进行幻灯片播放'
+              <p className="text-[10px] text-gray-500 pt-1">
+                {activeDesktopCount > 1
+                  ? `已启用 ${activeDesktopCount} 张图片，将随机循环展示`
+                  : '添加并激活背景图片，关闭"激活"可在不删除的情况下暂时隐藏'
                 }
               </p>
             </div>
 
             {/* 移动端背景URL列表 */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>移动端背景图片 ({mobileUrlCount})</Label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-xs dark:text-gray-300 dark:hover:text-white bg-transparent"
-                  onClick={() => {
-                    const newUrls = [...mobileUrls, ''];
-                    syncMobileUrls(newUrls);
-                    setEditingImage({ type: 'mobile', index: newUrls.length - 1 });
-                  }}
-                >
-                  <Plus className="h-3 w-3 mr-1" />
-                  添加图片
-                </Button>
+            <div className="space-y-2 border rounded-lg p-3 bg-muted/30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Label className="font-bold">移动端背景 ({activeMobileCount}/{mobileUrlCount})</Label>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs bg-transparent"
+                    onClick={() => toggleSelectAll('mobile')}
+                  >
+                    {selectedMobile.size === mobileItems.length && mobileItems.length > 0 ? <CheckSquare className="h-3 w-3 mr-1" /> : <Square className="h-3 w-3 mr-1" />}
+                    全选
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs text-primary bg-transparent"
+                    onClick={() => {
+                      const newItems = [...mobileItems, { url: '', active: true }];
+                      syncMobileItems(newItems);
+                      setEditingImage({ type: 'mobile', index: newItems.length - 1 });
+                    }}
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    添加
+                  </Button>
+                </div>
               </div>
+
+              {/* 批量操作栏 */}
+              {selectedMobile.size > 0 && (
+                <div className="flex items-center gap-2 py-1.5 px-2 bg-primary/10 dark:bg-primary/20 rounded-md mb-2 animate-in fade-in slide-in-from-top-1 border border-primary/20 dark:border-primary/40">
+                  <span className="text-[10px] font-medium text-primary dark:text-primary-foreground/90 mr-auto pl-1">已选 {selectedMobile.size} 项</span>
+                  <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px] hover:bg-primary/20 dark:text-primary-foreground/80 dark:hover:text-white" onClick={() => handleBatchToggleActive('mobile', true)}>
+                    <Eye className="h-3 w-3 mr-1" /> 激活
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px] hover:bg-primary/20 dark:text-primary-foreground/80 dark:hover:text-white" onClick={() => handleBatchToggleActive('mobile', false)}>
+                    <EyeOff className="h-3 w-3 mr-1" /> 隐藏
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px] text-destructive hover:text-destructive hover:bg-destructive/10 dark:text-red-400 dark:hover:text-red-300" onClick={() => handleBatchDelete('mobile')}>
+                    <Trash2 className="h-3 w-3 mr-1" /> 删除
+                  </Button>
+                </div>
+              )}
+
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {mobileUrls.map((url, index) => (
-                  <div key={index} className="relative group aspect-[9/16] bg-muted rounded-md border overflow-hidden">
-                    {url ? (
+                {mobileItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className={`relative group aspect-[9/16] bg-muted rounded-md border overflow-hidden transition-all ${!item.active ? 'opacity-60 grayscale-[0.5]' : ''} ${selectedMobile.has(index) ? 'ring-2 ring-primary border-primary' : 'hover:border-primary/50'}`}
+                  >
+                    {/* 选择框 */}
+                    <div
+                      className={`absolute top-2 left-2 z-20 w-5 h-5 rounded border shadow-sm flex items-center justify-center cursor-pointer transition-all duration-200 ${selectedMobile.has(index) ? 'bg-primary border-primary scale-110' : 'bg-white/90 dark:bg-zinc-800/90 border-gray-400 dark:border-zinc-600 hover:border-primary group-hover:scale-105'}`}
+                      onClick={(e) => { e.stopPropagation(); toggleSelect('mobile', index); }}
+                    >
+                      {selectedMobile.has(index) ? (
+                        <Check className="h-3.5 w-3.5 text-primary-foreground stroke-[3px]" />
+                      ) : (
+                        <div className="w-1.5 h-1.5 bg-gray-400/50 rounded-full group-hover:bg-primary/50" />
+                      )}
+                    </div>
+
+                    {/* 状态标识 */}
+                    <div className="absolute top-1.5 right-1.5 z-10 flex gap-1">
+                      {!item.active && (
+                        <div className="bg-black/60 text-white rounded-full px-1 py-0.5 text-[7px] flex items-center backdrop-blur-sm">
+                          <EyeOff className="h-2 w-2 mr-0.5" /> 隐藏
+                        </div>
+                      )}
+                    </div>
+
+                    {item.url ? (
                       <img
-                        src={url}
+                        src={item.url}
                         alt={`Mobile Background ${index + 1}`}
-                        className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
                         onClick={() => setEditingImage({ type: 'mobile', index })}
                         referrerPolicy="no-referrer"
                       />
@@ -287,31 +495,32 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                         <span className="text-[10px] text-muted-foreground">设置</span>
                       </div>
                     )}
-                    <div className="absolute left-1 top-1 flex items-center justify-center w-5 h-5 rounded-full bg-black/50 text-white text-[10px] pointer-events-none">
-                      {index + 1}
+
+                    {/* 操作浮层 */}
+                    <div className="absolute inset-x-0 bottom-0 bg-black/80 translate-y-full group-hover:translate-y-0 transition-transform duration-200 flex items-center justify-center gap-4 py-2 backdrop-blur-md border-t border-white/10">
+                      <button title={item.active ? "隐藏" : "激活"} onClick={(e) => {
+                        e.stopPropagation();
+                        const newItems = [...mobileItems];
+                        newItems[index].active = !newItems[index].active;
+                        syncMobileItems(newItems);
+                      }} className="text-white hover:text-white transition-colors p-1.5 hover:bg-white/20 rounded-full bg-white/5">
+                        {item.active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                      <button title="删除" onClick={(e) => {
+                        e.stopPropagation();
+                        const newItems = mobileItems.filter((_, i) => i !== index);
+                        syncMobileItems(newItems.length > 0 ? newItems : [{ url: '', active: true }]);
+                        const newSelected = new Set(selectedMobile);
+                        newSelected.delete(index);
+                        setSelectedMobile(newSelected);
+                      }} className="text-red-400 hover:text-red-300 transition-colors p-1.5 hover:bg-red-400/20 rounded-full bg-red-400/10">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
-                    {mobileUrls.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute right-1 top-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity p-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const newUrls = mobileUrls.filter((_, i) => i !== index);
-                          syncMobileUrls(newUrls.length > 0 ? newUrls : ['']);
-                          if (editingImage?.type === 'mobile' && editingImage?.index === index) {
-                            setEditingImage(null);
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    )}
                   </div>
                 ))}
               </div>
-              <p className="text-sm text-gray-500">输入移动端背景图片URL，如不设置则使用桌面端背景</p>
+              <p className="text-[10px] text-gray-500 pt-1">如不设置移动端背景则使用桌面端背景</p>
             </div>
 
             {/* 幻灯片间隔设置 - 仅在有多张图片时显示 */}
@@ -449,9 +658,9 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
             {editingImage && (
               <>
                 <div className={`relative rounded-md overflow-hidden bg-muted border mx-auto ${editingImage.type === 'desktop' ? 'aspect-video w-full' : 'max-h-[300px] aspect-[9/16] w-1/2'}`}>
-                  {(editingImage.type === 'desktop' ? desktopUrls : mobileUrls)[editingImage.index] ? (
+                  {(editingImage.type === 'desktop' ? desktopItems : mobileItems)[editingImage.index]?.url ? (
                     <img
-                      src={(editingImage.type === 'desktop' ? desktopUrls : mobileUrls)[editingImage.index]}
+                      src={(editingImage.type === 'desktop' ? desktopItems : mobileItems)[editingImage.index].url}
                       alt="Preview"
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
@@ -463,30 +672,51 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>图片URL</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>图片URL</Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {(editingImage.type === 'desktop' ? desktopItems : mobileItems)[editingImage.index]?.active ? '已启用' : '已隐藏'}
+                      </span>
+                      <Switch
+                        checked={(editingImage.type === 'desktop' ? desktopItems : mobileItems)[editingImage.index]?.active ?? true}
+                        onCheckedChange={(checked) => {
+                          if (editingImage.type === 'desktop') {
+                            const newItems = [...desktopItems];
+                            newItems[editingImage.index] = { ...newItems[editingImage.index], active: checked };
+                            syncDesktopItems(newItems);
+                          } else {
+                            const newItems = [...mobileItems];
+                            newItems[editingImage.index] = { ...newItems[editingImage.index], active: checked };
+                            syncMobileItems(newItems);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
                   <ClearableInput
-                    value={(editingImage.type === 'desktop' ? desktopUrls : mobileUrls)[editingImage.index] || ''}
+                    value={(editingImage.type === 'desktop' ? desktopItems : mobileItems)[editingImage.index]?.url || ''}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       const val = e.target.value;
                       if (editingImage.type === 'desktop') {
-                        const newUrls = [...desktopUrls];
-                        newUrls[editingImage.index] = val;
-                        syncDesktopUrls(newUrls);
+                        const newItems = [...desktopItems];
+                        newItems[editingImage.index] = { ...newItems[editingImage.index], url: val };
+                        syncDesktopItems(newItems);
                       } else {
-                        const newUrls = [...mobileUrls];
-                        newUrls[editingImage.index] = val;
-                        syncMobileUrls(newUrls);
+                        const newItems = [...mobileItems];
+                        newItems[editingImage.index] = { ...newItems[editingImage.index], url: val };
+                        syncMobileItems(newItems);
                       }
                     }}
                     onClear={() => {
                       if (editingImage.type === 'desktop') {
-                        const newUrls = [...desktopUrls];
-                        newUrls[editingImage.index] = '';
-                        syncDesktopUrls(newUrls);
+                        const newItems = [...desktopItems];
+                        newItems[editingImage.index] = { ...newItems[editingImage.index], url: '' };
+                        syncDesktopItems(newItems);
                       } else {
-                        const newUrls = [...mobileUrls];
-                        newUrls[editingImage.index] = '';
-                        syncMobileUrls(newUrls);
+                        const newItems = [...mobileItems];
+                        newItems[editingImage.index] = { ...newItems[editingImage.index], url: '' };
+                        syncMobileItems(newItems);
                       }
                     }}
                     placeholder={editingImage.type === 'desktop' ? "https://example.com/background.jpg" : "https://example.com/mobile-bg.jpg"}

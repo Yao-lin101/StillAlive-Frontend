@@ -118,16 +118,16 @@ export const Background: React.FC<BackgroundProps> = ({
         // 清透水色系复合渐变底色
         background: `
           radial-gradient(at 0% 0%, #E0F7FA 0, transparent 50%),
-          radial-gradient(at 100% 0%, #B2EBF2 0, transparent 50%),
-          radial-gradient(at 100% 100%, #81D4FA 0, transparent 50%),
-          radial-gradient(at 0% 100%, #E1F5FE 0, transparent 50%),
+          radial-gradient(at 100% 0%, #81D4FA 0, transparent 50%),
+          radial-gradient(at 100% 100%, #E1F5FE 0, transparent 50%),
+          radial-gradient(at 0% 100%, #B2EBF2 0, transparent 50%),
           #CCF3FF
         `
       }}
     >
       {/* 极细微颗粒感叠加，增加质感 */}
-      <div className="absolute inset-0 opacity-[0.15] mix-blend-soft-light pointer-events-none" 
-           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} 
+      <div className="absolute inset-0 opacity-[0.15] mix-blend-soft-light pointer-events-none"
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
       />
 
       {hasImages && (
@@ -138,10 +138,12 @@ export const Background: React.FC<BackgroundProps> = ({
 
             return (
               <React.Fragment key={url}>
-                {/* 氛围底层：模糊原图产生环境色漫反射，解决立绘透明像素后的空洞感 */}
+                {/* 氛围底层：同步安全属性以复用网络请求并避免 Referer 导致的 403 */}
                 <img
                   src={url}
                   alt=""
+                  crossOrigin="anonymous"
+                  referrerPolicy="no-referrer"
                   className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                   style={{
                     filter: 'blur(80px) saturate(1.4) brightness(0.9)',
@@ -165,7 +167,7 @@ export const Background: React.FC<BackgroundProps> = ({
                     if (!hasTriggeredLoadRef.current && onInitialLoad && isActive) {
                       hasTriggeredLoadRef.current = true;
                       setInitialImageLoaded(true);
-                      
+
                       // 首图加载完毕后，立刻算出下一张并挂载，开始静默下载
                       if (backgroundUrls.length > 1) {
                         let nextTarget: number;

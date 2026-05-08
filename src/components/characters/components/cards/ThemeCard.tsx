@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -185,6 +186,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
     };
     onUpdate(themeToSave);
     await onSave(newConfig);
+    toast.success('背景主题配置已保存');
 
     // 保存成功后，更新原始值
     setOriginalTheme({ ...themeToSave });
@@ -218,23 +220,28 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
         selectedDesktop.has(i) ? { ...item, active } : item
       );
       syncDesktopItems(newItems);
+      setSelectedDesktop(new Set());
     } else {
       const newItems = mobileItems.map((item, i) =>
         selectedMobile.has(i) ? { ...item, active } : item
       );
       syncMobileItems(newItems);
+      setSelectedMobile(new Set());
     }
   };
 
   const handleBatchDelete = (type: 'desktop' | 'mobile') => {
-    if (type === 'desktop') {
-      const newItems = desktopItems.filter((_, i) => !selectedDesktop.has(i));
-      syncDesktopItems(newItems.length > 0 ? newItems : [{ url: '', active: true }]);
-      setSelectedDesktop(new Set());
-    } else {
-      const newItems = mobileItems.filter((_, i) => !selectedMobile.has(i));
-      syncMobileItems(newItems.length > 0 ? newItems : [{ url: '', active: true }]);
-      setSelectedMobile(new Set());
+    const count = type === 'desktop' ? selectedDesktop.size : selectedMobile.size;
+    if (window.confirm(`确定要删除选中的 ${count} 张图片吗？`)) {
+      if (type === 'desktop') {
+        const newItems = desktopItems.filter((_, i) => !selectedDesktop.has(i));
+        syncDesktopItems(newItems.length > 0 ? newItems : [{ url: '', active: true }]);
+        setSelectedDesktop(new Set());
+      } else {
+        const newItems = mobileItems.filter((_, i) => !selectedMobile.has(i));
+        syncMobileItems(newItems.length > 0 ? newItems : [{ url: '', active: true }]);
+        setSelectedMobile(new Set());
+      }
     }
   };
 
@@ -356,40 +363,56 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                         src={item.url}
                         alt={`Background ${index + 1}`}
                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
-                        onClick={() => setEditingImage({ type: 'desktop', index })}
+                        onClick={() => {
+                          if (selectedDesktop.size > 0) {
+                            toggleSelect('desktop', index);
+                          } else {
+                            setEditingImage({ type: 'desktop', index });
+                          }
+                        }}
                         referrerPolicy="no-referrer"
                       />
                     ) : (
                       <div
                         className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors"
-                        onClick={() => setEditingImage({ type: 'desktop', index })}
+                        onClick={() => {
+                          if (selectedDesktop.size > 0) {
+                            toggleSelect('desktop', index);
+                          } else {
+                            setEditingImage({ type: 'desktop', index });
+                          }
+                        }}
                       >
                         <Plus className="h-6 w-6 text-muted-foreground/50 mb-1" />
                         <span className="text-[10px] text-muted-foreground">设置图片</span>
                       </div>
                     )}
 
-                    {/* 操作浮层 */}
-                    <div className="absolute inset-x-0 bottom-0 bg-black/80 translate-y-full group-hover:translate-y-0 transition-transform duration-200 flex items-center justify-center gap-5 py-2 backdrop-blur-md border-t border-white/10">
-                      <button title={item.active ? "隐藏" : "激活"} onClick={(e) => {
-                        e.stopPropagation();
-                        const newItems = [...desktopItems];
-                        newItems[index].active = !newItems[index].active;
-                        syncDesktopItems(newItems);
-                      }} className="text-white hover:text-white transition-colors p-1.5 hover:bg-white/20 rounded-full bg-white/5">
-                        {item.active ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                      </button>
-                      <button title="删除" onClick={(e) => {
-                        e.stopPropagation();
-                        const newItems = desktopItems.filter((_, i) => i !== index);
-                        syncDesktopItems(newItems.length > 0 ? newItems : [{ url: '', active: true }]);
-                        const newSelected = new Set(selectedDesktop);
-                        newSelected.delete(index);
-                        setSelectedDesktop(newSelected);
-                      }} className="text-red-400 hover:text-red-300 transition-colors p-1.5 hover:bg-red-400/20 rounded-full bg-red-400/10">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
+                    {/* 操作浮层 - 仅在非批量选择模式下展示 */}
+                    {selectedDesktop.size === 0 && (
+                      <div className="absolute inset-x-0 bottom-0 bg-black/80 translate-y-full group-hover:translate-y-0 transition-transform duration-200 flex items-center justify-center gap-5 py-2 backdrop-blur-md border-t border-white/10">
+                        <button title={item.active ? "隐藏" : "激活"} onClick={(e) => {
+                          e.stopPropagation();
+                          const newItems = [...desktopItems];
+                          newItems[index].active = !newItems[index].active;
+                          syncDesktopItems(newItems);
+                        }} className="text-white hover:text-white transition-colors p-1.5 hover:bg-white/20 rounded-full bg-white/5">
+                          {item.active ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        </button>
+                        <button title="删除" onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm('确定要删除这张图片吗？')) {
+                            const newItems = desktopItems.filter((_, i) => i !== index);
+                            syncDesktopItems(newItems.length > 0 ? newItems : [{ url: '', active: true }]);
+                            const newSelected = new Set(selectedDesktop);
+                            newSelected.delete(index);
+                            setSelectedDesktop(newSelected);
+                          }
+                        }} className="text-red-400 hover:text-red-300 transition-colors p-1.5 hover:bg-red-400/20 rounded-full bg-red-400/10">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -483,40 +506,56 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
                         src={item.url}
                         alt={`Mobile Background ${index + 1}`}
                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
-                        onClick={() => setEditingImage({ type: 'mobile', index })}
+                        onClick={() => {
+                          if (selectedMobile.size > 0) {
+                            toggleSelect('mobile', index);
+                          } else {
+                            setEditingImage({ type: 'mobile', index });
+                          }
+                        }}
                         referrerPolicy="no-referrer"
                       />
                     ) : (
                       <div
                         className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors"
-                        onClick={() => setEditingImage({ type: 'mobile', index })}
+                        onClick={() => {
+                          if (selectedMobile.size > 0) {
+                            toggleSelect('mobile', index);
+                          } else {
+                            setEditingImage({ type: 'mobile', index });
+                          }
+                        }}
                       >
                         <Plus className="h-6 w-6 text-muted-foreground/50 mb-1" />
                         <span className="text-[10px] text-muted-foreground">设置</span>
                       </div>
                     )}
 
-                    {/* 操作浮层 */}
-                    <div className="absolute inset-x-0 bottom-0 bg-black/80 translate-y-full group-hover:translate-y-0 transition-transform duration-200 flex items-center justify-center gap-4 py-2 backdrop-blur-md border-t border-white/10">
-                      <button title={item.active ? "隐藏" : "激活"} onClick={(e) => {
-                        e.stopPropagation();
-                        const newItems = [...mobileItems];
-                        newItems[index].active = !newItems[index].active;
-                        syncMobileItems(newItems);
-                      }} className="text-white hover:text-white transition-colors p-1.5 hover:bg-white/20 rounded-full bg-white/5">
-                        {item.active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                      <button title="删除" onClick={(e) => {
-                        e.stopPropagation();
-                        const newItems = mobileItems.filter((_, i) => i !== index);
-                        syncMobileItems(newItems.length > 0 ? newItems : [{ url: '', active: true }]);
-                        const newSelected = new Set(selectedMobile);
-                        newSelected.delete(index);
-                        setSelectedMobile(newSelected);
-                      }} className="text-red-400 hover:text-red-300 transition-colors p-1.5 hover:bg-red-400/20 rounded-full bg-red-400/10">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+                    {/* 操作浮层 - 仅在非批量选择模式下展示 */}
+                    {selectedMobile.size === 0 && (
+                      <div className="absolute inset-x-0 bottom-0 bg-black/80 translate-y-full group-hover:translate-y-0 transition-transform duration-200 flex items-center justify-center gap-4 py-2 backdrop-blur-md border-t border-white/10">
+                        <button title={item.active ? "隐藏" : "激活"} onClick={(e) => {
+                          e.stopPropagation();
+                          const newItems = [...mobileItems];
+                          newItems[index].active = !newItems[index].active;
+                          syncMobileItems(newItems);
+                        }} className="text-white hover:text-white transition-colors p-1.5 hover:bg-white/20 rounded-full bg-white/5">
+                          {item.active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                        <button title="删除" onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm('确定要删除这张图片吗？')) {
+                            const newItems = mobileItems.filter((_, i) => i !== index);
+                            syncMobileItems(newItems.length > 0 ? newItems : [{ url: '', active: true }]);
+                            const newSelected = new Set(selectedMobile);
+                            newSelected.delete(index);
+                            setSelectedMobile(newSelected);
+                          }
+                        }} className="text-red-400 hover:text-red-300 transition-colors p-1.5 hover:bg-red-400/20 rounded-full bg-red-400/10">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

@@ -329,10 +329,35 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
   };
 
   return (
-    <div style={{ fontFamily: '"Inter", sans-serif', color: THEME.text, padding: '4px' }}>
+    <div className="custom-scrollbar" style={{ 
+      fontFamily: '"Inter", sans-serif', 
+      color: THEME.text, 
+      padding: '4px',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+      overflowY: 'auto',
+      overflowX: 'hidden'
+    }}>
+      {/* 标题块：随页面滚动 */}
       <TitleSection date={date} meta={meta} title={llm.title} />
-      <TabNav activeTab={activeTab} setActiveTab={setActiveTab} statuses={statuses} />
-      <div style={{ minHeight: '300px' }}>
+
+      {/* 导航页签：吸顶固定 */}
+      <div style={{ 
+        position: 'sticky', 
+        top: '-4px', // 抵消父容器的 padding
+        zIndex: 50, 
+        background: '#FFFFFF',
+        padding: '8px 0',
+        margin: '0 -4px', // 扩展到边缘
+        paddingLeft: '4px',
+        paddingRight: '4px'
+      }}>
+        <TabNav activeTab={activeTab} setActiveTab={setActiveTab} statuses={statuses} />
+      </div>
+
+      {/* 内容展示区 */}
+      <div style={{ marginTop: '16px', minHeight: 0 }}>
         {renderContent()}
       </div>
     </div>

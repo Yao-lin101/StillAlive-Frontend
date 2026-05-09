@@ -149,6 +149,7 @@ export const CharacterDisplayPage: React.FC = () => {
     is_visible: boolean;
     visibility?: string;
     is_owner?: boolean;
+    template_style?: string;
   } | null>(null);
 
   const fetchMessages = async () => {
@@ -715,6 +716,7 @@ export const CharacterDisplayPage: React.FC = () => {
                           report={selectedReport}
                           isLoading={isLoadingReportDetail}
                           isOwner={character?.is_owner || false}
+                          templateStyle={dailyReportConfig?.template_style as any}
                           onHide={handleToggleReportHidden}
                           onDelete={handleDeleteReport}
                           onBack={() => {

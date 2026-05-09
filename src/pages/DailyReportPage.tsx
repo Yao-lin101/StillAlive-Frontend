@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 export const DailyReportPage: React.FC = () => {
   const { code, date } = useParams<{ code: string; date: string }>();
   const [report, setReport] = useState<DailyReportDetailType | null>(null);
+  const [templateStyle, setTemplateStyle] = useState<string>('default');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -15,8 +16,16 @@ export const DailyReportPage: React.FC = () => {
       if (!code || !date) return;
       try {
         setIsLoading(true);
-        const reportData = await characterService.getDailyReportDetail(code, date);
+        // 并行获取报告详情和角色配置（以获取模板风格）
+        const [reportData, configData] = await Promise.all([
+          characterService.getDailyReportDetail(code, date),
+          characterService.getDailyReportConfigPublic(code).catch(() => null)
+        ]);
+        
         setReport(reportData);
+        if (configData?.template_style) {
+          setTemplateStyle(configData.template_style);
+        }
       } catch (err) {
         console.error('Failed to fetch report or character:', err);
         toast.error('获取日报数据失败');
@@ -72,6 +81,7 @@ export const DailyReportPage: React.FC = () => {
               report={report}
               isLoading={isLoading}
               isOwner={false}
+              templateStyle={templateStyle as any}
             />
           </div>
         </div>

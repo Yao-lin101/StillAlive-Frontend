@@ -217,6 +217,7 @@ export const characterService = {
     is_visible: boolean;
     visibility?: string;
     is_owner?: boolean;
+    template_style?: string;
   }> {
     try {
       const response = await api.get(`/d/${code}/reports/config/`);

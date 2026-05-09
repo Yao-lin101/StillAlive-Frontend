@@ -10,7 +10,7 @@
 import React from 'react';
 import type { TemplateStyle, TemplateProps } from './types';
 import { DefaultTemplate } from './templates/DefaultTemplate';
-import { ArisuTemplate } from './templates/ArisuTemplate';
+import { ArisuTemplate, ArisuLoading } from './templates/ArisuTemplate';
 
 // ── 模板注册表 ─────────────────────────────────────────────────────
 const TEMPLATE_MAP: Record<TemplateStyle, React.FC<TemplateProps>> = {
@@ -21,6 +21,11 @@ const TEMPLATE_MAP: Record<TemplateStyle, React.FC<TemplateProps>> = {
   // retro: RetroTemplate,
   minimal: DefaultTemplate,  // 占位，暂时降级到 default
   retro: DefaultTemplate,
+};
+
+// ── 加载状态注册表 ───────────────────────────────────────────────────
+export const LOADING_MAP: Record<string, React.FC> = {
+  alice: ArisuLoading,
 };
 
 interface ReportRendererProps extends TemplateProps {

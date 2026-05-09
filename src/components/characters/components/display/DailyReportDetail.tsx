@@ -12,7 +12,7 @@ import {
   EyeOff,
   ChevronLeft,
 } from 'lucide-react';
-import { ReportRenderer } from './report/ReportRenderer';
+import { ReportRenderer, LOADING_MAP } from './report/ReportRenderer';
 import type { TemplateStyle } from './report/types';
 
 // ── Markdown 粗体兼容处理 ─────────────────────────────────────────
@@ -73,10 +73,20 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
     Object.keys(report.report_data).length > 0
   );
 
+  // 如果 isLoading 为 true，尝试使用模板对应的 Loading 组件
+  const activeTemplate = (templateStyle === 'default' && report?.template_style) 
+    ? (report.template_style as TemplateStyle) 
+    : templateStyle;
+
   // ── 加载状态 ────────────────────────────────────────────────────
   if (isLoading) {
+    const TemplateLoading = LOADING_MAP[activeTemplate];
+    if (TemplateLoading) {
+      return <TemplateLoading />;
+    }
+
     return (
-      <div className="flex items-center justify-center min-h-[200px]">
+      <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-blue-500" />
       </div>
     );

@@ -14,6 +14,7 @@ import {
   Star,
   Fish
 } from 'lucide-react';
+import '@/styles/ArisuTemplate.css';
 
 // ── 主题色彩配置 (水色系) ──────────────────────────────────────────
 const AQUA_THEME = {
@@ -65,7 +66,7 @@ const SlotComment: React.FC<{ slot: ReportCommentSlot; color: string; index: num
       <img 
         src={`/assets/reports/alice/Arisu_${emoticonId}.avif`}
         alt="Arisu"
-        style={{ width: '70px', height: '70px', objectFit: 'contain', flexShrink: 0, marginTop: '8px' }}
+        style={{ width: '70px', height: '70px', objectFit: 'contain', flexShrink: 0, marginTop: '8px', borderRadius: '16px' }}
       />
       <div style={{
         flex: 1,
@@ -85,6 +86,38 @@ const SlotComment: React.FC<{ slot: ReportCommentSlot; color: string; index: num
           textAlign: isLeft ? 'left' : 'right'
         }}>{slot.range}</div>
         <div style={{ fontSize: '14px', color: AQUA_THEME.textMain, lineHeight: 1.6 }}>{slot.comment}</div>
+      </div>
+    </div>
+  );
+};
+
+// ── 加载状态组件 ──────────────────────────────────────────────
+
+export const ArisuLoading: React.FC = () => {
+  return (
+    <div className="alice-loading-container fade-in">
+      <div className="alice-loading-grid" />
+      <div className="alice-loading-content">
+        <div className="alice-avatar-wrapper">
+          <img 
+            src="/assets/reports/alice/Arisu_06.avif" 
+            alt="Loading..." 
+            className="alice-loading-avatar" 
+          />
+          <div className="alice-loading-ring" />
+        </div>
+        <div className="alice-loading-text">
+          <h3 className="alice-loading-title">Arisu is Connecting...</h3>
+          <p className="alice-loading-subtitle">正在连接千年学院数据中心</p>
+        </div>
+        <div className="alice-progress-container">
+          <div className="alice-progress-bar" />
+        </div>
+        <div className="alice-loading-status">
+          <span className="dot">.</span>
+          <span className="dot">.</span>
+          <span className="dot">.</span>
+        </div>
       </div>
     </div>
   );
@@ -282,7 +315,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
                 src="/assets/reports/alice/Emoticon_05.webp"
                 alt="character emoticon"
                 className="section-overall-img"
-                style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
+                style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px', borderRadius: '16px' }}
               />
               <LLMComment comment={llm.chat} status={statuses?.chat} variant="glass" />
               <div style={{ clear: 'both' }}></div>
@@ -319,7 +352,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
                       <img 
                         src={`/assets/reports/alice/Arisu_${emoticonId}.avif`}
                         alt="Arisu"
-                        style={{ width: '60px', height: '60px', objectFit: 'contain', flexShrink: 0, marginTop: '12px' }}
+                        style={{ width: '60px', height: '60px', objectFit: 'contain', flexShrink: 0, marginTop: '12px', borderRadius: '16px' }}
                       />
                       <GlassCard style={{ 
                         flex: 1, 
@@ -368,362 +401,6 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
         overflowX: 'hidden'
       }}
     >
-      <style>{`
-        @font-face {
-          font-family: 'LXGW WenKai';
-          src: url('https://tc.ciallo.ccwu.cc/file/1775130743963_1774880718993_LXGWWenKai-Regular.woff2') format('woff2');
-          font-weight: 400;
-        }
-
-        @font-face {
-          font-family: 'LXGW WenKai';
-          src: url('https://tc.ciallo.ccwu.cc/file/1775130739223_1774880715380_LXGWWenKai-Medium.woff2') format('woff2');
-          font-weight: 600;
-        }
-
-        .alice-template-container {
-          --alice-sky: #8fc5ff;
-          --alice-sea: #6d9afa;
-          --alice-text: #5E5358;
-          --alice-sub: #8D818A;
-          
-          font-family: 'LXGW WenKai', 'Inter', -apple-system, sans-serif;
-          color: var(--alice-text);
-          padding: 12px;
-          flex: 1;
-          position: relative;
-        }
-
-        .page-shell {
-          position: relative;
-          border-radius: 32px;
-          padding: 40px 24px;
-          background-color: #dff4ff;
-          background-image: 
-            linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(242, 251, 255, 0.95)),
-            linear-gradient(rgba(117, 193, 240, 0.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(117, 193, 240, 0.08) 1px, transparent 1px);
-          background-size: auto, 26px 26px, 26px 26px;
-          border: 1px solid rgba(255, 255, 255, 0.9);
-          box-shadow: 0 24px 70px rgba(90, 76, 90, 0.08);
-        }
-
-        .header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-          padding: 32px;
-          border-radius: 24px;
-          color: #fff;
-          margin-bottom: 28px;
-          position: relative;
-          box-shadow: 0 16px 40px rgba(77, 163, 210, 0.15);
-          overflow: hidden;
-        }
-
-        .header-slideshow {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          z-index: 0;
-        }
-
-        .slide {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          background-size: cover;
-          background-position: center;
-          opacity: 0;
-          animation: slideAnimation 30s infinite;
-        }
-
-        .slide:nth-child(1) { background-image: url('/assets/reports/alice/header-bg-1.avif'); animation-delay: 0s; }
-        .slide:nth-child(2) { background-image: url('/assets/reports/alice/header-bg-2.avif'); animation-delay: 5s; }
-        .slide:nth-child(3) { background-image: url('/assets/reports/alice/header-bg-3.avif'); animation-delay: 10s; }
-        .slide:nth-child(4) { background-image: url('/assets/reports/alice/header-bg-4.avif'); animation-delay: 15s; }
-        .slide:nth-child(5) { background-image: url('/assets/reports/alice/header-bg-5.avif'); animation-delay: 20s; }
-        .slide:nth-child(6) { background-image: url('/assets/reports/alice/header-bg-6.avif'); animation-delay: 25s; }
-
-        @keyframes slideAnimation {
-          0% { opacity: 0; transform: scale(1.1); }
-          2% { opacity: 1; }
-          16% { opacity: 1; }
-          18% { opacity: 0; transform: scale(1.05); }
-          100% { opacity: 0; }
-        }
-
-        .header-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(120deg, rgba(44, 118, 161, 0.5) 0%, rgba(88, 176, 221, 0.35) 56%, rgba(174, 226, 247, 0.15) 100%);
-          z-index: 1;
-        }
-
-        .header-content {
-          position: relative;
-          z-index: 2;
-          width: 100%;
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-        }
-
-        .header-title h1 {
-          margin: 0;
-          font-size: 32px;
-          font-weight: 600;
-        }
-
-        .header-subtitle {
-          margin-top: 8px;
-          font-size: 15px;
-          opacity: 0.9;
-        }
-
-        .date-box {
-          text-align: center;
-          padding: 16px 24px;
-          background: rgba(255, 255, 255, 0.2);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border-radius: 20px;
-          border: 1px solid rgba(255, 255, 255, 0.4);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .hero-grid {
-          display: grid;
-          grid-template-columns: 1.2fr 0.8fr;
-          gap: 20px;
-          margin-bottom: 24px;
-        }
-
-        .glass-card {
-          background: rgba(255, 255, 255, 0.7);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.8);
-          border-radius: 24px;
-          box-shadow: 0 10px 30px rgba(75, 148, 196, 0.05);
-        }
-
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 16px;
-          margin-bottom: 32px;
-        }
-
-        .stat-item {
-          padding: 16px;
-          border-radius: 20px;
-          background: rgba(255, 255, 255, 0.6);
-          border: 1px solid rgba(255, 255, 255, 0.8);
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .stat-value {
-          font-size: 20px;
-          font-weight: 700;
-          color: var(--alice-sea);
-        }
-
-        .stat-label {
-          font-size: 12px;
-          color: var(--alice-sub);
-        }
-
-        .nav-tabs {
-          display: flex;
-          gap: 8px;
-          padding: 8px 12px;
-          background: rgba(255, 255, 255, 0.8);
-          border-radius: 16px;
-          margin-bottom: 24px;
-          position: sticky;
-          top: 0;
-          z-index: 50;
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.8);
-          flex-shrink: 0;
-          min-height: fit-content;
-        }
-
-        .nav-tabs button {
-          flex: 1;
-          padding: 10px;
-          border: none;
-          background: transparent;
-          border-radius: 12px;
-          font-size: 13px;
-          font-weight: 600;
-          color: var(--alice-sub);
-          cursor: pointer;
-          transition: all 0.2s;
-          outline: none;
-          -webkit-tap-highlight-color: transparent;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-        }
-
-        .nav-tabs button svg {
-          width: 18px;
-          height: 18px;
-          flex-shrink: 0;
-        }
-
-        .nav-tabs button:focus {
-          outline: none;
-        }
-
-        .nav-tabs button.active {
-          background: #fff;
-          color: var(--alice-sea);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-
-        .sub-tabs {
-          display: flex;
-          gap: 8px;
-          margin-bottom: 16px;
-          flex-shrink: 0;
-        }
-
-        .sub-tabs button {
-          padding: 6px 16px;
-          border-radius: 12px;
-          border: 1px solid rgba(255,255,255,0.8);
-          background: rgba(255,255,255,0.4);
-          font-size: 13px;
-          font-weight: 600;
-          color: var(--alice-sub);
-          cursor: pointer;
-        }
-
-        .sub-tabs button.active {
-          background: var(--alice-sea);
-          color: #fff;
-          border-color: var(--alice-sea);
-        }
-
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
-
-        .section-title {
-          font-size: 18px;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 8px;
-        }
-
-        .fade-in {
-          animation: fadeIn 0.4s ease-out;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ── Mobile Optimizations ────────────────────────────────────── */
-        @media (max-width: 768px) {
-          .page-shell {
-            padding: 20px 12px;
-            border-radius: 20px;
-          }
-
-          .header {
-            padding: 20px;
-            margin-bottom: 20px;
-            flex-direction: column;
-            align-items: stretch;
-            gap: 20px;
-          }
-
-          .header-content {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 16px;
-          }
-
-          .header-title h1 {
-            font-size: 24px;
-          }
-
-          .header-subtitle {
-            font-size: 13px;
-          }
-
-          .date-box {
-            padding: 10px 16px;
-            align-self: center;
-          }
-
-          .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-          }
-
-          .stat-item {
-            padding: 12px;
-          }
-
-          .stat-value {
-            font-size: 18px;
-          }
-
-          .nav-tabs {
-            padding: 6px;
-            gap: 4px;
-            margin: 0 auto 16px auto;
-            width: calc(100% - 8px);
-            justify-content: center;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            flex-shrink: 0;
-          }
-
-          .nav-tabs button {
-            padding: 8px 4px;
-            font-size: 11px;
-            min-width: 60px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-          }
-
-          .nav-tabs button svg {
-            width: 16px;
-            height: 16px;
-          }
-
-          .hero-grid {
-            grid-template-columns: 1fr;
-          }
-
-          /* Emoticon floating adjustment */
-          .section-overall-img {
-            width: 70px !important;
-            height: 70px !important;
-            margin-left: 8px !important;
-          }
-        }
-      `}</style>
 
       <div className="page-shell">
         {/* Header Section */}

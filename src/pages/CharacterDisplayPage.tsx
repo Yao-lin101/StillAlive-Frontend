@@ -387,10 +387,12 @@ export const CharacterDisplayPage: React.FC = () => {
   }, [showStatusDialog]);
 
   useEffect(() => {
-    if (activeTab === 'report' && !showReportDetail) {
+    // 只有在非初始化检查状态下，且切换到日报页签或切换年月时才自动获取
+    if (activeTab === 'report' && !showReportDetail && !isCheckingReport) {
       fetchReportDates();
     }
-  }, [activeTab, currentReportYear, currentReportMonth]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, currentReportYear, currentReportMonth, showReportDetail]);
 
   // 根据状态更新音乐播放器
   const updateMusicPlayer = (config: StatusConfigType, statusData: CharacterStatus | null) => {

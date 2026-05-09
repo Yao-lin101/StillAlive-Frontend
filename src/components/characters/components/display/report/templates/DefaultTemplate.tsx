@@ -201,18 +201,19 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
   const statuses = llm?.sections_status;
 
   const scrollToNav = () => {
-    // 使用 setTimeout 确保在 React 渲染循环结束后执行，获取最新的 DOM 状态
     setTimeout(() => {
-      if (containerRef.current && navRef.current) {
-        // 使用锚点元素的 offsetTop，它不会随吸顶状态改变
-        // 这里的 offsetTop 是相对于 containerRef 的
-        const targetTop = navRef.current.offsetTop;
-        containerRef.current.scrollTo({
-          top: targetTop,
+      if (navRef.current) {
+        // 计算锚点相对于文档顶部的绝对位置
+        const rect = navRef.current.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const targetY = rect.top + scrollTop;
+
+        window.scrollTo({
+          top: targetY,
           behavior: 'smooth'
         });
       }
-    }, 50); // 稍微增加延迟，确保内容切换后的布局已稳定
+    }, 50);
   };
 
   const handleTabChange = (id: TabId) => {
@@ -411,11 +412,7 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
       color: THEME.text, 
       padding: '4px',
       display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      position: 'relative' // 关键：确保 navRef.offsetTop 是相对于此容器计算的
+      flexDirection: 'column'
     }}>
       {/* 标题块：随页面滚动 */}
       <TitleSection date={date} meta={meta} title={llm.title} />

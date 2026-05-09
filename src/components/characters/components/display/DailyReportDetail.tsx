@@ -93,9 +93,9 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col">
       {/* ── 内容区 (由内部模板控制滚动) ───────────────────────── */}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1">
         {hasReportData ? (
           <ReportRenderer
             data={report.report_data!}

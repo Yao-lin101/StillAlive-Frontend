@@ -155,15 +155,15 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
       case 'summary':
         return (
           <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-              <div style={{ flex: 1 }}>
-                <LLMComment comment={llm.overall} status={statuses?.title_summary} variant="glass" />
-              </div>
+            <div style={{ display: 'block', position: 'relative', marginBottom: '24px' }}>
               <img
                 src="/assets/reports/alice/Emoticon_04.webp"
                 alt="character emoticon"
-                style={{ width: '100px', height: '100px', objectFit: 'contain', marginTop: '4px', flexShrink: 0 }}
+                className="section-overall-img"
+                style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
               />
+              <LLMComment comment={llm.overall} status={statuses?.title_summary} variant="glass" />
+              <div style={{ clear: 'both' }}></div>
             </div>
             {llm.raw_markdown && (
               <div style={{ marginTop: '12px' }}>
@@ -181,15 +181,15 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
             <GlassCard style={{ padding: '24px' }}>
               <ActivityTimeline data={activity} activeColor={AQUA_THEME.sea} />
             </GlassCard>
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-              <div style={{ flex: 1 }}>
-                <LLMComment comment={llm.schedule} status={statuses?.schedule} variant="glass" />
-              </div>
+            <div style={{ display: 'block', position: 'relative', marginBottom: '24px' }}>
               <img
                 src="/assets/reports/alice/Emoticon_03.webp"
                 alt="character emoticon"
-                style={{ width: '100px', height: '100px', objectFit: 'contain', marginTop: '4px', flexShrink: 0 }}
+                className="section-overall-img"
+                style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
               />
+              <LLMComment comment={llm.schedule} status={statuses?.schedule} variant="glass" />
+              <div style={{ clear: 'both' }}></div>
             </div>
             {(llm.schedule_slots?.length ?? 0) > 0 && (
               <div style={{ marginTop: '12px' }}>
@@ -220,15 +220,15 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
 
             {activeActivityTab === 'analysis' ? (
               <>
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                  <div style={{ flex: 1 }}>
-                    <LLMComment comment={llm.activity} status={statuses?.activity} variant="glass" />
-                  </div>
+                <div style={{ display: 'block', position: 'relative', marginBottom: '24px' }}>
                   <img
                     src="/assets/reports/alice/Emoticon_02.webp"
                     alt="character emoticon"
-                    style={{ width: '100px', height: '100px', objectFit: 'contain', marginTop: '4px', flexShrink: 0 }}
+                    className="section-overall-img"
+                    style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
                   />
+                  <LLMComment comment={llm.activity} status={statuses?.activity} variant="glass" />
+                  <div style={{ clear: 'both' }}></div>
                 </div>
                 {(llm.activity_slots?.length ?? 0) > 0 && (
                   <div style={{ marginTop: '12px' }}>
@@ -252,15 +252,15 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
       case 'findings':
         return (
           <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-              <div style={{ flex: 1 }}>
-                <LLMComment comment={llm.findings} status={statuses?.findings} variant="glass" />
-              </div>
+            <div style={{ display: 'block', position: 'relative', marginBottom: '24px' }}>
               <img
                 src="/assets/reports/alice/Emoticon_01.webp"
                 alt="character emoticon"
-                style={{ width: '100px', height: '100px', objectFit: 'contain', marginTop: '4px', flexShrink: 0 }}
+                className="section-overall-img"
+                style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
               />
+              <LLMComment comment={llm.findings} status={statuses?.findings} variant="glass" />
+              <div style={{ clear: 'both' }}></div>
             </div>
             {(llm.findings_slots?.length ?? 0) > 0 && (
               <div style={{ marginTop: '12px' }}>
@@ -277,15 +277,15 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
 
         return (
           <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-              <div style={{ flex: 1 }}>
-                <LLMComment comment={llm.chat} status={statuses?.chat} variant="glass" />
-              </div>
+            <div style={{ display: 'block', position: 'relative', marginBottom: '24px' }}>
               <img
                 src="/assets/reports/alice/Emoticon_05.webp"
                 alt="character emoticon"
-                style={{ width: '100px', height: '100px', objectFit: 'contain', marginTop: '4px', flexShrink: 0 }}
+                className="section-overall-img"
+                style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
               />
+              <LLMComment comment={llm.chat} status={statuses?.chat} variant="glass" />
+              <div style={{ clear: 'both' }}></div>
             </div>
 
             <div className="sub-tabs">
@@ -568,6 +568,12 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
           color: var(--alice-sub);
           cursor: pointer;
           transition: all 0.2s;
+          outline: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-tabs button:focus {
+          outline: none;
         }
 
         .nav-tabs button.active {
@@ -618,6 +624,80 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Mobile Optimizations ────────────────────────────────────── */
+        @media (max-width: 768px) {
+          .page-shell {
+            padding: 20px 12px;
+            border-radius: 20px;
+          }
+
+          .header {
+            padding: 20px;
+            margin-bottom: 20px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 20px;
+          }
+
+          .header-content {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 16px;
+          }
+
+          .header-title h1 {
+            font-size: 24px;
+          }
+
+          .header-subtitle {
+            font-size: 13px;
+          }
+
+          .date-box {
+            padding: 10px 16px;
+            align-self: center;
+          }
+
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+          }
+
+          .stat-item {
+            padding: 12px;
+          }
+
+          .stat-value {
+            font-size: 18px;
+          }
+
+          .nav-tabs {
+            padding: 4px;
+            gap: 4px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+
+          .nav-tabs button {
+            padding: 8px 4px;
+            font-size: 12px;
+            min-width: 60px;
+          }
+
+          .hero-grid {
+            grid-template-columns: 1fr;
+          }
+
+          /* Emoticon floating adjustment */
+          .section-overall-img {
+            width: 70px !important;
+            height: 70px !important;
+            margin-left: 8px !important;
+          }
         }
       `}</style>
 

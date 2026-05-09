@@ -133,12 +133,114 @@ export interface DailyReportConfig {
   updated_at?: string;
 }
 
+// ── 结构化报告数据类型 ────────────────────────────────────────────────
+
+export interface ReportStepsChart {
+  labels: string[];
+  values: number[];
+  total: number;
+  max_value: number;
+}
+
+export interface ReportActivityHour {
+  hour: number;
+  label: string;
+  level: 0 | 1 | 2;  // 0=不活跃, 1=轻度, 2=高度
+  active_minutes: number;
+}
+
+export interface ReportActivityTimeline {
+  hours: ReportActivityHour[];
+  global_ranges: string[];
+  today_ranges: string[];
+}
+
+export interface ReportAppItem {
+  name: string;
+  count: number;
+}
+
+export interface ReportAppUsage {
+  phone: ReportAppItem[];
+  computer: ReportAppItem[];
+  combined: ReportAppItem[];
+  total_phone_records: number;
+  total_computer_records: number;
+  has_phone: boolean;
+  has_computer: boolean;
+}
+
+export interface ReportPrivateTopic {
+  time: string;
+  topic: string;
+  summary: string;
+}
+
+export interface ReportGroupChat {
+  name: string;
+  bot_nickname: string;
+  user_nickname: string;
+  topics: Array<{ time: string; summary: string }>;
+}
+
+export interface ReportChatData {
+  has_private: boolean;
+  has_group: boolean;
+  private_topics: ReportPrivateTopic[];
+  group_chats: ReportGroupChat[];
+  total_message_blocks: number;
+}
+
+export interface ReportCommentSlot {
+  range: string;
+  comment: string;
+  locked: boolean;
+}
+
+export interface ReportChatItem {
+  ref: string;
+  topic: string;
+  comment: string;
+  analyzed_at?: string;
+}
+
+export interface ReportLLMComments {
+  version: number;
+  title: string | null;
+  overall: string | null;
+  schedule: string | null;
+  schedule_slots?: ReportCommentSlot[];
+  activity: string | null;
+  activity_slots?: ReportCommentSlot[];
+  findings: string | null;
+  chat: string | null;
+  chat_items?: ReportChatItem[];
+  has_content: boolean;
+  sections_status?: Record<string, 'pending' | 'updating' | 'done' | 'error'>;
+  raw_markdown?: string;
+}
+
+export interface ReportData {
+  meta: {
+    date: string;
+    total_records: number;
+    data_cutoff_time: string;
+  };
+  steps: ReportStepsChart;
+  activity: ReportActivityTimeline;
+  apps: ReportAppUsage;
+  chat: ReportChatData;
+  llm: ReportLLMComments;
+}
+
 export interface DailyReportDetail {
   date: string;
   is_hidden: boolean;
   markdown: string;
   error?: string;
+  report_data?: ReportData;
 }
+
 
 export interface DailyReportAnalysis {
   markdown: string;

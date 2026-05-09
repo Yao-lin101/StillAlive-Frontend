@@ -542,9 +542,8 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
 
         .nav-tabs {
           display: flex;
-          justify-content: center;
           gap: 8px;
-          padding: 8px 16px;
+          padding: 8px 12px;
           background: rgba(255, 255, 255, 0.8);
           border-radius: 16px;
           margin-bottom: 24px;
@@ -554,17 +553,13 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
           border: 1px solid rgba(255, 255, 255, 0.8);
-          margin-left: auto;
-          margin-right: auto;
-          width: fit-content;
-          max-width: 100%;
           flex-shrink: 0;
           min-height: fit-content;
         }
 
         .nav-tabs button {
-          padding: 10px 16px;
-          min-width: 80px;
+          flex: 1;
+          padding: 10px;
           border: none;
           background: transparent;
           border-radius: 12px;
@@ -575,6 +570,16 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
           transition: all 0.2s;
           outline: none;
           -webkit-tap-highlight-color: transparent;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .nav-tabs button svg {
+          width: 18px;
+          height: 18px;
+          flex-shrink: 0;
         }
 
         .nav-tabs button:focus {

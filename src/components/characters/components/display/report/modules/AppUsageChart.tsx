@@ -5,13 +5,14 @@
  * 整体无数据时返回 null。
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import type { ReportAppUsage, ReportAppItem } from '../types';
 
 interface AppUsageChartProps {
   data: ReportAppUsage;
   barColor?: string;
   accentColor?: string;
+  activeTab?: 'phone' | 'computer';
 }
 
 const HorizontalBar: React.FC<{
@@ -33,7 +34,6 @@ const HorizontalBar: React.FC<{
         marginBottom: '6px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-          {/* 排名标签 */}
           <div style={{
             fontSize: '11px',
             fontWeight: 700,
@@ -89,72 +89,25 @@ const HorizontalBar: React.FC<{
   );
 };
 
-type AppTab = 'phone' | 'computer';
-
 export const AppUsageChart: React.FC<AppUsageChartProps> = ({
   data,
   barColor = '#A7F3D0',
   accentColor = '#10B981',
+  activeTab: externalTab,
 }) => {
   const hasPhone = data?.has_phone && data.phone.length > 0;
   const hasComputer = data?.has_computer && data.computer.length > 0;
 
-  const defaultTab: AppTab = hasPhone ? 'phone' : 'computer';
-  const [activeTab, setActiveTab] = useState<AppTab>(defaultTab);
+  const currentTab = externalTab || (hasPhone ? 'phone' : 'computer');
 
   if (!hasPhone && !hasComputer) return null;
 
   const displayList: ReportAppItem[] =
-    activeTab === 'phone' ? (data.phone ?? []) : (data.computer ?? []);
+    currentTab === 'phone' ? (data.phone ?? []) : (data.computer ?? []);
   const maxCount = displayList.length > 0 ? displayList[0].count : 1;
-
-  const tabs: { key: AppTab; label: string; icon: string; show: boolean }[] = [
-    { key: 'phone', label: '手机', icon: 'M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z', show: hasPhone },
-    { key: 'computer', label: '电脑', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', show: hasComputer },
-  ];
 
   return (
     <div style={{ width: '100%' }}>
-      {/* Tab 切换 */}
-      {hasPhone && hasComputer && (
-        <div style={{
-          display: 'flex',
-          gap: '6px',
-          marginBottom: '20px',
-          background: '#F1F5F9',
-          borderRadius: '10px',
-          padding: '4px',
-          width: 'fit-content',
-        }}>
-          {tabs.filter(t => t.show).map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 16px',
-                borderRadius: '8px',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontWeight: 600,
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                background: activeTab === tab.key ? '#FFFFFF' : 'transparent',
-                color: activeTab === tab.key ? accentColor : '#64748B',
-                boxShadow: activeTab === tab.key ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d={tab.icon} />
-              </svg>
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* 条形图列表 */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
         {displayList.map((item, i) => (
@@ -179,7 +132,7 @@ export const AppUsageChart: React.FC<AppUsageChartProps> = ({
         fontWeight: 500,
         textAlign: 'right',
       }}>
-        今日活跃共采集 <span style={{ color: accentColor, fontWeight: 700 }}>{activeTab === 'phone' ? data.total_phone_records : data.total_computer_records}</span> 条样本
+        今日活跃共采集 <span style={{ color: accentColor, fontWeight: 700 }}>{currentTab === 'phone' ? data.total_phone_records : data.total_computer_records}</span> 条样本
       </div>
     </div>
   );

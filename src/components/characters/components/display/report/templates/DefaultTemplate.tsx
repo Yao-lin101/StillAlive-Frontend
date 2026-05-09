@@ -148,6 +148,7 @@ const TitleSection: React.FC<{ date: string; meta: any; title: string | null }> 
 
 export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
   const [activeTab, setActiveTab] = useState<TabId>('summary');
+  const [activeActivityTab, setActiveActivityTab] = useState<'analysis' | 'phone' | 'computer'>('analysis');
   const [activeChatTab, setActiveChatTab] = useState<'group' | 'private'>('group');
   const { meta, steps, activity, apps, llm } = data;
   const statuses = llm?.sections_status;
@@ -182,14 +183,59 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
       case 'activity':
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ background: '#FFF', padding: '20px', borderRadius: '16px', border: '1px solid #F1F5F9' }}>
-              <AppUsageChart data={apps} barColor="#D1FAE5" accentColor={THEME.accent2} />
+            {/* 二级 Tab 切换 */}
+            <div style={{ 
+              display: 'flex', 
+              gap: '6px', 
+              background: '#F1F5F9', 
+              padding: '4px', 
+              borderRadius: '10px', 
+              width: 'fit-content' 
+            }}>
+              {[
+                { id: 'analysis', label: '分析' },
+                { id: 'phone', label: '手机', show: apps.has_phone },
+                { id: 'computer', label: '电脑', show: apps.has_computer }
+              ].filter(t => t.show !== false).map(tab => (
+                <button 
+                  key={tab.id}
+                  onClick={() => setActiveActivityTab(tab.id as any)}
+                  style={{
+                    padding: '6px 16px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: activeActivityTab === tab.id ? '#FFF' : 'transparent',
+                    color: activeActivityTab === tab.id ? THEME.accent2 : THEME.textMuted,
+                    boxShadow: activeActivityTab === tab.id ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
-            <LLMComment comment={llm.activity} status={statuses?.activity} />
-            {(llm.activity_slots?.length ?? 0) > 0 && (
-              <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: THEME.textMuted, marginBottom: '12px' }}>活动详情</div>
-                {llm.activity_slots?.map((slot, i) => <SlotComment key={i} slot={slot} color={THEME.accent2} />)}
+
+            {activeActivityTab === 'analysis' ? (
+              <>
+                <LLMComment comment={llm.activity} status={statuses?.activity} />
+                {(llm.activity_slots?.length ?? 0) > 0 && (
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: THEME.textMuted, marginBottom: '12px' }}>活动详情</div>
+                    {llm.activity_slots?.map((slot, i) => <SlotComment key={i} slot={slot} color={THEME.accent2} />)}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{ background: '#FFF', padding: '20px', borderRadius: '16px', border: '1px solid #F1F5F9' }}>
+                <AppUsageChart 
+                  data={apps} 
+                  barColor="#D1FAE5" 
+                  accentColor={THEME.accent2} 
+                  activeTab={activeActivityTab as 'phone' | 'computer'} 
+                />
               </div>
             )}
           </div>

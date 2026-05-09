@@ -25,13 +25,16 @@ type TabId = 'summary' | 'schedule' | 'activity' | 'findings' | 'chat';
 // ── 子组件 ──────────────────────────────────────────────────
 
 const TabNav: React.FC<{ activeTab: TabId; setActiveTab: (id: TabId) => void; statuses?: Record<string, string> }> = ({ activeTab, setActiveTab, statuses }) => {
-  const tabs: { id: TabId; label: string; color: string; sectionKey: string }[] = [
+  const tabs = ([
     { id: 'summary', label: '总体总结', color: THEME.accent1, sectionKey: 'title_summary' },
     { id: 'schedule', label: '作息分析', color: THEME.accent1, sectionKey: 'schedule' },
     { id: 'activity', label: '活动画像', color: THEME.accent2, sectionKey: 'activity' },
     { id: 'findings', label: '有趣发现', color: THEME.accent4, sectionKey: 'findings' },
     { id: 'chat', label: '水群聊天', color: THEME.accent3, sectionKey: 'chat' },
-  ];
+  ] as { id: TabId; label: string; color: string; sectionKey: string }[]).filter(tab => {
+    if (tab.id === 'chat' && statuses?.chat === 'skipped') return false;
+    return true;
+  });
 
   return (
     <div style={{

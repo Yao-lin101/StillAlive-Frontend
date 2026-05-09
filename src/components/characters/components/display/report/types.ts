@@ -21,7 +21,7 @@ import type {
 
 // ── 模板注册表 ──────────────────────────────────────────────────────
 /** 所有可用模板的标识符 */
-export type TemplateStyle = 'default' | 'minimal' | 'retro';
+export type TemplateStyle = 'default' | 'minimal' | 'retro' | 'alice';
 
 /** 每个模板组件接收相同的 TemplateProps */
 export interface TemplateProps {

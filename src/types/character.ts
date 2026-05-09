@@ -128,6 +128,7 @@ export interface DailyReportConfig {
     steps?: string;
   };
   persona?: string;
+  template_style?: string; // 修正为 string 以便与后端兼容，或者导入 TemplateStyle
   ai_persona?: AIPersona;
   created_at?: string;
   updated_at?: string;
@@ -238,6 +239,7 @@ export interface DailyReportDetail {
   date: string;
   is_hidden: boolean;
   markdown: string;
+  template_style?: string;
   error?: string;
   report_data?: ReportData;
 }

@@ -100,7 +100,7 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
           <ReportRenderer
             data={report.report_data!}
             date={report.date}
-            templateStyle={templateStyle}
+            templateStyle={(templateStyle === 'default' && report.template_style) ? (report.template_style as TemplateStyle) : templateStyle}
           />
         ) : (
           /* Markdown 原文视图（降级 / 回退） */

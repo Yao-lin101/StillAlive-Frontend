@@ -24,6 +24,7 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
     steps?: string;
   }>({});
   const [persona, setPersona] = useState<string>('');
+  const [templateStyle, setTemplateStyle] = useState<string>('default');
   const [aiPersona, setAiPersona] = useState<AIPersona>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -53,6 +54,7 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
         setVisibility(config.visibility);
         setFieldMappings(config.field_mappings || {});
         setPersona(config.persona || '');
+        setTemplateStyle(config.template_style || 'default');
         setAiPersona(config.ai_persona || {});
       } catch (error) {
         console.error('Failed to fetch daily report config:', error);
@@ -104,6 +106,19 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
       toast.error('保存失败');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleSaveTheme = async (style: string) => {
+    try {
+      setTemplateStyle(style);
+      await characterService.updateDailyReportConfig(characterUid, {
+        template_style: style
+      });
+      toast.success('日报主题已更新');
+    } catch (error) {
+      console.error('Failed to save theme:', error);
+      toast.error('保存失败');
     }
   };
 
@@ -233,6 +248,52 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
                 >
                   {isSaving ? '保存中...' : '保存可见范围'}
                 </Button>
+              </div>
+            </div>
+          )}
+
+          {isEnabled && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-4 h-4 text-blue-400" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">日报主题</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { id: 'default', label: '默认简约', color: 'bg-slate-100' },
+                  {
+                    id: 'alice',
+                    label: '爱丽丝',
+                    color: 'bg-blue-100',
+                    preview: '/assets/reports/alice/Arisu_01.avif'
+                  }
+                ].map((theme) => (
+                  <button
+                    key={theme.id}
+                    onClick={() => handleSaveTheme(theme.id)}
+                    className={`
+                      relative p-3 rounded-xl border-2 transition-all text-left
+                      ${templateStyle === theme.id
+                        ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20'
+                        : 'border-transparent bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800'}
+                    `}
+                  >
+                    <div className={`w-full h-20 rounded-lg ${theme.color} mb-2 border border-black/5 overflow-hidden`}>
+                      {theme.preview ? (
+                        <img src={theme.preview} alt={theme.label} className="w-full h-full object-contain" />
+                      ) : (
+                        <div className="w-full h-full opacity-50" />
+                      )}
+                    </div>
+                    <span className="text-xs font-semibold block">{theme.label}</span>
+                    {templateStyle === theme.id && (
+                      <div className="absolute top-2 right-2 p-1 bg-blue-500 rounded-full">
+                        <CheckIcon className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
           )}

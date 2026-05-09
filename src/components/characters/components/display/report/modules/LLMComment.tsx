@@ -22,6 +22,8 @@ interface LLMCommentProps {
   color?: string;
   /** 是否以 Markdown 渲染（默认 true） */
   useMarkdown?: boolean;
+  /** 渲染风格 */
+  variant?: 'default' | 'glass';
 }
 
 export const LLMComment: React.FC<LLMCommentProps> = ({
@@ -31,6 +33,7 @@ export const LLMComment: React.FC<LLMCommentProps> = ({
   placeholder = 'AI 深度分析生成中...',
   color = '#334155',
   useMarkdown = true,
+  variant = 'default',
 }) => {
   const isUpdating = status === 'updating';
   const isError = status === 'error';
@@ -48,9 +51,10 @@ export const LLMComment: React.FC<LLMCommentProps> = ({
     return (
       <div style={{
         padding: '16px',
-        background: isUpdating ? '#F1F5F9' : '#F8FAFC',
+        background: variant === 'glass' ? 'rgba(255, 255, 255, 0.4)' : (isUpdating ? '#F1F5F9' : '#F8FAFC'),
         borderRadius: '12px',
-        border: '1px dashed #E2E8F0',
+        border: variant === 'glass' ? '1px solid rgba(255, 255, 255, 0.6)' : '1px dashed #E2E8F0',
+        backdropFilter: variant === 'glass' ? 'blur(8px)' : 'none',
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
@@ -116,9 +120,9 @@ export const LLMComment: React.FC<LLMCommentProps> = ({
               <blockquote style={{ 
                 margin: '16px 0', 
                 padding: '12px 16px', 
-                background: '#F1F5F9', 
-                borderLeft: '4px solid #CBD5E1',
-                borderRadius: '4px',
+                background: variant === 'glass' ? 'rgba(255, 255, 255, 0.3)' : '#F1F5F9', 
+                borderLeft: variant === 'glass' ? '4px solid #6d9afa' : '4px solid #CBD5E1',
+                borderRadius: '8px',
                 color: '#475569',
                 fontSize: '14px',
               }}>

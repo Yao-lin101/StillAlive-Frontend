@@ -10,10 +10,12 @@
 import React from 'react';
 import type { TemplateStyle, TemplateProps } from './types';
 import { DefaultTemplate } from './templates/DefaultTemplate';
+import { ArisuTemplate } from './templates/ArisuTemplate';
 
 // ── 模板注册表 ─────────────────────────────────────────────────────
 const TEMPLATE_MAP: Record<TemplateStyle, React.FC<TemplateProps>> = {
   default: DefaultTemplate,
+  alice: ArisuTemplate,
   // 未来扩展：
   // minimal: MinimalTemplate,
   // retro: RetroTemplate,

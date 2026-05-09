@@ -227,7 +227,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
             {(llm.schedule_slots?.length ?? 0) > 0 && (
               <div style={{ marginTop: '12px' }}>
                 <div style={{ fontSize: '13px', fontWeight: 600, color: AQUA_THEME.textSub, marginBottom: '16px', paddingLeft: '4px' }}>时段点评</div>
-                {llm.schedule_slots?.map((slot, i) => <SlotComment key={i} slot={slot} color={AQUA_THEME.sea} index={i} />)}
+                {[...(llm.schedule_slots || [])].reverse().map((slot, i) => <SlotComment key={i} slot={slot} color={AQUA_THEME.sea} index={i} />)}
               </div>
             )}
           </div>
@@ -266,7 +266,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
                 {(llm.activity_slots?.length ?? 0) > 0 && (
                   <div style={{ marginTop: '12px' }}>
                     <div style={{ fontSize: '13px', fontWeight: 600, color: AQUA_THEME.textSub, marginBottom: '16px', paddingLeft: '4px' }}>活动详情</div>
-                    {llm.activity_slots?.map((slot, i) => <SlotComment key={i} slot={slot} color={AQUA_THEME.accent} index={i} />)}
+                    {[...(llm.activity_slots || [])].reverse().map((slot, i) => <SlotComment key={i} slot={slot} color={AQUA_THEME.accent} index={i} />)}
                   </div>
                 )}
               </>
@@ -298,7 +298,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
             {(llm.findings_slots?.length ?? 0) > 0 && (
               <div style={{ marginTop: '12px' }}>
                 <div style={{ fontSize: '13px', fontWeight: 600, color: AQUA_THEME.textSub, marginBottom: '16px', paddingLeft: '4px' }}>发现详情</div>
-                {llm.findings_slots?.map((slot, i) => <SlotComment key={i} slot={slot} color="#F59E0B" index={i} />)}
+                {[...(llm.findings_slots || [])].reverse().map((slot, i) => <SlotComment key={i} slot={slot} color="#F59E0B" index={i} />)}
               </div>
             )}
           </div>

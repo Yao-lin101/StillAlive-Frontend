@@ -65,8 +65,8 @@ export const DailyReportPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 flex flex-col">
       {/* 极简主内容区 */}
-      <main className="flex-1 flex flex-col w-full max-w-5xl mx-auto p-2 md:p-6">
-        <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl md:rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col">
+      <main className="flex-1 flex flex-col w-full max-w-5xl mx-auto p-2 md:p-6 h-screen overflow-hidden">
+        <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl md:rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col overflow-hidden">
           <div className="flex-1 p-0">
             <DailyReportDetail
               report={report}

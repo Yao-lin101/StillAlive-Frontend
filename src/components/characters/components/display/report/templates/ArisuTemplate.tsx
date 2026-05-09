@@ -542,24 +542,29 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
 
         .nav-tabs {
           display: flex;
+          justify-content: center;
           gap: 8px;
-          padding: 8px;
+          padding: 8px 16px;
           background: rgba(255, 255, 255, 0.8);
           border-radius: 16px;
           margin-bottom: 24px;
           position: sticky;
-          top: -12px;
+          top: 0;
           z-index: 50;
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
           border: 1px solid rgba(255, 255, 255, 0.8);
-          margin-left: -6px;
-          margin-right: -6px;
+          margin-left: auto;
+          margin-right: auto;
+          width: fit-content;
+          max-width: 100%;
+          flex-shrink: 0;
+          min-height: fit-content;
         }
 
         .nav-tabs button {
-          flex: 1;
-          padding: 10px;
+          padding: 10px 16px;
+          min-width: 80px;
           border: none;
           background: transparent;
           border-radius: 12px;
@@ -586,6 +591,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
           display: flex;
           gap: 8px;
           margin-bottom: 16px;
+          flex-shrink: 0;
         }
 
         .sub-tabs button {
@@ -676,16 +682,29 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
           }
 
           .nav-tabs {
-            padding: 4px;
+            padding: 6px;
             gap: 4px;
+            margin: 0 auto 16px auto;
+            width: calc(100% - 8px);
+            justify-content: center;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+            flex-shrink: 0;
           }
 
           .nav-tabs button {
             padding: 8px 4px;
-            font-size: 12px;
+            font-size: 11px;
             min-width: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+          }
+
+          .nav-tabs button svg {
+            width: 16px;
+            height: 16px;
           }
 
           .hero-grid {
@@ -752,13 +771,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
       <div ref={navRef} style={{ height: 0, overflow: 'hidden' }} />
 
       {/* Navigation - Moved outside page-shell to match DefaultTemplate protocol */}
-      <div className="nav-tabs" style={{ 
-        position: 'sticky', 
-        top: '-12px', 
-        zIndex: 50, 
-        padding: '8px 12px',
-        margin: '0 12px 24px 12px'
-      }}>
+      <div className="nav-tabs">
         {[
           { id: 'summary', label: '总结', Icon: ClipboardList },
           { id: 'schedule', label: '作息', Icon: Clock },
@@ -770,10 +783,9 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
             key={tab.id}
             className={activeTab === tab.id ? 'active' : ''}
             onClick={() => handleTabChange(tab.id as TabId)}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
           >
-            <tab.Icon className="w-4 h-4" />
-            {tab.label}
+            <tab.Icon />
+            <span>{tab.label}</span>
           </button>
         ))}
       </div>

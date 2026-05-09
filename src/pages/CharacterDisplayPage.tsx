@@ -661,13 +661,13 @@ export const CharacterDisplayPage: React.FC = () => {
             }}
           >
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className={`grid w-full ${dailyReportConfig?.is_visible ? 'grid-cols-2' : 'grid-cols-1'} mb-4 !bg-gray-100`}>
+              <TabsList className="flex w-fit mx-auto gap-1 mb-4 !bg-gray-100 p-1 rounded-xl">
                 <TabsTrigger 
                   value="status"
-                  className="!text-gray-600 
+                  className="px-6 py-2 !text-gray-600 
                     data-[state=active]:!bg-white 
                     data-[state=active]:!text-slate-800
-                    data-[state=active]:!shadow-none
+                    data-[state=active]:!shadow-sm
                     data-[state=active]:!from-transparent
                     data-[state=active]:!to-transparent"
                 >
@@ -676,10 +676,10 @@ export const CharacterDisplayPage: React.FC = () => {
                 {dailyReportConfig?.is_visible && (
                   <TabsTrigger 
                     value="report"
-                    className="!text-gray-600 
+                    className="px-6 py-2 !text-gray-600 
                       data-[state=active]:!bg-white 
                       data-[state=active]:!text-slate-800
-                      data-[state=active]:!shadow-none
+                      data-[state=active]:!shadow-sm
                       data-[state=active]:!from-transparent
                       data-[state=active]:!to-transparent"
                   >

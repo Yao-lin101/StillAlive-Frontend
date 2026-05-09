@@ -148,6 +148,7 @@ const TitleSection: React.FC<{ date: string; meta: any; title: string | null }> 
 
 export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
   const [activeTab, setActiveTab] = useState<TabId>('summary');
+  const [activeChatTab, setActiveChatTab] = useState<'group' | 'private'>('group');
   const { meta, steps, activity, apps, llm } = data;
   const statuses = llm?.sections_status;
 
@@ -194,20 +195,86 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
           </div>
         );
       case 'findings':
-        return <LLMComment comment={llm.findings} status={statuses?.findings} />;
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <LLMComment comment={llm.findings} status={statuses?.findings} />
+            {(llm.findings_slots?.length ?? 0) > 0 && (
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: THEME.textMuted, marginBottom: '12px' }}>发现详情</div>
+                {llm.findings_slots?.map((slot, i) => <SlotComment key={i} slot={slot} color={THEME.accent4} />)}
+              </div>
+            )}
+          </div>
+        );
       case 'chat':
+        const groupItems = llm.chat_items?.filter(item => item.ref !== '私聊') || [];
+        const privateItems = llm.chat_items?.filter(item => item.ref === '私聊') || [];
+        const displayItems = activeChatTab === 'group' ? groupItems : privateItems;
+
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <LLMComment comment={llm.chat} status={statuses?.chat} />
-            {llm.chat_items?.map((item, i) => (
-              <div key={i} style={{ padding: '16px', background: '#FFF1F2', borderRadius: '12px', border: '1px solid #FCE7F3' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: THEME.accent3 }}>{item.ref} · {item.topic}</span>
-                  <span style={{ fontSize: '10px', color: THEME.textMuted }}>{item.analyzed_at}</span>
+            
+            {/* 二级 Tab 切换 */}
+            <div style={{ 
+              display: 'flex', 
+              gap: '6px', 
+              background: '#F1F5F9', 
+              padding: '4px', 
+              borderRadius: '10px', 
+              width: 'fit-content' 
+            }}>
+              <button 
+                onClick={() => setActiveChatTab('group')}
+                style={{
+                  padding: '6px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: activeChatTab === 'group' ? '#FFF' : 'transparent',
+                  color: activeChatTab === 'group' ? THEME.accent3 : THEME.textMuted,
+                  boxShadow: activeChatTab === 'group' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.2s'
+                }}
+              >
+                水群 ({groupItems.length})
+              </button>
+              <button 
+                onClick={() => setActiveChatTab('private')}
+                style={{
+                  padding: '6px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: activeChatTab === 'private' ? '#FFF' : 'transparent',
+                  color: activeChatTab === 'private' ? THEME.accent3 : THEME.textMuted,
+                  boxShadow: activeChatTab === 'private' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.2s'
+                }}
+              >
+                互动 ({privateItems.length})
+              </button>
+            </div>
+
+            {displayItems.length > 0 ? (
+              displayItems.map((item, i) => (
+                <div key={i} style={{ padding: '16px', background: '#FFF1F2', borderRadius: '12px', border: '1px solid #FCE7F3' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: THEME.accent3 }}>{item.ref} · {item.topic}</span>
+                    <span style={{ fontSize: '10px', color: THEME.textMuted }}>{item.analyzed_at}</span>
+                  </div>
+                  <div style={{ fontSize: '14px', color: THEME.text, lineHeight: 1.6 }}>{item.comment}</div>
                 </div>
-                <div style={{ fontSize: '14px', color: THEME.text, lineHeight: 1.6 }}>{item.comment}</div>
+              ))
+            ) : (
+              <div style={{ padding: '40px', textAlign: 'center', color: THEME.textMuted, fontSize: '14px' }}>
+                今日暂无{activeChatTab === 'group' ? '水群记录' : '私聊互动'}
               </div>
-            ))}
+            )}
           </div>
         );
       default:

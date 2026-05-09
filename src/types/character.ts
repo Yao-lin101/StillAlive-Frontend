@@ -213,6 +213,7 @@ export interface ReportLLMComments {
   activity: string | null;
   activity_slots?: ReportCommentSlot[];
   findings: string | null;
+  findings_slots?: ReportCommentSlot[];
   chat: string | null;
   chat_items?: ReportChatItem[];
   has_content: boolean;

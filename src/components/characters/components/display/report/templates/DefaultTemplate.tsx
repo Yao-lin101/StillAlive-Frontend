@@ -193,8 +193,42 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
   const [activeTab, setActiveTab] = useState<TabId>('summary');
   const [activeActivityTab, setActiveActivityTab] = useState<'analysis' | 'phone' | 'computer'>('analysis');
   const [activeChatTab, setActiveChatTab] = useState<'group' | 'private'>('group');
+  
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const navRef = React.useRef<HTMLDivElement>(null);
+
   const { meta, steps, activity, apps, llm } = data;
   const statuses = llm?.sections_status;
+
+  const scrollToNav = () => {
+    // 使用 setTimeout 确保在 React 渲染循环结束后执行，获取最新的 DOM 状态
+    setTimeout(() => {
+      if (containerRef.current && navRef.current) {
+        // 使用锚点元素的 offsetTop，它不会随吸顶状态改变
+        // 这里的 offsetTop 是相对于 containerRef 的
+        const targetTop = navRef.current.offsetTop;
+        containerRef.current.scrollTo({
+          top: targetTop,
+          behavior: 'smooth'
+        });
+      }
+    }, 50); // 稍微增加延迟，确保内容切换后的布局已稳定
+  };
+
+  const handleTabChange = (id: TabId) => {
+    setActiveTab(id);
+    scrollToNav();
+  };
+
+  const handleActivityTabChange = (id: 'analysis' | 'phone' | 'computer') => {
+    setActiveActivityTab(id);
+    scrollToNav();
+  };
+
+  const handleChatTabChange = (id: 'group' | 'private') => {
+    setActiveChatTab(id);
+    scrollToNav();
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -242,7 +276,7 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
               ].filter(t => t.show !== false).map(tab => (
                 <button 
                   key={tab.id}
-                  onClick={() => setActiveActivityTab(tab.id as any)}
+                  onClick={() => handleActivityTabChange(tab.id as any)}
                   style={{
                     padding: '6px 16px',
                     borderRadius: '8px',
@@ -314,7 +348,7 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
               width: 'fit-content' 
             }}>
               <button 
-                onClick={() => setActiveChatTab('group')}
+                onClick={() => handleChatTabChange('group')}
                 style={{
                   padding: '6px 16px',
                   borderRadius: '8px',
@@ -331,7 +365,7 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
                 水群 ({groupItems.length})
               </button>
               <button 
-                onClick={() => setActiveChatTab('private')}
+                onClick={() => handleChatTabChange('private')}
                 style={{
                   padding: '6px 16px',
                   borderRadius: '8px',
@@ -372,7 +406,7 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
   };
 
   return (
-    <div className="custom-scrollbar" style={{ 
+    <div ref={containerRef} className="custom-scrollbar" style={{ 
       fontFamily: '"Inter", sans-serif', 
       color: THEME.text, 
       padding: '4px',
@@ -380,10 +414,14 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
       flexDirection: 'column',
       height: '100%',
       overflowY: 'auto',
-      overflowX: 'hidden'
+      overflowX: 'hidden',
+      position: 'relative' // 关键：确保 navRef.offsetTop 是相对于此容器计算的
     }}>
       {/* 标题块：随页面滚动 */}
       <TitleSection date={date} meta={meta} title={llm.title} />
+
+      {/* 锚点：用于滚动定位，放在页签栏之前 */}
+      <div ref={navRef} style={{ height: 0, overflow: 'hidden' }} />
 
       {/* 导航页签：吸顶固定 */}
       <div style={{ 
@@ -396,7 +434,7 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
         paddingLeft: '4px',
         paddingRight: '4px'
       }}>
-        <TabNav activeTab={activeTab} setActiveTab={setActiveTab} statuses={statuses} />
+        <TabNav activeTab={activeTab} setActiveTab={handleTabChange} statuses={statuses} />
       </div>
 
       {/* 内容展示区 */}

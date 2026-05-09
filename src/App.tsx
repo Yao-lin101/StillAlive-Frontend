@@ -5,6 +5,7 @@ import RegisterForm from './components/auth/RegisterForm';
 import { HomePage } from './pages/HomePage';
 import { CharactersPage } from './pages/CharactersPage';
 import { CharacterDisplayPage } from '@/pages/CharacterDisplayPage';
+import { DailyReportPage } from '@/pages/DailyReportPage';
 import { SurvivorsPage } from '@/pages/SurvivorsPage';
 import { DockNav } from '@/components/layout/DockNav';
 import authService from '@/lib/auth';
@@ -110,6 +111,7 @@ function App() {
             }
           />
           <Route path="/d/:code" element={<CharacterDisplayPage />} />
+          <Route path="/d/:code/report/:date" element={<DailyReportPage />} />
 
           {/* 需要侧边栏的页面 */}
           <Route

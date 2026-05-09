@@ -123,21 +123,64 @@ const TitleSection: React.FC<{ date: string; meta: any; title: string | null }> 
     <div style={{
       background: 'linear-gradient(135deg, #EEF2FF 0%, #F0FDFA 100%)',
       borderRadius: '16px',
-      padding: '24px 32px',
+      padding: '20px 24px', // 缩小内边距
       marginBottom: '20px',
       border: '1px solid #E0E7FF',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-        <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: '#1E1B4B' }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'flex-start', // 改为对齐顶部，适应多行
+        marginBottom: '12px',
+        flexWrap: 'wrap', // 允许换行
+        gap: '12px'
+      }}>
+        <h1 style={{ 
+          margin: 0, 
+          fontSize: '22px', 
+          fontWeight: 800, 
+          color: '#1E1B4B',
+          whiteSpace: 'nowrap' // 防止日期和星期错开
+        }}>
           {formattedDate}
-          <span style={{ fontSize: '16px', fontWeight: 500, color: THEME.textMuted, marginLeft: '8px' }}>{weekdays[dateObj.getDay()]}</span>
+          <span style={{ fontSize: '15px', fontWeight: 500, color: THEME.textMuted, marginLeft: '8px' }}>{weekdays[dateObj.getDay()]}</span>
         </h1>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <span style={{ fontSize: '11px', padding: '2px 8px', background: '#FFF', borderRadius: '12px', border: '1px solid #E0E7FF', color: THEME.accent1 }}>{cutoffLabel}</span>
-          <span style={{ fontSize: '11px', padding: '2px 8px', background: '#E2E8F0', borderRadius: '12px', color: THEME.textMuted }}>{meta?.total_records} 记录</span>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          <span style={{ 
+            fontSize: '11px', 
+            padding: '2px 8px', 
+            background: '#FFF', 
+            borderRadius: '12px', 
+            border: '1px solid #E0E7FF', 
+            color: THEME.accent1,
+            whiteSpace: 'nowrap'
+          }}>
+            {cutoffLabel}
+          </span>
+          <span style={{ 
+            fontSize: '11px', 
+            padding: '2px 8px', 
+            background: '#E2E8F0', 
+            borderRadius: '12px', 
+            color: THEME.textMuted,
+            whiteSpace: 'nowrap'
+          }}>
+            {meta?.total_records} 记录
+          </span>
         </div>
       </div>
-      {title && <div style={{ fontSize: '18px', fontWeight: 700, color: '#1E1B4B', paddingTop: '12px', borderTop: '1px solid rgba(99,102,241,0.1)' }}>{title}</div>}
+      {title && (
+        <div style={{ 
+          fontSize: '17px', 
+          fontWeight: 700, 
+          color: '#1E1B4B', 
+          paddingTop: '12px', 
+          borderTop: '1px solid rgba(99,102,241,0.1)',
+          lineHeight: 1.4
+        }}>
+          {title}
+        </div>
+      )}
     </div>
   );
 };

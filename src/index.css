@@ -214,21 +214,31 @@ button:focus-visible {
 }
 
 @layer utilities {
-  .custom-scrollbar::-webkit-scrollbar {
+  /* 全局统一的“静默滚动条”：平时隐藏，交互时显现 */
+  *::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
 
-  .custom-scrollbar::-webkit-scrollbar-track {
+  *::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--muted-foreground) / 0.3);
+  *::-webkit-scrollbar-thumb {
+    background-color: transparent;
     border-radius: 9999px;
   }
 
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  *:hover::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.2);
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  /* 针对已经手动标注 .custom-scrollbar 的地方保持兼容并增强反馈 */
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
   }
 }

@@ -37,7 +37,7 @@ const TabNav: React.FC<{ activeTab: TabId; setActiveTab: (id: TabId) => void; st
   });
 
   return (
-    <div style={{
+    <div className="custom-scrollbar" style={{
       display: 'flex',
       gap: '4px',
       padding: '4px',

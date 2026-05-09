@@ -150,7 +150,7 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
       </div>
 
       {/* ── 内容区 ──────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto mb-4 pr-2 -mr-2">
+      <div className="flex-1 overflow-y-auto mb-4 pr-1 custom-scrollbar">
 
         {/* HTML 模板视图 */}
         {renderMode === 'html' && hasReportData ? (

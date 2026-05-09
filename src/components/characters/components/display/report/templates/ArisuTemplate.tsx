@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { TemplateProps, ReportCommentSlot } from '../types';
 import { StepsChart } from '../modules/StepsChart';
 import { ActivityTimeline } from '../modules/ActivityTimeline';
 import { AppUsageChart } from '../modules/AppUsageChart';
 import { LLMComment } from '../modules/LLMComment';
 import {
+  ClipboardList,
+  Clock,
+  Smartphone,
+  Sparkles,
+  MessageSquare,
   Shell,
   Star,
   Fish
 } from 'lucide-react';
+import { useReportTemplate, type TabId } from '../hooks/useReportTemplate';
+import { TemplateShell } from '../components/TemplateShell';
 import '@/styles/ArisuTemplate.css';
-import { ReportLayout, TabId } from '../components/ReportLayout';
+import '@/styles/TemplateShell.css';
 
 // ── 主题色彩配置 (水色系) ──────────────────────────────────────────
 const AQUA_THEME = {
@@ -120,8 +127,16 @@ export const ArisuLoading: React.FC = () => {
 // ── 模块实现 ────────────────────────────────────────────────
 
 export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
-  const [activeActivityTab, setActiveActivityTab] = useState<'analysis' | 'phone' | 'computer'>('analysis');
-  const [activeChatTab, setActiveChatTab] = useState<'group' | 'private'>('group');
+  const {
+    containerRef,
+    navRef,
+    activeTab,
+    activeActivityTab,
+    activeChatTab,
+    handleTabChange,
+    handleActivityTabChange,
+    handleChatTabChange
+  } = useReportTemplate();
 
   const { meta, steps, activity, apps, llm } = data;
   const statuses = llm?.sections_status;
@@ -134,7 +149,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
   const totalApps = (apps?.total_phone_records || 0) + (apps?.total_computer_records || 0);
   const totalChats = llm.chat_items?.length || 0;
 
-  const renderContent = (activeTab: TabId) => {
+  const renderContent = () => {
     switch (activeTab) {
       case 'summary':
         return (
@@ -144,7 +159,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
                 src="/assets/reports/alice/Emoticon_04.webp"
                 alt="character emoticon"
                 className="section-overall-img"
-                style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px', borderRadius: '16px' }}
+                style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
               />
               <LLMComment comment={llm.overall} status={statuses?.title_summary} variant="glass" />
               <div style={{ clear: 'both' }}></div>
@@ -170,7 +185,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
                 src="/assets/reports/alice/Emoticon_03.webp"
                 alt="character emoticon"
                 className="section-overall-img"
-                style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px', borderRadius: '16px' }}
+                style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
               />
               <LLMComment comment={llm.schedule} status={statuses?.schedule} variant="glass" />
               <div style={{ clear: 'both' }}></div>
@@ -194,7 +209,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
               ].filter(t => t.show !== false).map(tab => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveActivityTab(tab.id as any)}
+                  onClick={() => handleActivityTabChange(tab.id as any)}
                   className={activeActivityTab === tab.id ? 'active' : ''}
                 >
                   {tab.label}
@@ -209,7 +224,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
                     src="/assets/reports/alice/Emoticon_02.webp"
                     alt="character emoticon"
                     className="section-overall-img"
-                    style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px', borderRadius: '16px' }}
+                    style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
                   />
                   <LLMComment comment={llm.activity} status={statuses?.activity} variant="glass" />
                   <div style={{ clear: 'both' }}></div>
@@ -241,7 +256,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
                 src="/assets/reports/alice/Emoticon_01.webp"
                 alt="character emoticon"
                 className="section-overall-img"
-                style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px', borderRadius: '16px' }}
+                style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
               />
               <LLMComment comment={llm.findings} status={statuses?.findings} variant="glass" />
               <div style={{ clear: 'both' }}></div>
@@ -274,13 +289,13 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
 
             <div className="sub-tabs">
               <button
-                onClick={() => setActiveChatTab('group')}
+                onClick={() => handleChatTabChange('group')}
                 className={activeChatTab === 'group' ? 'active' : ''}
               >
                 水群 ({groupItems.length})
               </button>
               <button
-                onClick={() => setActiveChatTab('private')}
+                onClick={() => handleChatTabChange('private')}
                 className={activeChatTab === 'private' ? 'active' : ''}
               >
                 互动 ({privateItems.length})
@@ -339,77 +354,101 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
   };
 
   const header = (
-    <div className="header">
-      <div className="header-slideshow">
-        <div className="slide"></div>
-        <div className="slide"></div>
-        <div className="slide"></div>
-        <div className="slide"></div>
-        <div className="slide"></div>
-        <div className="slide"></div>
-      </div>
-      <div className="header-overlay"></div>
-
-      <div className="header-content">
-        <div className="header-title">
-          <div style={{ fontSize: '13px', letterSpacing: '2px', marginBottom: '8px', opacity: 0.8 }}>DAILY REPORT</div>
-          <h1>{llm.title || '今日日报'}</h1>
-          <div className="header-subtitle">{meta?.data_cutoff_time ? `Data until ${new Date(meta.data_cutoff_time).toLocaleTimeString()}` : 'Full Day Summary'}</div>
+    <div className="page-shell">
+      {/* Header Section */}
+      <div className="header">
+        <div className="header-slideshow">
+          <div className="slide"></div>
+          <div className="slide"></div>
+          <div className="slide"></div>
+          <div className="slide"></div>
+          <div className="slide"></div>
+          <div className="slide"></div>
         </div>
-        <div className="date-box">
-          <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '1px', marginBottom: '4px' }}>{weekdays[dateObj.getDay()]}</div>
-          <div style={{ fontSize: '15px', fontWeight: 700 }}>{formattedDate}</div>
+        <div className="header-overlay"></div>
+
+        <div className="header-content">
+          <div className="header-title">
+            <div style={{ fontSize: '13px', letterSpacing: '2px', marginBottom: '8px', opacity: 0.8 }}>DAILY REPORT</div>
+            <h1>{llm.title || '今日日报'}</h1>
+            <div className="header-subtitle">{meta?.data_cutoff_time ? `Data until ${new Date(meta.data_cutoff_time).toLocaleTimeString()}` : 'Full Day Summary'}</div>
+          </div>
+          <div className="date-box">
+            <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '1px', marginBottom: '4px' }}>{weekdays[dateObj.getDay()]}</div>
+            <div style={{ fontSize: '15px', fontWeight: 700 }}>{formattedDate}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Section */}
+      <div className="stats-grid">
+        <div className="stat-item">
+          <span className="stat-label">今日步数</span>
+          <span className="stat-value">{totalSteps.toLocaleString()}</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">活跃数据</span>
+          <span className="stat-value">{totalApps.toLocaleString()}</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">聊天互动</span>
+          <span className="stat-value">{totalChats}</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">数据记录</span>
+          <span className="stat-value">{meta?.total_records || 0}</span>
         </div>
       </div>
     </div>
   );
 
-  const stats = (
-    <div className="stats-grid">
-      <div className="stat-item">
-        <span className="stat-label">今日步数</span>
-        <span className="stat-value">{totalSteps.toLocaleString()}</span>
-      </div>
-      <div className="stat-item">
-        <span className="stat-label">活跃数据</span>
-        <span className="stat-value">{totalApps.toLocaleString()}</span>
-      </div>
-      <div className="stat-item">
-        <span className="stat-label">聊天互动</span>
-        <span className="stat-value">{totalChats}</span>
-      </div>
-      <div className="stat-item">
-        <span className="stat-label">数据记录</span>
-        <span className="stat-value">{meta?.total_records || 0}</span>
-      </div>
+  const nav = (
+    <div className="nav-tabs">
+      {[
+        { id: 'summary', label: '总结', Icon: ClipboardList },
+        { id: 'schedule', label: '作息', Icon: Clock },
+        { id: 'activity', label: '活跃', Icon: Smartphone },
+        { id: 'findings', label: '发现', Icon: Sparkles },
+        { id: 'chat', label: '聊天', Icon: MessageSquare },
+      ].map(tab => (
+        <button
+          key={tab.id}
+          className={activeTab === tab.id ? 'active' : ''}
+          onClick={() => handleTabChange(tab.id as TabId)}
+        >
+          <tab.Icon />
+          <span>{tab.label}</span>
+        </button>
+      ))}
     </div>
   );
 
-  const decorations = (
-    <>
+  const content = (
+    <div className="page-shell" style={{ marginTop: 0, paddingTop: 0 }}>
+      <div style={{ minHeight: '400px' }}>
+        {renderContent()}
+      </div>
+
+      {/* Decorative elements (Icons) */}
       <div style={{ position: 'absolute', top: '10%', left: '-20px', opacity: 0.2, transform: 'rotate(-15deg)' }}><Shell className="w-8 h-8" /></div>
       <div style={{ position: 'absolute', top: '40%', right: '-15px', opacity: 0.2, transform: 'rotate(15deg)' }}><Star className="w-8 h-8" /></div>
       <div style={{ position: 'absolute', bottom: '10%', left: '10px', opacity: 0.2 }}><Fish className="w-8 h-8" /></div>
-    </>
+    </div>
   );
 
   return (
-    <ReportLayout
-      data={data}
-      date={date}
-      templateStyle="alice"
-      containerClassName="alice-template-container"
+    <TemplateShell
+      containerRef={containerRef}
+      navRef={navRef}
+      className="alice-template-container"
+      style={{
+        '--template-nav-bg': 'transparent', // Arisu uses a blurred background handled in CSS
+        '--template-nav-top': '0px',
+        '--template-nav-padding': '0px'
+      } as React.CSSProperties}
       header={header}
-      stats={stats}
-      decorations={decorations}
-    >
-      {(activeTab) => (
-        <div className="page-shell" style={{ marginTop: 0, paddingTop: 0 }}>
-          <div style={{ minHeight: '400px' }}>
-            {renderContent(activeTab)}
-          </div>
-        </div>
-      )}
-    </ReportLayout>
+      nav={nav}
+      content={content}
+    />
   );
 };

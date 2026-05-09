@@ -169,7 +169,57 @@
   color: var(--alice-sub);
 }
 
-/* Nav tabs are now handled by the ReportLayout framework */
+.nav-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  margin-bottom: 24px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
+  min-height: fit-content;
+}
+
+.nav-tabs button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--alice-sub);
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.nav-tabs button svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.nav-tabs button:focus {
+  outline: none;
+}
+
+.nav-tabs button.active {
+  background: #fff;
+  color: var(--alice-sea);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
 
 .sub-tabs {
   display: flex;
@@ -263,6 +313,32 @@
 
   .stat-value {
     font-size: 18px;
+  }
+
+  .nav-tabs {
+    padding: 6px;
+    gap: 4px;
+    margin: 0 auto 16px auto;
+    width: calc(100% - 8px);
+    justify-content: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-shrink: 0;
+  }
+
+  .nav-tabs button {
+    padding: 8px 4px;
+    font-size: 11px;
+    min-width: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .nav-tabs button svg {
+    width: 16px;
+    height: 16px;
   }
 
   .hero-grid {

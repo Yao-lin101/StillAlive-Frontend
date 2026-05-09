@@ -1,0 +1,40 @@
+/**
+ * TemplateShell — 基础布局 CSS
+ *
+ * 所有报告模板共用的骨架样式。
+ * 每个模板可通过 CSS 变量或自己的 className 覆盖特定部分。
+ *
+ * CSS 变量（在模板根元素上覆盖）：
+ *   --template-nav-bg        导航栏背景色
+ *   --template-nav-top       sticky top 偏移（默认 0）
+ *   --template-nav-padding   导航栏内边距
+ *   --template-content-pt    内容区顶部边距
+ */
+
+/* ── 基础容器 ─────────────────────────────────────────────────── */
+.template-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ── 吸顶导航栏 ────────────────────────────────────────────────── */
+.template-shell__nav {
+  position: sticky;
+  top: var(--template-nav-top, 0px);
+  z-index: 50;
+  background: var(--template-nav-bg, #ffffff);
+  padding: var(--template-nav-padding, 8px 0);
+  /* 防止在某些浏览器中 sticky 失效 */
+  flex-shrink: 0;
+}
+
+/* ── 内容区 ─────────────────────────────────────────────────────── */
+.template-shell__content {
+  padding-top: var(--template-content-pt, 0px);
+  min-height: 0;
+}

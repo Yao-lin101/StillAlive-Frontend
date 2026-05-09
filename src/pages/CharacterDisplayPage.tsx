@@ -423,6 +423,42 @@ export const CharacterDisplayPage: React.FC = () => {
     }
   };
 
+  // ── 轮询增量日报更新 ──────────────────────────────────────────────
+  useEffect(() => {
+    let pollInterval: NodeJS.Timeout | null = null;
+
+    const checkIncomplete = (report: DailyReportDetailType | null) => {
+      const llm = report?.report_data?.llm;
+      if (!llm || llm.version < 2) return false;
+      const statuses = llm.sections_status || {};
+      return Object.values(statuses).some(s => 
+        s === 'pending' || s === 'updating'
+      );
+    };
+
+    if (showReportDetail && selectedReport && code) {
+      if (checkIncomplete(selectedReport)) {
+        pollInterval = setInterval(async () => {
+          try {
+            const report = await characterService.getDailyReportDetail(code, selectedReport.date);
+            if (report) {
+              setSelectedReport(report);
+              if (!checkIncomplete(report)) {
+                if (pollInterval) clearInterval(pollInterval);
+              }
+            }
+          } catch (err) {
+            console.error('Polling report detail failed:', err);
+          }
+        }, 4000);
+      }
+    }
+
+    return () => {
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, [showReportDetail, selectedReport?.date, code]);
+
   const statusItems = character?.status_config && Object.entries(character.status_config)
     .filter(([key]) => key !== 'display' && key !== 'theme')
     .flatMap(([_, configs]) =>

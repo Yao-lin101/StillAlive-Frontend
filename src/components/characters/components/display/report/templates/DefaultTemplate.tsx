@@ -202,16 +202,25 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
 
   const scrollToNav = () => {
     setTimeout(() => {
-      if (navRef.current) {
-        // 计算锚点相对于文档顶部的绝对位置
-        const rect = navRef.current.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const targetY = rect.top + scrollTop;
+      if (navRef.current && containerRef.current) {
+        // 自动检测滚动容器：如果内部容器高度受限且内容溢出，则内部滚动
+        const isInternalScroll = containerRef.current.scrollHeight > containerRef.current.clientHeight + 10;
 
-        window.scrollTo({
-          top: targetY,
-          behavior: 'smooth'
-        });
+        if (isInternalScroll) {
+          // 内部滚动：定位到锚点在容器内的 offsetTop
+          containerRef.current.scrollTo({
+            top: navRef.current.offsetTop,
+            behavior: 'smooth'
+          });
+        } else {
+          // 外部滚动（window）：定位到锚点在文档中的绝对位置
+          const rect = navRef.current.getBoundingClientRect();
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          window.scrollTo({
+            top: rect.top + scrollTop,
+            behavior: 'smooth'
+          });
+        }
       }
     }, 50);
   };
@@ -412,7 +421,12 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
       color: THEME.text, 
       padding: '4px',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      flex: 1,
+      minHeight: 0,
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      position: 'relative'
     }}>
       {/* 标题块：随页面滚动 */}
       <TitleSection date={date} meta={meta} title={llm.title} />

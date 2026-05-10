@@ -85,9 +85,9 @@ const SlotComment: React.FC<{ slot: ReportCommentSlot; color: string; index: num
           color, 
           marginBottom: '6px', 
           fontFamily: 'monospace',
-          textAlign: isLeft ? 'left' : 'right'
+          textAlign: 'left'
         }}>{slot.range}</div>
-        <div style={{ fontSize: '14px', color: AQUA_THEME.textMain, lineHeight: 1.6 }}>{slot.comment}</div>
+        <div style={{ fontSize: '14px', color: AQUA_THEME.textMain, lineHeight: 1.6, textAlign: 'left' }}>{slot.comment}</div>
       </div>
     </div>
   );
@@ -331,13 +331,12 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
                         <div style={{ 
                           display: 'flex', 
                           justifyContent: 'space-between', 
-                          marginBottom: '8px',
-                          flexDirection: isLeft ? 'row' : 'row-reverse'
+                          marginBottom: '8px'
                         }}>
                           <span style={{ fontSize: '13px', fontWeight: 700, color: AQUA_THEME.sea }}>{item.ref} · {item.topic}</span>
                           <span style={{ fontSize: '11px', color: AQUA_THEME.textSub, fontFamily: 'monospace' }}>{item.analyzed_at}</span>
                         </div>
-                        <div style={{ fontSize: '14px', color: AQUA_THEME.textMain, lineHeight: 1.6, textAlign: isLeft ? 'left' : 'right' }}>{item.comment}</div>
+                        <div style={{ fontSize: '14px', color: AQUA_THEME.textMain, lineHeight: 1.6, textAlign: 'left' }}>{item.comment}</div>
                       </GlassCard>
                     </div>
                   );

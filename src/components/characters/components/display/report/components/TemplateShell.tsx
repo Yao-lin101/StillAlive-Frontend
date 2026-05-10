@@ -61,6 +61,7 @@ export const TemplateShell: React.FC<TemplateShellProps> = ({
       position: 'relative',
       overflowY: 'auto',
       overflowX: 'hidden',
+      overscrollBehaviorY: 'contain',
       ...style,
     }}
   >

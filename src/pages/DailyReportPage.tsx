@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 export const DailyReportPage: React.FC = () => {
   const { code, date } = useParams<{ code: string; date: string }>();
   const [report, setReport] = useState<DailyReportDetailType | null>(null);
+  const [characterName, setCharacterName] = useState<string>('');
   const [templateStyle, setTemplateStyle] = useState<string>('default');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -16,13 +17,17 @@ export const DailyReportPage: React.FC = () => {
       if (!code || !date) return;
       try {
         setIsLoading(true);
-        // 并行获取报告详情和角色配置（以获取模板风格）
-        const [reportData, configData] = await Promise.all([
+        // 并行获取报告详情、角色公开信息和配置（以获取模板风格）
+        const [reportData, characterData, configData] = await Promise.all([
           characterService.getDailyReportDetail(code, date),
+          characterService.getPublicDisplay(code).catch(() => null),
           characterService.getDailyReportConfigPublic(code).catch(() => null)
         ]);
         
         setReport(reportData);
+        if (characterData?.name) {
+          setCharacterName(characterData.name);
+        }
         if (configData?.template_style) {
           setTemplateStyle(configData.template_style);
         }
@@ -36,6 +41,24 @@ export const DailyReportPage: React.FC = () => {
 
     fetchData();
   }, [code, date]);
+
+  // 更新浏览器标签标题
+  useEffect(() => {
+    if (characterName && date) {
+      const llmTitle = report?.report_data?.llm?.title;
+      if (llmTitle) {
+        document.title = `${characterName} | ${llmTitle} | ${date}`;
+      } else {
+        document.title = `${characterName} 的日报 (${date})`;
+      }
+    } else {
+      document.title = 'Loading Report... | StillAlive';
+    }
+
+    return () => {
+      document.title = 'StillAlive';
+    };
+  }, [characterName, date, report?.report_data?.llm?.title]);
 
   // 轮询逻辑：如果日报还在分析中，则持续获取最新状态
   useEffect(() => {

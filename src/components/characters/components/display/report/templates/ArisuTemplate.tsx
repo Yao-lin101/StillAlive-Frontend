@@ -306,7 +306,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
 
             {displayItems.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {displayItems.map((item, i) => {
+                {[...displayItems].reverse().map((item, i) => {
                   const emoticonId = ((i + 7) % 10 + 1).toString().padStart(2, '0');
                   const isLeft = i % 2 === 0;
                   return (

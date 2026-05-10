@@ -220,7 +220,7 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
             {(llm.schedule_slots?.length ?? 0) > 0 && (
               <div>
                 <div style={{ fontSize: '13px', fontWeight: 600, color: THEME.textMuted, marginBottom: '12px' }}>时段点评</div>
-                {llm.schedule_slots?.map((slot, i) => <SlotComment key={i} slot={slot} color={THEME.accent1} />)}
+                {(llm.schedule_slots || []).slice().reverse().map((slot, i) => <SlotComment key={i} slot={slot} color={THEME.accent1} />)}
               </div>
             )}
           </div>
@@ -258,7 +258,7 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
                 {(llm.activity_slots?.length ?? 0) > 0 && (
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: 600, color: THEME.textMuted, marginBottom: '12px' }}>活动详情</div>
-                    {llm.activity_slots?.map((slot, i) => <SlotComment key={i} slot={slot} color={THEME.accent2} />)}
+                    {(llm.activity_slots || []).slice().reverse().map((slot, i) => <SlotComment key={i} slot={slot} color={THEME.accent2} />)}
                   </div>
                 )}
               </>
@@ -277,7 +277,7 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
             {(llm.findings_slots?.length ?? 0) > 0 && (
               <div>
                 <div style={{ fontSize: '13px', fontWeight: 600, color: THEME.textMuted, marginBottom: '12px' }}>发现详情</div>
-                {llm.findings_slots?.map((slot, i) => <SlotComment key={i} slot={slot} color={THEME.accent4} />)}
+                {(llm.findings_slots || []).slice().reverse().map((slot, i) => <SlotComment key={i} slot={slot} color={THEME.accent4} />)}
               </div>
             )}
           </div>
@@ -314,7 +314,7 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
             </div>
 
             {displayItems.length > 0 ? (
-              displayItems.map((item, i) => (
+              [...displayItems].reverse().map((item, i) => (
                 <div key={i} style={{ padding: '16px', background: '#FFF1F2', borderRadius: '12px', border: '1px solid #FCE7F3' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: THEME.accent3 }}>{item.ref} · {item.topic}</span>

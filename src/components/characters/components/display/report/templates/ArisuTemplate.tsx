@@ -109,8 +109,8 @@ export const ArisuLoading: React.FC = () => {
           <div className="alice-loading-ring" />
         </div>
         <div className="alice-loading-text">
-          <h3 className="alice-loading-title">Arisu is Connecting...</h3>
-          <p className="alice-loading-subtitle">正在连接千年学院数据中心</p>
+          <h3 className="alice-loading-title">Arisu is Logging in...</h3>
+          <p className="alice-loading-subtitle">正在同步勇者的冒险纪录，请老师稍等……Loading...</p>
         </div>
         <div className="alice-progress-container">
           <div className="alice-progress-bar" />
@@ -168,7 +168,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
             </div>
             {llm.raw_markdown && (
               <div style={{ marginTop: '12px' }}>
-                <LLMComment comment={llm.raw_markdown} placeholder="正在生成详细复盘..." variant="glass" />
+                <LLMComment comment={llm.raw_markdown} placeholder="正在通过千年学院数据中心生成详细复盘，请老师稍等……Loading..." variant="glass" />
               </div>
             )}
           </div>
@@ -344,8 +344,10 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
                 })}
               </div>
             ) : (
-              <div style={{ padding: '60px', textAlign: 'center', color: AQUA_THEME.textSub, fontSize: '14px', background: 'rgba(255,255,255,0.3)', borderRadius: '20px' }}>
-                今日暂无{activeChatTab === 'group' ? '水群记录' : '私聊互动'}
+              <div style={{ padding: '60px', textAlign: 'center', color: AQUA_THEME.textSub, fontSize: '14px', background: 'rgba(255,255,255,0.3)', borderRadius: '20px', lineHeight: 1.6 }}>
+                {activeChatTab === 'group' 
+                  ? '报告老师！爱丽丝未能检索到今日的“水群”任务数据……大概是队友们都在存档休息吧？邦邦咔邦！' 
+                  : '报告老师！爱丽丝今日尚未接收到来自老师的关键通讯。Loading... 爱丽丝会一直在这里待命的！'}
               </div>
             )}
           </div>

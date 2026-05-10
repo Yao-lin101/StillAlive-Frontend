@@ -27,6 +27,8 @@ export type TemplateStyle = 'default' | 'minimal' | 'retro' | 'alice';
 export interface TemplateProps {
   data: ReportData;
   date: string;
+  variant?: 'modal' | 'page';
+  code?: string;
 }
 
 // ── 各模块 Props ─────────────────────────────────────────────────────

@@ -82,6 +82,8 @@ export const DailyReportPage: React.FC = () => {
               isLoading={isLoading}
               isOwner={false}
               templateStyle={templateStyle as any}
+              variant="page"
+              code={code}
             />
           </div>
         </div>

@@ -54,6 +54,8 @@ interface DailyReportDetailProps {
   onBack?: () => void;
   /** 模板风格，可从外部传入覆盖 */
   templateStyle?: TemplateStyle;
+  variant?: 'modal' | 'page';
+  code?: string;
 }
 
 export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
@@ -64,6 +66,8 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
   onDelete,
   onBack,
   templateStyle = 'default',
+  variant,
+  code,
 }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -111,6 +115,8 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
             data={report.report_data!}
             date={report.date}
             templateStyle={(templateStyle === 'default' && report.template_style) ? (report.template_style as TemplateStyle) : templateStyle}
+            variant={variant}
+            code={code}
           />
         ) : (
           /* Markdown 原文视图（降级 / 回退） */

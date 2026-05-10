@@ -717,6 +717,8 @@ export const CharacterDisplayPage: React.FC = () => {
                           isLoading={isLoadingReportDetail}
                           isOwner={character?.is_owner || false}
                           templateStyle={dailyReportConfig?.template_style as any}
+                          variant="modal"
+                          code={code}
                           onHide={handleToggleReportHidden}
                           onDelete={handleDeleteReport}
                           onBack={() => {

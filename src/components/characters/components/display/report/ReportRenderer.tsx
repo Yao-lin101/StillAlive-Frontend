@@ -36,7 +36,9 @@ export const ReportRenderer: React.FC<ReportRendererProps> = ({
   data,
   date,
   templateStyle = 'default',
+  variant,
+  code,
 }) => {
   const Template = TEMPLATE_MAP[templateStyle] ?? DefaultTemplate;
-  return <Template data={data} date={date} />;
+  return <Template data={data} date={date} variant={variant} code={code} />;
 };

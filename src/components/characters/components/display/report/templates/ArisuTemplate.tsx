@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { TemplateProps, ReportCommentSlot } from '../types';
 import { StepsChart } from '../modules/StepsChart';
 import { ActivityTimeline } from '../modules/ActivityTimeline';
@@ -126,7 +127,8 @@ export const ArisuLoading: React.FC = () => {
 
 // ── 模块实现 ────────────────────────────────────────────────
 
-export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
+export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, code }) => {
+  const navigate = useNavigate();
   const {
     containerRef,
     navRef,
@@ -373,7 +375,17 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date }) => {
             <h1>{llm.title || '今日日报'}</h1>
             <div className="header-subtitle">{meta?.data_cutoff_time ? `Data until ${new Date(meta.data_cutoff_time).toLocaleTimeString()}` : 'Full Day Summary'}</div>
           </div>
-          <div className="date-box">
+          <div 
+            className="date-box clickable" 
+            onClick={() => {
+              if (variant === 'modal' && code) {
+                navigate(`/d/${code}/report/${date}`);
+              } else if (variant === 'page' && code) {
+                navigate(`/d/${code}`);
+              }
+            }}
+            title={variant === 'modal' ? '查看独立详情页' : '返回角色主页'}
+          >
             <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '1px', marginBottom: '4px' }}>{weekdays[dateObj.getDay()]}</div>
             <div style={{ fontSize: '15px', fontWeight: 700 }}>{formattedDate}</div>
           </div>

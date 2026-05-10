@@ -96,9 +96,9 @@ export const DailyReportPage: React.FC = () => {
 
   return (
     <div className="h-[100dvh] overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 flex flex-col">
-      {/* 极简主内容区 - 全屏铺满 */}
-      <main className="flex-1 flex flex-col w-full min-h-0">
-        <div className="flex-1 bg-white dark:bg-slate-900 flex flex-col overflow-hidden relative">
+      {/* 响应式主内容区：移动端铺满，桌面端限制宽度 */}
+      <main className="flex-1 flex flex-col w-full max-w-5xl mx-auto p-0 md:p-6 min-h-0">
+        <div className="flex-1 bg-white dark:bg-slate-900 md:rounded-3xl md:shadow-sm md:border md:border-slate-100 dark:md:border-slate-800 flex flex-col overflow-hidden relative">
           <div className="flex-1 flex flex-col min-h-0">
             <DailyReportDetail
               report={report}

@@ -20,6 +20,14 @@
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
+  /* 响应式间距：桌面端左右和底部留白，顶部不留白以确保吸顶无缝隙 */
+  padding: 0 12px 12px 12px;
+}
+
+@media (max-width: 768px) {
+  .template-shell {
+    padding: 0;
+  }
 }
 
 /* ── 吸顶导航栏 ────────────────────────────────────────────────── */

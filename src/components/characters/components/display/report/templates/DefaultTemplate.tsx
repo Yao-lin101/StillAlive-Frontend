@@ -341,7 +341,7 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
       style={{
         fontFamily: '"Inter", sans-serif',
         color: THEME.text,
-        padding: '4px',
+        padding: '0',
         // 覆盖 nav 背景为纯白
         '--template-nav-bg': '#FFFFFF',
         '--template-nav-top': '-4px',

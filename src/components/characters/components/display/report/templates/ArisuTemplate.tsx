@@ -417,7 +417,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
   );
 
   const nav = (
-    <div className="nav-tabs">
+    <div className="nav-tabs template-shell__nav-tabs">
       {[
         { id: 'summary', label: '总结', Icon: ClipboardList },
         { id: 'schedule', label: '作息', Icon: Clock },
@@ -427,7 +427,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
       ].map(tab => (
         <button
           key={tab.id}
-          className={activeTab === tab.id ? 'active' : ''}
+          className={`template-shell__nav-tab-item ${activeTab === tab.id ? 'active' : ''}`}
           onClick={() => handleTabChange(tab.id as TabId)}
         >
           <tab.Icon />

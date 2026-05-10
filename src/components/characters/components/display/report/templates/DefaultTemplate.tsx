@@ -52,13 +52,14 @@ const TabNav: React.FC<{
   });
 
   return (
-    <div className="custom-scrollbar" style={{
-      display: 'flex',
+    <div className="template-shell__nav-tabs" style={{
       gap: '4px',
       padding: '4px',
       background: '#F1F5F9',
       borderRadius: '12px',
-      overflowX: 'auto',
+      // 通过 CSS 变量微调自适应参数
+      ['--template-nav-tab-min-width' as any]: '0',
+      ['--template-nav-gap' as any]: '4px',
     }}>
       {tabs.map(tab => {
         const isActive = activeTab === tab.id;
@@ -68,9 +69,8 @@ const TabNav: React.FC<{
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
+            className="template-shell__nav-tab-item"
             style={{
-              flex: 1,
-              minWidth: '90px',
               padding: '8px 12px',
               border: 'none',
               borderRadius: '8px',
@@ -81,11 +81,7 @@ const TabNav: React.FC<{
               color: isActive ? tab.color : THEME.textMuted,
               boxShadow: isActive ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
               transition: 'all 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               gap: '6px',
-              whiteSpace: 'nowrap',
             }}
           >
             {tab.label}

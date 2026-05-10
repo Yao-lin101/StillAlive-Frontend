@@ -33,6 +33,33 @@
   flex-shrink: 0;
 }
 
+/* ── 统一导航栏自适应布局 ────────────────────────────────────── */
+.template-shell__nav-tabs {
+  display: flex;
+  gap: var(--template-nav-gap, 8px);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* 隐藏滚动条 */
+  padding: 0 4px;
+}
+
+.template-shell__nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.template-shell__nav-tab-item {
+  flex: 1;
+  /* 确保在窄屏下也能收缩以适应宽度，不触发滚动 */
+  min-width: var(--template-nav-tab-min-width, 0);
+  flex-shrink: 1;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  overflow: hidden; /* 防止文字溢出 */
+}
+
 /* ── 内容区 ─────────────────────────────────────────────────────── */
 .template-shell__content {
   padding-top: var(--template-content-pt, 0px);

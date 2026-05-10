@@ -65,3 +65,36 @@
   padding-top: var(--template-content-pt, 0px);
   min-height: 0;
 }
+
+/* ── 自定义美化滚动条 (透明蓝色流光感) ─────────────────────────────── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(110, 154, 250, 0.2) 0%,
+    rgba(110, 154, 250, 0.6) 50%,
+    rgba(110, 154, 250, 0.2) 100%
+  );
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 4px rgba(110, 154, 250, 0.3);
+  transition: background 0.3s;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(110, 154, 250, 0.4) 0%,
+    rgba(110, 154, 250, 0.8) 50%,
+    rgba(110, 154, 250, 0.4) 100%
+  );
+  box-shadow: 0 0 8px rgba(110, 154, 250, 0.5);
+}

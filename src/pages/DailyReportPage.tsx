@@ -95,9 +95,9 @@ export const DailyReportPage: React.FC = () => {
   }, [report?.date, code, date, !!report]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 flex flex-col">
+    <div className="h-[100dvh] overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 flex flex-col">
       {/* 极简主内容区 */}
-      <main className="flex-1 flex flex-col w-full max-w-5xl mx-auto p-2 md:p-6 h-[100dvh] md:h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col w-full max-w-5xl mx-auto p-2 md:p-6 min-h-0">
         <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl md:rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col overflow-hidden relative">
           <div className="flex-1 p-0 flex flex-col min-h-0">
             <DailyReportDetail

@@ -26,7 +26,8 @@
 
 @media (max-width: 768px) {
   .template-shell {
-    padding: 0;
+    /* 移动端保留基础左右边距，防止内容贴边 */
+    padding: 0 16px 16px 16px;
   }
 }
 

@@ -80,6 +80,12 @@
   height: 6px;
 }
 
+/* 确保带自定义滚动条的容器不会触发滚动链 */
+.custom-scrollbar {
+  overscroll-behavior-y: contain;
+}
+
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }

@@ -94,22 +94,45 @@ export const DailyReportPage: React.FC = () => {
     };
   }, [report?.date, code, date, !!report]);
 
+  // 锁定 body 滚动，防止移动端橡皮筋效果导致漏出底色
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    const originalHeight = window.getComputedStyle(document.body).height;
+    const originalHtmlStyle = window.getComputedStyle(document.documentElement).overflow;
+    const originalHtmlHeight = window.getComputedStyle(document.documentElement).height;
+
+    const originalBg = document.body.style.backgroundColor;
+    const originalHtmlBg = document.documentElement.style.backgroundColor;
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.height = '100%';
+    document.body.style.backgroundColor = '#F8FAFC'; // 匹配页面背景色
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.height = '100%';
+    document.documentElement.style.backgroundColor = '#F8FAFC';
+
+    return () => {
+      document.body.style.overflow = originalStyle;
+      document.body.style.height = originalHeight;
+      document.body.style.backgroundColor = originalBg;
+      document.documentElement.style.overflow = originalHtmlStyle;
+      document.documentElement.style.height = originalHtmlHeight;
+      document.documentElement.style.backgroundColor = originalHtmlBg;
+    };
+  }, []);
+
   return (
-    <div className="h-[100dvh] overflow-hidden overscroll-none bg-[#F8FAFC] dark:bg-slate-950 flex flex-col">
+    <div className="fixed inset-0 flex flex-col overflow-hidden overscroll-none bg-[#F8FAFC] dark:bg-slate-950 w-full z-0">
       {/* 响应式主内容区：移动端铺满，桌面端限制宽度 */}
-      <main className="flex-1 flex flex-col w-full max-w-5xl mx-auto p-0 md:p-6 min-h-0">
-        <div className="flex-1 bg-white dark:bg-slate-900 md:rounded-3xl md:shadow-sm md:border md:border-slate-100 dark:md:border-slate-800 flex flex-col overflow-hidden relative">
-          <div className="flex-1 flex flex-col min-h-0">
-            <DailyReportDetail
-              report={report}
-              isLoading={isLoading}
-              isOwner={false}
-              templateStyle={templateStyle as any}
-              variant="page"
-              code={code}
-            />
-          </div>
-        </div>
+      <main className="flex-1 flex flex-col w-full max-w-5xl mx-auto min-h-0 overflow-hidden">
+        <DailyReportDetail
+          report={report}
+          isLoading={isLoading}
+          isOwner={false}
+          templateStyle={templateStyle as any}
+          variant="page"
+          code={code}
+        />
       </main>
     </div>
   );

@@ -143,7 +143,7 @@ export const CharacterDisplayPage: React.FC = () => {
   const [isLoadingReportDetail, setIsLoadingReportDetail] = useState(false);
   const [showReportDetail, setShowReportDetail] = useState(false);
   const [isCheckingReport, setIsCheckingReport] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>('status');
+  const [activeTab, setActiveTab] = useState<string>('report');
   const [dailyReportConfig, setDailyReportConfig] = useState<{
     is_enabled: boolean;
     is_visible: boolean;
@@ -380,10 +380,7 @@ export const CharacterDisplayPage: React.FC = () => {
 
   useEffect(() => {
     if (showStatusDialog) {
-      setActiveTab('status');
-      setShowReportDetail(false);
-      setSelectedReport(null);
-      setSelectedReportDate(null);
+      handleTabChange('report');
     }
   }, [showStatusDialog]);
 
@@ -663,17 +660,6 @@ export const CharacterDisplayPage: React.FC = () => {
           >
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className={`grid w-full ${dailyReportConfig?.is_visible ? 'grid-cols-2' : 'grid-cols-1'} mb-4 !bg-gray-100`}>
-                <TabsTrigger 
-                  value="status"
-                  className="!text-gray-600 
-                    data-[state=active]:!bg-white 
-                    data-[state=active]:!text-slate-800
-                    data-[state=active]:!shadow-none
-                    data-[state=active]:!from-transparent
-                    data-[state=active]:!to-transparent"
-                >
-                  状态信息
-                </TabsTrigger>
                 {dailyReportConfig?.is_visible && (
                   <TabsTrigger 
                     value="report"
@@ -687,6 +673,17 @@ export const CharacterDisplayPage: React.FC = () => {
                     日报分析
                   </TabsTrigger>
                 )}
+                <TabsTrigger 
+                  value="status"
+                  className="!text-gray-600 
+                    data-[state=active]:!bg-white 
+                    data-[state=active]:!text-slate-800
+                    data-[state=active]:!shadow-none
+                    data-[state=active]:!from-transparent
+                    data-[state=active]:!to-transparent"
+                >
+                  状态信息
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="status" className="mt-2">

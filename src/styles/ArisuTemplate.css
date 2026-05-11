@@ -9,23 +9,27 @@
   color: var(--alice-text);
   flex: 1;
   position: relative;
-}
-
-
-
-
-.page-shell {
-  position: relative;
-  border-radius: 32px;
-  padding: 40px 24px;
+  
+  /* 统一底色与背景 */
   background-color: #dff4ff;
   background-image: 
     linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(242, 251, 255, 0.95)),
     linear-gradient(rgba(117, 193, 240, 0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgba(117, 193, 240, 0.08) 1px, transparent 1px);
   background-size: auto, 26px 26px, 26px 26px;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 24px 70px rgba(90, 76, 90, 0.08);
+}
+
+
+
+
+
+.page-shell {
+  position: relative;
+  border-radius: 0;
+  padding: 40px 24px;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 @media (max-width: 768px) {

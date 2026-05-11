@@ -368,6 +368,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
           <div className="slide"></div>
           <div className="slide"></div>
           <div className="slide"></div>
+          <div className="slide"></div>
         </div>
         <div className="header-overlay"></div>
 

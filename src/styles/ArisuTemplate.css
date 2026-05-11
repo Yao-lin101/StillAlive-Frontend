@@ -71,7 +71,7 @@
   background-size: cover;
   background-position: center;
   opacity: 0;
-  animation: slideAnimation 30s infinite;
+  animation: slideAnimation 35s infinite;
 }
 
 .slide:nth-child(1) { background-image: url('/assets/reports/alice/header-bg-1.avif'); animation-delay: 0s; }
@@ -80,12 +80,13 @@
 .slide:nth-child(4) { background-image: url('/assets/reports/alice/header-bg-4.avif'); animation-delay: 15s; }
 .slide:nth-child(5) { background-image: url('/assets/reports/alice/header-bg-5.avif'); animation-delay: 20s; }
 .slide:nth-child(6) { background-image: url('/assets/reports/alice/header-bg-6.avif'); animation-delay: 25s; }
+.slide:nth-child(7) { background-image: url('/assets/reports/alice/header-bg-7.avif'); animation-delay: 30s; }
 
 @keyframes slideAnimation {
   0% { opacity: 0; transform: scale(1.1); }
   2% { opacity: 1; }
-  16% { opacity: 1; }
-  18% { opacity: 0; transform: scale(1.05); }
+  14% { opacity: 1; }
+  16% { opacity: 0; transform: scale(1.05); }
   100% { opacity: 0; }
 }
 

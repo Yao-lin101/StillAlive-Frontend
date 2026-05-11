@@ -14,7 +14,7 @@ import { useState, useRef, useCallback } from 'react';
 
 export type TabId = 'summary' | 'schedule' | 'activity' | 'findings' | 'chat';
 export type ActivityTabId = 'analysis' | 'phone' | 'computer';
-export type ChatTabId = 'group' | 'private';
+export type ChatTabId = 'overall' | 'group' | 'private';
 
 export interface UseReportTemplateReturn {
   // Refs — 传给 TemplateShell
@@ -38,7 +38,7 @@ export interface UseReportTemplateReturn {
 export function useReportTemplate(): UseReportTemplateReturn {
   const [activeTab, setActiveTab] = useState<TabId>('summary');
   const [activeActivityTab, setActiveActivityTab] = useState<ActivityTabId>('analysis');
-  const [activeChatTab, setActiveChatTab] = useState<ChatTabId>('group');
+  const [activeChatTab, setActiveChatTab] = useState<ChatTabId>('overall');
 
   const containerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLDivElement>(null);

@@ -282,16 +282,16 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
       case 'chat': {
         const groupItems   = llm.chat_items?.filter(item => item.ref !== '私聊') || [];
         const privateItems = llm.chat_items?.filter(item => item.ref === '私聊') || [];
-        const displayItems = activeChatTab === 'group' ? groupItems : privateItems;
+        const displayItems = activeChatTab === 'group' ? groupItems : (activeChatTab === 'private' ? privateItems : []);
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <LLMComment comment={llm.chat} status={statuses?.chat} />
             <div style={{ display: 'flex', gap: '6px', background: '#F1F5F9', padding: '4px', borderRadius: '10px', width: 'fit-content' }}>
               {([
+                { id: 'overall', label: '分析' },
                 { id: 'group',   label: `水群 (${groupItems.length})` },
                 { id: 'private', label: `互动 (${privateItems.length})` },
-              ] as { id: 'group' | 'private'; label: string }[]).map(tab => (
+              ] as { id: 'overall' | 'group' | 'private'; label: string }[]).map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => handleChatTabChange(tab.id)}
@@ -309,7 +309,9 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
               ))}
             </div>
 
-            {displayItems.length > 0 ? (
+            {activeChatTab === 'overall' ? (
+              <LLMComment comment={llm.chat} status={statuses?.chat} />
+            ) : displayItems.length > 0 ? (
               [...displayItems].reverse().map((item, i) => (
                 <div key={i} style={{ padding: '16px', background: '#FFF1F2', borderRadius: '12px', border: '1px solid #FCE7F3' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>

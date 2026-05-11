@@ -274,37 +274,38 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
       case 'chat':
         const groupItems = llm.chat_items?.filter(item => item.ref !== '私聊') || [];
         const privateItems = llm.chat_items?.filter(item => item.ref === '私聊') || [];
-        const displayItems = activeChatTab === 'group' ? groupItems : privateItems;
+        const displayItems = activeChatTab === 'group' ? groupItems : (activeChatTab === 'private' ? privateItems : []);
 
         return (
           <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ display: 'block', position: 'relative', marginBottom: '24px' }}>
-              <img
-                src="/assets/reports/alice/Emoticon_05.webp"
-                alt="character emoticon"
-                className="section-overall-img"
-                style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px', borderRadius: '16px' }}
-              />
-              <LLMComment comment={llm.chat} status={statuses?.chat} variant="glass" />
-              <div style={{ clear: 'both' }}></div>
-            </div>
-
             <div className="sub-tabs">
-              <button
-                onClick={() => handleChatTabChange('group')}
-                className={activeChatTab === 'group' ? 'active' : ''}
-              >
-                水群 ({groupItems.length})
-              </button>
-              <button
-                onClick={() => handleChatTabChange('private')}
-                className={activeChatTab === 'private' ? 'active' : ''}
-              >
-                互动 ({privateItems.length})
-              </button>
+              {[
+                { id: 'overall', label: '分析' },
+                { id: 'group', label: `水群 (${groupItems.length})` },
+                { id: 'private', label: `互动 (${privateItems.length})` }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => handleChatTabChange(tab.id as any)}
+                  className={activeChatTab === tab.id ? 'active' : ''}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
 
-            {displayItems.length > 0 ? (
+            {activeChatTab === 'overall' ? (
+              <div style={{ display: 'block', position: 'relative', marginBottom: '24px' }}>
+                <img
+                  src="/assets/reports/alice/Emoticon_05.webp"
+                  alt="character emoticon"
+                  className="section-overall-img"
+                  style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px', borderRadius: '16px' }}
+                />
+                <LLMComment comment={llm.chat} status={statuses?.chat} variant="glass" />
+                <div style={{ clear: 'both' }}></div>
+              </div>
+            ) : displayItems.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {[...displayItems].reverse().map((item, i) => {
                   const emoticonId = ((i + 7) % 10 + 1).toString().padStart(2, '0');

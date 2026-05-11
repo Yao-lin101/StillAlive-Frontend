@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { characterService } from '@/services/characterService';
-import { DailyReportDetail } from '@/components/characters/components/display/DailyReportDetail';
+import { ReportRenderer, LOADING_MAP } from '@/components/characters/components/display/report/ReportRenderer';
+import type { TemplateStyle } from '@/components/characters/components/display/report/types';
 import type { DailyReportDetail as DailyReportDetailType } from '@/types/character';
+import { Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const DailyReportPage: React.FC = () => {
@@ -111,6 +113,11 @@ export const DailyReportPage: React.FC = () => {
     document.documentElement.style.height = '100%';
     document.documentElement.style.backgroundColor = '#F8FAFC';
 
+    const hasDark = document.documentElement.classList.contains('dark');
+    if (hasDark) {
+      document.documentElement.classList.remove('dark');
+    }
+
     return () => {
       document.body.style.overflow = originalStyle;
       document.body.style.height = originalHeight;
@@ -118,21 +125,52 @@ export const DailyReportPage: React.FC = () => {
       document.documentElement.style.overflow = originalHtmlStyle;
       document.documentElement.style.height = originalHtmlHeight;
       document.documentElement.style.backgroundColor = originalHtmlBg;
+      if (hasDark) {
+        document.documentElement.classList.add('dark');
+      }
     };
   }, []);
 
+  const renderBody = () => {
+    const activeStyle = (templateStyle === 'default' && report?.template_style)
+      ? (report.template_style as TemplateStyle)
+      : (templateStyle as TemplateStyle);
+
+    if (isLoading) {
+      const TemplateLoading = LOADING_MAP[activeStyle];
+      if (TemplateLoading) return <TemplateLoading />;
+      return (
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-blue-500" />
+        </div>
+      );
+    }
+
+    if (!report) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full text-gray-500 bg-white">
+          <Calendar className="w-12 h-12 mb-4 opacity-50" />
+          <p>该日期暂无日报数据</p>
+        </div>
+      );
+    }
+
+    return (
+      <ReportRenderer
+        data={report.report_data!}
+        date={report.date}
+        templateStyle={activeStyle}
+        variant="page"
+        code={code}
+      />
+    );
+  };
+
   return (
-    <div className="fixed inset-0 flex flex-col overflow-hidden overscroll-none bg-[#F8FAFC] dark:bg-slate-950 w-full z-0">
+    <div className="fixed inset-0 flex flex-col overflow-hidden overscroll-none bg-[#F8FAFC] w-full z-0 light">
       {/* 响应式主内容区：移动端铺满，桌面端限制宽度 */}
       <main className="flex-1 flex flex-col w-full max-w-5xl mx-auto min-h-0 overflow-hidden">
-        <DailyReportDetail
-          report={report}
-          isLoading={isLoading}
-          isOwner={false}
-          templateStyle={templateStyle as any}
-          variant="page"
-          code={code}
-        />
+        {renderBody()}
       </main>
     </div>
   );

@@ -194,46 +194,48 @@ export const DailyReportDetail: React.FC<DailyReportDetailProps> = ({
         )}
       </div>
 
-      {/* ── 底部操作按钮 ─────────────────────────────────────────── */}
-      <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-2">
-        <div>
-          {onBack && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onBack}
-              className="text-xs h-9 bg-white"
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" /> 返回日历
-            </Button>
+      {/* ── 底部操作按钮：仅在弹窗模式下显示，独立页模式由模板自理 ──────────────── */}
+      {variant !== 'page' && (
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-2">
+          <div>
+            {onBack && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onBack}
+                className="text-xs h-9 bg-white"
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" /> 返回日历
+              </Button>
+            )}
+          </div>
+
+          {isOwner && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onHide}
+                className="text-xs h-9 bg-white"
+              >
+                {report.is_hidden ? (
+                  <><Eye className="w-4 h-4 mr-1" /> 显示</>
+                ) : (
+                  <><EyeOff className="w-4 h-4 mr-1" /> 隐藏</>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="text-xs h-9 bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+              >
+                <Trash2 className="w-4 h-4 mr-1" /> 删除
+              </Button>
+            </div>
           )}
         </div>
-
-        {isOwner && (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onHide}
-              className="text-xs h-9 bg-white"
-            >
-              {report.is_hidden ? (
-                <><Eye className="w-4 h-4 mr-1" /> 显示</>
-              ) : (
-                <><EyeOff className="w-4 h-4 mr-1" /> 隐藏</>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowDeleteConfirm(true)}
-              className="text-xs h-9 bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
-            >
-              <Trash2 className="w-4 h-4 mr-1" /> 删除
-            </Button>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* ── 删除确认弹窗 ─────────────────────────────────────────── */}
       {showDeleteConfirm && (

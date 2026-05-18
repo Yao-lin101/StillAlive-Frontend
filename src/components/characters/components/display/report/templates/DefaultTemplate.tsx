@@ -18,6 +18,16 @@ import { useReportTemplate, type TabId } from '../hooks/useReportTemplate';
 import { TemplateShell } from '../components/TemplateShell';
 import '@/styles/TemplateShell.css';
 
+// ── 标签首字母大写格式化工具 ─────────────────────────────────────────
+const formatKeyLabel = (key: string | undefined, fallback: string) => {
+  if (!key || key === 'computer_app' || key === 'computer_app_2') return fallback;
+  return key
+    .replace(/[_-]/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 // ── 主题色彩配置 ──────────────────────────────────────────────────
 const THEME = {
   bg: 'transparent',
@@ -228,8 +238,17 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
             <div style={{ display: 'flex', gap: '6px', background: '#F1F5F9', padding: '4px', borderRadius: '10px', width: 'fit-content' }}>
               {[
                 { id: 'analysis', label: '分析' },
-                { id: 'phone',    label: '手机', show: apps.has_phone },
-                { id: 'computer', label: '电脑', show: apps.has_computer },
+                { id: 'phone',    label: '手机', show: apps.has_phone && apps.phone && apps.phone.length > 0 },
+                { 
+                  id: 'computer', 
+                  label: apps.computer_2 && apps.computer_2.length > 0 ? formatKeyLabel(apps.computer_key, '电脑一') : formatKeyLabel(apps.computer_key, '电脑'), 
+                  show: apps.computer && apps.computer.length > 0 
+                },
+                { 
+                  id: 'computer_2', 
+                  label: formatKeyLabel(apps.computer_key_2, '电脑二'), 
+                  show: apps.computer_2 && apps.computer_2.length > 0 
+                },
               ].filter(t => t.show !== false).map(tab => (
                 <button
                   key={tab.id}
@@ -260,7 +279,7 @@ export const DefaultTemplate: React.FC<TemplateProps> = ({ data, date }) => {
               </>
             ) : (
               <div style={{ background: '#FFF', padding: '20px', borderRadius: '16px', border: '1px solid #F1F5F9' }}>
-                <AppUsageChart data={apps} barColor="#D1FAE5" accentColor={THEME.accent2} activeTab={activeActivityTab as 'phone' | 'computer'} />
+                <AppUsageChart data={apps} barColor="#D1FAE5" accentColor={THEME.accent2} activeTab={activeActivityTab as 'phone' | 'computer' | 'computer_2'} />
               </div>
             )}
           </div>

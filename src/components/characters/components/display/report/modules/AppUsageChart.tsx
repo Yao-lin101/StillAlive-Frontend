@@ -12,7 +12,7 @@ interface AppUsageChartProps {
   data: ReportAppUsage;
   barColor?: string;
   accentColor?: string;
-  activeTab?: 'phone' | 'computer';
+  activeTab?: 'phone' | 'computer' | 'computer_2';
 }
 
 const HorizontalBar: React.FC<{
@@ -96,14 +96,18 @@ export const AppUsageChart: React.FC<AppUsageChartProps> = ({
   activeTab: externalTab,
 }) => {
   const hasPhone = data?.has_phone && data.phone.length > 0;
-  const hasComputer = data?.has_computer && data.computer.length > 0;
+  const hasComputer = (data?.has_computer && data.computer.length > 0) || (data?.computer_2 && data.computer_2.length > 0);
 
   const currentTab = externalTab || (hasPhone ? 'phone' : 'computer');
 
   if (!hasPhone && !hasComputer) return null;
 
   const displayList: ReportAppItem[] =
-    currentTab === 'phone' ? (data.phone ?? []) : (data.computer ?? []);
+    currentTab === 'phone'
+      ? (data.phone ?? [])
+      : currentTab === 'computer_2'
+      ? (data.computer_2 ?? [])
+      : (data.computer ?? []);
   const maxCount = displayList.length > 0 ? displayList[0].count : 1;
 
   return (

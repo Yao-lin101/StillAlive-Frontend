@@ -21,6 +21,7 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
   const [fieldMappings, setFieldMappings] = useState<{
     phone_app?: string;
     computer_app?: string;
+    computer_app_2?: string;
     steps?: string;
   }>({});
   const [persona, setPersona] = useState<string>('');
@@ -122,7 +123,7 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
     }
   };
 
-  const handleFieldMappingChange = async (field: 'phone_app' | 'computer_app' | 'steps', value: string | undefined) => {
+  const handleFieldMappingChange = async (field: 'phone_app' | 'computer_app' | 'computer_app_2' | 'steps', value: string | undefined) => {
     const newMappings = {
       ...fieldMappings,
       [field]: value || undefined
@@ -337,7 +338,7 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
             <div className="p-4 border border-gray-100 dark:border-gray-800 rounded-lg bg-white/50 dark:bg-slate-900/30">
               <div className="flex items-center gap-2 mb-2">
                 <Monitor className="w-4 h-4 text-purple-500" />
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">电脑正在使用的 APP</label>
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">电脑 (设备一) 正在使用的 APP</label>
               </div>
               <select
                 value={fieldMappings.computer_app || ''}
@@ -352,7 +353,29 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
                 ))}
               </select>
               <p className="text-xs text-gray-400 mt-1">
-                系统将分析您的电脑 APP 使用习惯和活跃时间
+                系统将分析您的第一台电脑 APP 使用习惯和活跃时间
+              </p>
+            </div>
+
+            <div className="p-4 border border-gray-100 dark:border-gray-800 rounded-lg bg-white/50 dark:bg-slate-900/30">
+              <div className="flex items-center gap-2 mb-2">
+                <Monitor className="w-4 h-4 text-purple-600" />
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">电脑 (设备二) 正在使用的 APP</label>
+              </div>
+              <select
+                value={fieldMappings.computer_app_2 || ''}
+                onChange={(e) => handleFieldMappingChange('computer_app_2', e.target.value || undefined)}
+                className="w-full p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-slate-950 dark:text-white focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 focus:border-blue-400 transition-all"
+              >
+                <option value="">-- 请选择 --</option>
+                {vitalSignOptions.map((option) => (
+                  <option key={option.key} value={option.key}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-400 mt-1">
+                系统将分析您的第二台电脑 APP 使用习惯和活跃时间 (可选)
               </p>
             </div>
 
@@ -395,7 +418,7 @@ export const DailyReportConfigSection: React.FC<DailyReportConfigSectionProps> =
                 </p>
                 <ul className="list-disc list-inside space-y-1">
                   <li>手机 APP 字段用于分析您的作息时间和 APP 使用偏好</li>
-                  <li>电脑 APP 字段用于分析您的工作/学习习惯</li>
+                  <li>电脑 APP 字段用于分析您的工作/学习习惯，支持至多两台设备</li>
                   <li>步数字段用于分析您的活动量和运动规律</li>
                   <li>至少配置一个字段才能启用日报分析</li>
                   <li>系统会在每小时生成一次当日日报</li>

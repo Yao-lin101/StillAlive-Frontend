@@ -20,6 +20,16 @@ import { TemplateShell } from '../components/TemplateShell';
 import '@/styles/ArisuTemplate.css';
 import '@/styles/TemplateShell.css';
 
+// ── 标签首字母大写格式化工具 ─────────────────────────────────────────
+const formatKeyLabel = (key: string | undefined, fallback: string) => {
+  if (!key || key === 'computer_app' || key === 'computer_app_2') return fallback;
+  return key
+    .replace(/[_-]/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 // ── 主题色彩配置 (水色系) ──────────────────────────────────────────
 const AQUA_THEME = {
   sky: '#8fc5ff',
@@ -206,8 +216,17 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
             <div className="sub-tabs">
               {[
                 { id: 'analysis', label: '分析' },
-                { id: 'phone', label: '手机', show: apps.has_phone },
-                { id: 'computer', label: '电脑', show: apps.has_computer }
+                { id: 'phone', label: '手机', show: apps.has_phone && apps.phone && apps.phone.length > 0 },
+                { 
+                  id: 'computer', 
+                  label: apps.computer_2 && apps.computer_2.length > 0 ? formatKeyLabel(apps.computer_key, '电脑一') : formatKeyLabel(apps.computer_key, '电脑'), 
+                  show: apps.computer && apps.computer.length > 0 
+                },
+                { 
+                  id: 'computer_2', 
+                  label: formatKeyLabel(apps.computer_key_2, '电脑二'), 
+                  show: apps.computer_2 && apps.computer_2.length > 0 
+                }
               ].filter(t => t.show !== false).map(tab => (
                 <button
                   key={tab.id}

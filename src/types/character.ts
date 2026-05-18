@@ -125,6 +125,7 @@ export interface DailyReportConfig {
   field_mappings: {
     phone_app?: string;
     computer_app?: string;
+    computer_app_2?: string;
     steps?: string;
   };
   persona?: string;
@@ -164,11 +165,14 @@ export interface ReportAppItem {
 export interface ReportAppUsage {
   phone: ReportAppItem[];
   computer: ReportAppItem[];
+  computer_2?: ReportAppItem[];
   combined: ReportAppItem[];
   total_phone_records: number;
   total_computer_records: number;
   has_phone: boolean;
   has_computer: boolean;
+  computer_key?: string;
+  computer_key_2?: string;
 }
 
 export interface ReportPrivateTopic {

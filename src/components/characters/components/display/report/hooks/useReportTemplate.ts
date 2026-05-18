@@ -13,7 +13,7 @@
 import { useState, useRef, useCallback } from 'react';
 
 export type TabId = 'summary' | 'schedule' | 'activity' | 'findings' | 'chat';
-export type ActivityTabId = 'analysis' | 'phone' | 'computer';
+export type ActivityTabId = 'analysis' | 'phone' | 'computer' | 'computer_2';
 export type ChatTabId = 'overall' | 'group' | 'private';
 
 export interface UseReportTemplateReturn {

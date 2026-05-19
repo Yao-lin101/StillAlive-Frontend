@@ -15,14 +15,31 @@ interface AppUsageChartProps {
   activeTab?: 'phone' | 'computer' | 'computer_2';
 }
 
+const formatDuration = (mins: number | undefined) => {
+  if (mins === undefined || mins <= 0) return '';
+  if (mins < 1) {
+    return `${Math.round(mins * 60)}秒`;
+  }
+  if (mins < 60) {
+    return `${Math.round(mins)}分钟`;
+  }
+  const hrs = Math.floor(mins / 60);
+  const remainingMins = Math.round(mins % 60);
+  if (remainingMins === 0) {
+    return `${hrs}小时`;
+  }
+  return `${hrs}小时${remainingMins}分钟`;
+};
+
 const HorizontalBar: React.FC<{
   item: ReportAppItem;
   max: number;
   barColor: string;
   accentColor: string;
   rank: number;
-}> = ({ item, max, barColor, accentColor, rank }) => {
-  const pct = max > 0 ? (item.count / max) * 100 : 0;
+  hasDurationData: boolean;
+}> = ({ item, max, barColor, accentColor, rank, hasDurationData }) => {
+  const pct = max > 0 ? ((hasDurationData ? (item.duration ?? 0) : item.count) / max) * 100 : 0;
   const isTop3 = rank < 3;
 
   return (
@@ -67,6 +84,11 @@ const HorizontalBar: React.FC<{
           flexShrink: 0,
         }}>
           {item.count} <span style={{ fontSize: '11px', fontWeight: 500, opacity: 0.7 }}>次</span>
+          {item.duration !== undefined && item.duration > 0 && (
+            <span style={{ fontSize: '12px', fontWeight: 500, marginLeft: '6px', opacity: 0.8 }}>
+              ({formatDuration(item.duration)})
+            </span>
+          )}
         </span>
       </div>
       <div style={{
@@ -108,20 +130,36 @@ export const AppUsageChart: React.FC<AppUsageChartProps> = ({
       : currentTab === 'computer_2'
       ? (data.computer_2 ?? [])
       : (data.computer ?? []);
-  const maxCount = displayList.length > 0 ? displayList[0].count : 1;
+
+  const hasDurationData = displayList.some(item => item.duration !== undefined && item.duration > 0);
+  
+  // 优先按照时长降序排序；如果时长相同或无时长，按照次数降序排序
+  const sortedDisplayList = [...displayList].sort((a, b) => {
+    if (hasDurationData) {
+      const durA = a.duration ?? 0;
+      const durB = b.duration ?? 0;
+      if (durB !== durA) return durB - durA;
+    }
+    return b.count - a.count;
+  });
+
+  const maxVal = Math.max(hasDurationData
+    ? Math.max(...sortedDisplayList.map(item => item.duration ?? 0))
+    : Math.max(...sortedDisplayList.map(item => item.count)), 1);
 
   return (
     <div style={{ width: '100%' }}>
       {/* 条形图列表 */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {displayList.map((item, i) => (
+        {sortedDisplayList.map((item, i) => (
           <HorizontalBar
             key={`${item.name}-${i}`}
             item={item}
-            max={maxCount}
+            max={maxVal}
             barColor={barColor}
             accentColor={accentColor}
             rank={i}
+            hasDurationData={hasDurationData}
           />
         ))}
       </div>
@@ -134,9 +172,27 @@ export const AppUsageChart: React.FC<AppUsageChartProps> = ({
         fontSize: '12px',
         color: '#94A3B8',
         fontWeight: 500,
-        textAlign: 'right',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '8px',
       }}>
-        今日活跃共采集 <span style={{ color: accentColor, fontWeight: 700 }}>{currentTab === 'phone' ? data.total_phone_records : data.total_computer_records}</span> 条样本
+        <div>
+          {currentTab === 'phone' && data.total_phone_duration !== undefined && data.total_phone_duration > 0 && (
+            <span>
+              手机活跃时长: <span style={{ color: accentColor, fontWeight: 700 }}>{formatDuration(data.total_phone_duration)}</span>
+            </span>
+          )}
+          {currentTab !== 'phone' && data.total_computer_duration !== undefined && data.total_computer_duration > 0 && (
+            <span>
+              电脑活跃时长: <span style={{ color: accentColor, fontWeight: 700 }}>{formatDuration(data.total_computer_duration)}</span>
+            </span>
+          )}
+        </div>
+        <div>
+          今日活跃共采集 <span style={{ color: accentColor, fontWeight: 700 }}>{currentTab === 'phone' ? data.total_phone_records : data.total_computer_records}</span> 条样本
+        </div>
       </div>
     </div>
   );

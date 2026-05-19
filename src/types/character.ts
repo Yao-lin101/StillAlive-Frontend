@@ -160,6 +160,7 @@ export interface ReportActivityTimeline {
 export interface ReportAppItem {
   name: string;
   count: number;
+  duration?: number;
 }
 
 export interface ReportAppUsage {
@@ -169,6 +170,9 @@ export interface ReportAppUsage {
   combined: ReportAppItem[];
   total_phone_records: number;
   total_computer_records: number;
+  total_phone_duration?: number;
+  total_computer_duration?: number;
+  total_active_duration?: number;
   has_phone: boolean;
   has_computer: boolean;
   computer_key?: string;

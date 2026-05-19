@@ -159,7 +159,19 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
 
   const totalSteps = steps?.total || 0;
   const totalApps = (apps?.total_phone_records || 0) + (apps?.total_computer_records || 0);
+  const totalDuration = apps?.total_active_duration !== undefined && apps.total_active_duration > 0
+    ? apps.total_active_duration
+    : (apps?.total_phone_duration || 0) + (apps?.total_computer_duration || 0);
   const totalChats = llm.chat_items?.length || 0;
+
+  const formatDurationBrief = (mins: number) => {
+    if (mins <= 0) return '0m';
+    if (mins < 60) return `${Math.round(mins)}m`;
+    const hrs = mins / 60;
+    return `${parseFloat(hrs.toFixed(1))}h`;
+  };
+
+  const durationText = formatDurationBrief(totalDuration);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -422,15 +434,15 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
         </div>
         <div className="stat-item">
           <span className="stat-label">活跃数据</span>
-          <span className="stat-value">{totalApps.toLocaleString()}</span>
+          <span className="stat-value">{totalApps.toLocaleString()}次</span>
         </div>
         <div className="stat-item">
           <span className="stat-label">聊天互动</span>
           <span className="stat-value">{totalChats}</span>
         </div>
         <div className="stat-item">
-          <span className="stat-label">数据记录</span>
-          <span className="stat-value">{meta?.total_records || 0}</span>
+          <span className="stat-label">总活跃时长</span>
+          <span className="stat-value">{durationText}</span>
         </div>
       </div>
     </div>

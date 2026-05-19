@@ -184,6 +184,7 @@
   font-size: 20px;
   font-weight: 700;
   color: var(--alice-sea);
+  white-space: nowrap;
 }
 
 .stat-label {

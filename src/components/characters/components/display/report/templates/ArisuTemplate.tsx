@@ -185,12 +185,12 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
                 className="section-overall-img"
                 style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
               />
-              <LLMComment comment={llm.overall} status={statuses?.title_summary} variant="glass" />
+              <LLMComment comment={llm.overall} status={statuses?.title_summary} placeholder="爱丽丝正在解析老师今天的冒险日志……Loading……" variant="glass" />
               <div style={{ clear: 'both' }}></div>
             </div>
             {llm.raw_markdown && (
               <div style={{ marginTop: '12px' }}>
-                <LLMComment comment={llm.raw_markdown} placeholder="正在通过千年学院数据中心生成详细复盘，请老师稍等……Loading..." variant="glass" />
+                <LLMComment comment={llm.raw_markdown} placeholder="正在连接千年科学学园数据中心生成详细复盘，请老师稍等……Loading..." variant="glass" />
               </div>
             )}
           </div>
@@ -211,7 +211,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
                 className="section-overall-img"
                 style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
               />
-              <LLMComment comment={llm.schedule} status={statuses?.schedule} variant="glass" />
+              <LLMComment comment={llm.schedule} status={statuses?.schedule} placeholder="爱丽丝正在对老师的活动周期进行数据对齐，请老师稍候……" variant="glass" />
               <div style={{ clear: 'both' }}></div>
             </div>
             {(llm.schedule_slots?.length ?? 0) > 0 && (
@@ -259,7 +259,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
                     className="section-overall-img"
                     style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
                   />
-                  <LLMComment comment={llm.activity} status={statuses?.activity} variant="glass" />
+                  <LLMComment comment={llm.activity} status={statuses?.activity} placeholder="爱丽丝正在整理今日的打怪与探索记录……请老师不要走开哦！" variant="glass" />
                   <div style={{ clear: 'both' }}></div>
                 </div>
                 {(llm.activity_slots?.length ?? 0) > 0 && (
@@ -291,7 +291,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
                 className="section-overall-img"
                 style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px' }}
               />
-              <LLMComment comment={llm.findings} status={statuses?.findings} variant="glass" />
+              <LLMComment comment={llm.findings} status={statuses?.findings} placeholder="爱丽丝正在分析老师今天获得的珍贵战利品……发现模块加载中！" variant="glass" />
               <div style={{ clear: 'both' }}></div>
             </div>
             {(llm.findings_slots?.length ?? 0) > 0 && (
@@ -333,7 +333,7 @@ export const ArisuTemplate: React.FC<TemplateProps> = ({ data, date, variant, co
                   className="section-overall-img"
                   style={{ width: '100px', height: '100px', objectFit: 'contain', float: 'right', marginLeft: '16px', marginBottom: '8px', borderRadius: '16px' }}
                 />
-                <LLMComment comment={llm.chat} status={statuses?.chat} variant="glass" />
+                <LLMComment comment={llm.chat} status={statuses?.chat} placeholder="爱丽丝正在加载回忆水晶中的聊天切片，马上就好！" variant="glass" />
                 <div style={{ clear: 'both' }}></div>
               </div>
             ) : displayItems.length > 0 ? (

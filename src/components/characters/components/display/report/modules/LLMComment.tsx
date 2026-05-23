@@ -32,7 +32,7 @@ export const LLMComment: React.FC<LLMCommentProps> = ({
   showPlaceholder = true,
   placeholder = 'AI 深度分析生成中...',
   color = '#334155',
-  useMarkdown = true,
+  useMarkdown = false,
   variant = 'default',
 }) => {
   const isUpdating = status === 'updating';
@@ -138,7 +138,7 @@ export const LLMComment: React.FC<LLMCommentProps> = ({
   }
 
   return (
-    <p style={{ fontSize: '15px', color, lineHeight: 1.8, margin: 0 }}>
+    <p style={{ fontSize: '15px', color, lineHeight: 1.8, margin: 0, whiteSpace: 'pre-wrap' }}>
       {comment}
     </p>
   );

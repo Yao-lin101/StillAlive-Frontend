@@ -345,6 +345,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
         // 必须在设置 src 之前设置 crossOrigin，否则浏览器可能会在赋予 CORS 属性前就发出非 CORS 请求，导致错误！
         audio.src = `https://api.injahow.cn/meting/?server=netease&type=url&id=${resolvedId}`;
+        // audio.src = `https://vercel-meting-api-seven.vercel.app/api?server=netease&type=url&id=${resolvedId}`;
 
         audio.loop = true;
         const handleEnded = () => {
